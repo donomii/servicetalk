@@ -34,3 +34,5 @@ Serve the Promise browser renderer at /promises.js.
 Serve live workbench/catalog data and workbench browser rendering.
 
 Serve selector refactoring previews and their browser script.
+
+Serve the combined visual editor browser script at /visual-editor.js.

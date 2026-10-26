@@ -27,17 +27,17 @@ async function runWorkbenchTool(tool){
    try{const response=await performInteraction({kind:'call',objectId:tool.objectId,method:tool.method,args:tool.args||[]});if(response.error)throw Error(response.error);else{}if(response.result.kind==='objid')await showInspect(response.result.objid);else showResultShelf();}catch(error){document.getElementById('workbench-status').textContent=error.message;}break;
  }
 }
-async function openWorkbench(){
+async function openWorkbench(reload=false){
  await loadWorkbench();document.getElementById('workbench-panel').hidden=false;
- document.getElementById('workbench-editor').value=JSON.stringify(workbenchDefinition,null,2);document.getElementById('workbench-message').textContent='';
+ startToolEditor(reload);document.getElementById('workbench-message').textContent='';
 }
 async function saveWorkbench(){
- try{const source=document.getElementById('workbench-editor').value;JSON.parse(source);const response=await performInteraction({kind:'call',objectId:workbenchObject,method:'definition:',args:[{kind:'string',str:source}]});if(response.error)throw Error(response.error);else{}await loadWorkbench();document.getElementById('workbench-message').textContent='Saved';}catch(error){document.getElementById('workbench-message').textContent=error.message;}
+ try{const source=visualWorkbenchSource();const response=await performInteraction({kind:'call',objectId:workbenchObject,method:'definition:',args:[{kind:'string',str:source}]});if(response.error)throw Error(response.error);else{}toolEditorState.definition=JSON.parse(source);toolEditorState.rawText=source;await loadWorkbench();startToolEditor(false);document.getElementById('workbench-message').textContent='Saved';}catch(error){document.getElementById('workbench-message').textContent=error.message;}
 }
 async function resetWorkbench(){
- const response=await performInteraction({kind:'call',objectId:workbenchObject,method:'resetTools',args:[]});if(response.error){document.getElementById('workbench-message').textContent=response.error;}else{await openWorkbench();}
+ const response=await performInteraction({kind:'call',objectId:workbenchObject,method:'resetTools',args:[]});if(response.error){document.getElementById('workbench-message').textContent=response.error;}else{await openWorkbench(true);}
 }
-function inspectWorkbench(){document.getElementById('workbench-panel').hidden=true;showInspect(workbenchObject);}
+function inspectWorkbench(){closeToolEditor();showInspect(workbenchObject);}
 function rememberExampleDraft(){
  if(!exampleSelected)return;else{}
  const draft={};for(const field of ['title','description','source','check'])draft[field]=document.getElementById('example-'+field).value;

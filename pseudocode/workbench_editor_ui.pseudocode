@@ -1,0 +1,7 @@
+startToolEditor: copy the saved Workbench definition or reuse the browser draft; render title, ordered tools, selected properties and toolbar preview.
+select/add/move/remove tool: validate current inputs, modify selection or definition, preserve ordering and show unsaved state.
+renderToolTarget: suggest registered receivers and their methods; edit typed arguments; match argument count/names to method metadata or selector arity.
+preview: clicking a toolbar preview selects its definition without executing it.
+toggleToolEditor: convert visual draft to JSON or validate JSON and rebuild visual controls; preserve unknown properties.
+visualWorkbenchSource: validate current inputs and serialize the selected editing mode for an ordinary definition: send.
+closeToolEditor: retain visual and raw drafts while dismissing the editor.

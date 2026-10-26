@@ -1,0 +1,9 @@
+openViewDesigner: use per-view draft or saved definition; show selected control properties, indented layout and live preview.
+renderViewControlProperties: offer type-specific labels, text, getter/setter/action selectors, typed arguments, slider bounds and table columns.
+addViewControl: insert within selected container or after a selected leaf; wrap a leaf root as needed.
+changeViewControl: move among siblings, nest into preceding container, lift after parent, duplicate subtree or remove; protect root.
+previewViewDesigner: use ordinary renderer with path decoration; highlight selection, intercept click/Enter/Space before action/setter handlers, and read live getters.
+toggleViewDesignerJSON: validate and switch representations while preserving extra fields and invalid raw drafts.
+saveViewDesigner: validate and send definition: to InspectorView; refresh live receiver and preview.
+reloadViewDesigner: read stored definition and discard both visual and raw drafts.
+closeViewDesigner: remember drafts by view object and dismiss.

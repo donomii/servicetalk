@@ -11,7 +11,7 @@ async function loadInspectorViews(id,inspection,version){
     if(version!==inspectionVersion)return;else{}
     const tabs=document.createElement('div');tabs.className='view-tabs';container.appendChild(tabs);
     const body=document.createElement('div');body.className='view-body';container.appendChild(body);
-    let selectionVersion=0;
+    let selectionVersion=0;const tabButtons=new Map();
     async function select(definition){
       const choice=++selectionVersion;
       selectedViews.set(id,definition.id);
@@ -20,6 +20,7 @@ async function loadInspectorViews(id,inspection,version){
         const view=await uiPost('/view',{target:id,key:definition.id,definition});
         if(view.error)throw Error(view.error);else{}
         if(version!==inspectionVersion || choice!==selectionVersion)return;else{}
+        tabButtons.get(definition.id).textContent=view.definition.title||definition.title||definition.id;
         body.replaceChildren();
         const controls=document.createElement('div');controls.className='view-tools';
         controls.appendChild(navButton('Inspect view object',()=>showInspect(view.objectId)));
@@ -28,24 +29,13 @@ async function loadInspectorViews(id,inspection,version){
         await renderViewNode(view.definition.body||view.definition,id,body,version,0);
       }catch(error){if(version===inspectionVersion)body.textContent=error.message;else{}}
     }
-    definitions.forEach(definition=>{if(!definition.id)throw Error('view requires id');else{tabs.appendChild(navButton(definition.title||definition.id,()=>select(definition)));}});
+    definitions.forEach(definition=>{if(!definition.id)throw Error('view requires id');else{const tab=navButton(definition.title||definition.id,()=>select(definition));tabButtons.set(definition.id,tab);tabs.appendChild(tab);}});
     const initial=definitions.find(view=>view.id===selectedViews.get(id))||definitions[0];
     if(initial)await select(initial);else{}
   }catch(error){if(version===inspectionVersion)container.textContent='Views: '+error.message;else{}}
 }
 function editInspectorView(view,id,container,version){
-  container.replaceChildren();
-  const editor=document.createElement('textarea');editor.className='view-editor';editor.setAttribute('aria-label','View layout JSON');editor.value=JSON.stringify(view.definition,null,2);
-  const status=document.createElement('div');
-  container.append(editor,navButton('Save layout',async()=>{
-    try{
-      const definition=JSON.parse(editor.value);
-      if(!definition.body && !definition.kind)throw Error('Layout requires body or kind');else{}
-      const result=await performInteraction({kind:'call',objectId:view.objectId,method:'definition:',args:[{kind:'string',str:editor.value}]});
-      if(result.error)throw Error(result.error);else{}
-      if(version===inspectionVersion)await showInspect(id,true);else{}
-    }catch(error){status.textContent=error.message;}
-  }),navButton('Cancel',()=>showInspect(id,true)),status);
+  openViewDesigner(view,id);
 }
 function viewValue(container,value){
   if(value && value.kind==='objid'){container.appendChild(objectLink(value.objid));}
@@ -60,14 +50,15 @@ async function viewAction(id,method,args,result){
   renderResult(result,response);
   if(response.error)return false;else{return true;}
 }
-async function renderViewNode(node,id,parent,version,depth){
+async function renderViewNode(node,id,parent,version,depth,decorate,path=[]){
   if(depth>16)throw Error('View nesting exceeds 16 levels');else{}
   const element=document.createElement('div');element.className='view-node view-'+(node.kind||'column');parent.appendChild(element);
+  if(decorate)decorate(element,node,path);else{}
   if(node.label){const label=document.createElement('label');label.textContent=node.label;element.appendChild(label);}else{}
   try{
     switch(node.kind||'column'){
       case 'row':case 'column':
-        for(const child of node.children||[])await renderViewNode(child,id,element,version,depth+1);
+        for(const [index,child]of (node.children||[]).entries())await renderViewNode(child,id,element,version,depth+1,decorate,[...path,index]);
         break;
       case 'text':case 'value':case 'code':{
         const value=await viewRead(node,id);const output=document.createElement(node.kind==='code'?'pre':'span');viewValue(output,value);element.appendChild(output);break;

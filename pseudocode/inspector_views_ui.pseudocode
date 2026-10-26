@@ -1,1 +1,3 @@
 Read object-supplied view descriptions. Render tabbed nested controls: layouts, values, text, code, editable inputs, sliders, actions, lists and tables. Invoke ordinary getters and actions, preserve typed object cells, isolate control errors, and allow editing/inspection of the backing view object.
+
+Edit layout opens the visual designer. Update the selected tab title from the stored view definition. The recursive renderer optionally decorates each element with its node and index path so the designer shares rendering and can intercept interactions.

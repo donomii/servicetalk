@@ -144,6 +144,7 @@ func runCoordinator(port int, mainClass string, mode string, evalExpr string) {
 	mux.HandleFunc("/refactoring.js", func(w http.ResponseWriter, r *http.Request) { w.Header().Set("Content-Type", "text/javascript"); fmt.Fprint(w, refactoringJS) })
 	mux.HandleFunc("/examples", c.handleExamples)
 	mux.HandleFunc("/workbench.js", func(w http.ResponseWriter, r *http.Request) { w.Header().Set("Content-Type", "text/javascript"); fmt.Fprint(w, workbenchJS) })
+	mux.HandleFunc("/visual-editor.js", func(w http.ResponseWriter, r *http.Request) { w.Header().Set("Content-Type", "text/javascript"); fmt.Fprint(w, visualEditorJS) })
 	mux.HandleFunc("/promises.js", func(w http.ResponseWriter, r *http.Request) { w.Header().Set("Content-Type", "text/javascript"); fmt.Fprint(w, promisesJS) })
 	mux.HandleFunc("/wiring.js", func(w http.ResponseWriter, r *http.Request) { w.Header().Set("Content-Type", "text/javascript"); fmt.Fprint(w, wiringJS) })
 	mux.HandleFunc("/cloning.js", func(w http.ResponseWriter, r *http.Request) { w.Header().Set("Content-Type", "text/javascript"); fmt.Fprint(w, cloningJS) })

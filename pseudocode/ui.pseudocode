@@ -44,3 +44,5 @@ Inspector adds asynchronous send and a snapshot-based Promise panel; graph toolb
 Toolbar comes from Workbench; fixed editor access remains available. Examples support isolated run/check, editing and object inspection.
 
 Selector refactoring panel contains original/replacement names, class scope, preview and per-file save controls.
+
+Add responsive Workbench visual editor and View designer panels, selection trees, property controls, live previews, JSON mode, save/reload/close actions and layout editing controls.
