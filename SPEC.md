@@ -229,3 +229,17 @@ working and bare repositories, including literal shell metacharacters, filenames
 beginning with a dash, multiline commit messages and nonzero/startup failures.
 Run it with Node and the coordinator MCP URL after installing the example's SDK
 dependencies. Temporary repositories and the workspace variable are cleaned up.
+
+The browser header shows only the Ctrl+Enter shortcut. The inspector omits
+the explanatory retention note from its display.
+
+Live Objects displays Class and ID. Selecting an object opens its inspector.
+Method buttons fill the method selector; keyword methods show one typed input
+per argument, and binary methods show one. Send invokes the object through MCP
+call, displays the returned value or error, and refreshes its fields. Argument
+types are number, string, Boolean, nil, object ID and character. Object references
+in fields and results are links to their inspectors. The modal fits narrow screens.
+
+Inspector methods are sorted alphabetically on every refresh. Clicking a unary
+method immediately invokes it and displays the result; methods with arguments
+open the argument inputs and use Send. Method clicks are ignored during a call.

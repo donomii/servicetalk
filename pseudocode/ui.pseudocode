@@ -8,3 +8,16 @@ open object inspector
     Preserve variable and method lists; wrap long diagnostic text.
 close inspector
     Dismiss when Escape is pressed or the backdrop is clicked.
+header
+    Display the Ctrl+Enter shortcut.
+retention display
+    Omit the explanatory retention note.
+interactive inspector
+    Select or type a method and enter typed arguments.
+    Send through MCP call, display result or error, refresh object fields.
+    Follow object references in fields and results to their inspectors.
+    Show only Class and ID in Live Objects.
+method buttons
+    Sort selectors alphabetically before rendering.
+    Unary button clicks invoke immediately; other methods prepare arguments.
+    Ignore method clicks while a call is pending.

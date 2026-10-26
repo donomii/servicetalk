@@ -48,20 +48,21 @@ tr:hover td{background:#f5f5f5;cursor:pointer}
 
 /* ---- inspect modal ---- */
 #mbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:10}
-#modal{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border:1px solid #ccc;padding:18px 20px;min-width:420px;max-width:620px;max-height:78vh;overflow-y:auto;z-index:11}
+#modal{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border:1px solid #ccc;padding:18px 20px;width:min(620px,calc(100vw - 24px));max-height:78vh;overflow-y:auto;z-index:11}
 #modal h3{color:#c0392b;margin-bottom:12px;font-size:13px;word-break:break-all}
 .iv{display:flex;gap:10px;padding:4px 0;border-bottom:1px solid #eee;font-size:12px}
 .ivk{color:#2471a3;min-width:130px;word-break:break-word}
 .ivv{color:#1a1a1a;word-break:break-all}
 .mths{color:#555;font-size:11px;margin-top:10px;line-height:1.9}
-.mths span{display:inline-block;background:#f0f0f0;border:1px solid #ddd;padding:1px 7px;margin:2px}
+.mths button{display:inline-block;background:#f0f0f0;border:1px solid #ddd;padding:1px 7px;margin:2px}
+#mcall{margin-top:12px}#mcall input,#mcall select{max-width:100%;padding:5px;font:inherit}#mselector{width:100%}.marg{display:flex;gap:6px;margin:6px 0}.marg input{flex:1;min-width:0}#mresult{white-space:pre-wrap;overflow-wrap:anywhere;margin-top:10px}.objlink{border:0;background:none;color:#2471a3;text-decoration:underline;cursor:pointer}
 </style>
 </head>
 <body>
 
 <div id="hdr">
   <h1>servicetalk</h1>
-  <small>workspace — state persists between evals — ctrl+enter to run</small>
+  <small>ctrl+enter to run</small>
 </div>
 
 <div id="main">
@@ -87,7 +88,7 @@ c value</textarea>
   <div id="objs-hdr"><span>Live Objects</span><span id="ocount">&ndash;</span></div>
   <div id="objs-scroll">
     <table>
-      <thead><tr><th>Class</th><th>ID</th><th>Subject</th></tr></thead>
+      <thead><tr><th>Class</th><th>ID</th></tr></thead>
       <tbody id="otbody"></tbody>
     </table>
   </div>
@@ -99,6 +100,13 @@ c value</textarea>
   <div id="mruntime" style="white-space:pre-wrap;overflow-wrap:anywhere;margin-bottom:12px"></div>
   <div id="mvars"></div>
   <div class="mths" id="mmths"></div>
+  <form id="mcall" onsubmit="sendObjectMessage(event)">
+    <label for="mselector">Method</label>
+    <input id="mselector" required oninput="prepareArguments()" placeholder="Select or enter a method">
+    <div id="margs"></div>
+    <button class="btn btn-run" id="msend">Send</button>
+  </form>
+  <div id="mresult" role="status"></div>
 </div>
 
 <script>
@@ -155,19 +163,28 @@ async function refreshObjs() {
     entries.forEach(e => {
       const tr = document.createElement('tr');
       tr.innerHTML = '<td class="cn">' + esc(e.className) + '</td>'
-                   + '<td class="oid">' + e.id + '</td>'
-                   + '<td class="pt">'  + esc(e.subject || '') + '</td>';
+                   + '<td class="oid">' + esc(e.id) + '</td>';
       tr.onclick = () => showInspect(e.id);
       tb.appendChild(tr);
     });
   } catch(_) {}
 }
 
-async function showInspect(id) {
+let inspectedId = null;
+let inspectionVersion = 0;
+async function showInspect(id, preserveCall = false) {
+  const version = ++inspectionVersion;
+  inspectedId = id;
+  if (!preserveCall) {
+    document.getElementById('mselector').value = '';
+    document.getElementById('margs').innerHTML = '';
+    document.getElementById('mresult').textContent = '';
+  }
   try {
     const r = await fetch('/inspect?id=' + encodeURIComponent(id));
     if (!r.ok) return;
     const d = await r.json();
+    if (version !== inspectionVersion || inspectedId !== id) return;
     document.getElementById('mtitle').textContent = d.className + '   ' + id;
     const runtime = d.runtime || {};
     const retention = d.retention || {};
@@ -176,7 +193,6 @@ async function showInspect(id) {
       'Placement: ' + (runtime.workerId ? 'worker ' + runtime.workerId : 'coordinator host'),
       'Mailbox: ' + ((runtime.metrics || {}).mailboxDepth || 0),
       retention.root ? 'Retention: GC root' : 'Root path: ' + ((retention.path || []).join(' → ') || 'no visible path'),
-      retention.note || '',
       (retention.unavailable || []).length ? 'Unavailable: ' + retention.unavailable.join(', ') : '',
       runtime.foreignReferences ? 'Foreign-held references require the class pulse handler.' : '',
       'Active calls and waits:',
@@ -196,25 +212,130 @@ async function showInspect(id) {
         row.className = 'iv';
         row.innerHTML = '<span class="ivk">' + esc(k) + '</span>'
                       + '<span class="ivv">' + esc(fmtVal(vars[k])) + '</span>';
+        if (vars[k] && vars[k].kind === 'objid') {
+          const value = row.querySelector('.ivv');
+          value.textContent = '';
+          value.appendChild(objectLink(vars[k].objid));
+        }
         vd.appendChild(row);
       });
     }
 
-    const methods = d.methods || [];
+    const methods = [...(d.methods || [])].sort();
     const md = document.getElementById('mmths');
-    md.innerHTML = methods.length
-      ? methods.map(m => '<span>' + esc(m) + '</span>').join('')
-      : '';
+    md.innerHTML = '';
+    methods.forEach(method => {
+      const button = document.createElement('button');
+      button.className = 'btn';
+      button.textContent = method;
+      button.onclick = () => {
+        if (document.getElementById('msend').disabled) return;
+        document.getElementById('mselector').value = method;
+        prepareArguments();
+        if (/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(method)) {
+          document.getElementById('mcall').requestSubmit();
+        }
+      };
+      md.appendChild(button);
+    });
 
     document.getElementById('mbg').style.display = 'block';
     document.getElementById('modal').style.display = 'block';
   } catch(_) {}
 }
 
+function objectLink(id) {
+  const button = document.createElement('button');
+  button.className = 'objlink';
+  button.textContent = '#' + id;
+  button.onclick = () => showInspect(id);
+  return button;
+}
+
+function prepareArguments() {
+  const selector = document.getElementById('mselector').value.trim();
+  const count = (selector.match(/:/g) || []).length || (/^[^a-zA-Z0-9_]+$/.test(selector) ? 1 : 0);
+  const container = document.getElementById('margs');
+  container.innerHTML = '';
+  for (let i = 0; i < count; i++) {
+    const row = document.createElement('div');
+    row.className = 'marg';
+    const type = document.createElement('select');
+    type.setAttribute('aria-label', 'Argument ' + (i + 1) + ' type');
+    ['number', 'string', 'bool', 'nil', 'objid', 'char'].forEach(kind => {
+      const option = document.createElement('option');
+      option.value = kind;
+      option.textContent = {bool:'Boolean',objid:'Object ID',char:'Character'}[kind] || kind;
+      type.appendChild(option);
+    });
+    const input = document.createElement('input');
+    input.setAttribute('aria-label', 'Argument ' + (i + 1));
+    input.placeholder = 'Argument ' + (i + 1);
+    type.onchange = () => { input.disabled = type.value === 'nil'; };
+    row.append(type, input);
+    container.appendChild(row);
+  }
+}
+
+function argumentValue(row) {
+  const kind = row.querySelector('select').value;
+  const text = row.querySelector('input').value;
+  switch (kind) {
+    case 'number':
+      if (!text.trim() || !Number.isFinite(Number(text))) throw Error('Enter a valid number.');
+      return {kind, num:Number(text)};
+    case 'string': return {kind, str:text};
+    case 'nil': return {kind};
+    case 'bool':
+      if (text !== 'true' && text !== 'false') throw Error('Enter true or false.');
+      return {kind, bool:text === 'true'};
+    case 'objid':
+      if (!text.trim()) throw Error('Enter an object ID.');
+      return {kind, objid:text.trim()};
+    case 'char':
+      if ([...text].length !== 1) throw Error('Enter one character.');
+      return {kind, char:text.codePointAt(0)};
+  }
+}
+
+async function sendObjectMessage(event) {
+  event.preventDefault();
+  const id = inspectedId;
+  const result = document.getElementById('mresult');
+  const button = document.getElementById('msend');
+  button.disabled = true;
+  result.textContent = 'Sending…';
+  try {
+    const method = document.getElementById('mselector').value.trim();
+    if (!method) throw Error('Choose a method.');
+    const args = [...document.querySelectorAll('.marg')].map(argumentValue);
+    const response = await fetch('/mcp', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({jsonrpc:'2.0',id:1,method:'tools/call',params:{name:'call',arguments:{objectId:id,method,args}}})
+    });
+    const reply = await response.json();
+    if (reply.error) throw Error(reply.error.message);
+    if (!response.ok || reply.result.isError) throw Error((reply.result.content || []).map(c => c.text || '').join('\n'));
+    if (inspectedId !== id) return;
+    const value = JSON.parse(reply.result.content[0].text);
+    result.textContent = fmtVal(value);
+    if (value.kind === 'objid') {
+      result.textContent = '';
+      result.appendChild(objectLink(value.objid));
+    }
+    await showInspect(id, true);
+    await refreshObjs();
+  } catch (error) {
+    if (inspectedId === id) result.textContent = 'Error: ' + error.message;
+  } finally {
+    button.disabled = false;
+  }
+}
+
 function fmtVal(v) {
   if (!v || v.kind === 'nil') return 'nil';
   switch(v.kind) {
-    case 'number': return v.num === Math.floor(v.num) ? String(v.num|0) : String(v.num);
+    case 'number': return String(v.num);
     case 'string': return '"' + v.str + '"';
     case 'objid':  return '#' + v.objid;
     case 'bool':   return String(v.bool);
@@ -223,6 +344,8 @@ function fmtVal(v) {
 }
 
 function closeM() {
+  inspectedId = null;
+  inspectionVersion++;
   document.getElementById('mbg').style.display = 'none';
   document.getElementById('modal').style.display = 'none';
 }
