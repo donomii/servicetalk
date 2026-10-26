@@ -1,0 +1,8 @@
+Connect an official MCP client to the supplied coordinator endpoint.
+Create temporary working and bare repositories through a Git object.
+Exercise status, stage a filename with shell metacharacters, inspect staged diff.
+Commit a literal multiline message and verify it is unchanged and no command substitution happened.
+Push to the bare remote, compare the remote head, and fetch it.
+Change a file and check diff, log and remotes.
+Verify checked operations signal nonzero exit and startup failures, while run returns the Process for inspection.
+Clear the workspace reference, disconnect and remove temporary repositories.

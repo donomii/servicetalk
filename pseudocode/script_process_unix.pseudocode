@@ -1,0 +1,6 @@
+configure script child(command)
+    Isolate the child in an owned process group.
+    Bound inherited output waits and kill that group on cancellation.
+
+cleanup script child(command)
+    Kill any remaining members of the owned process group.

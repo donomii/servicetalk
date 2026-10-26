@@ -1,0 +1,101 @@
+# Local cluster smoke test.  Builds the demo image (multi-stage Go build
+# + alpine runtime) and runs a coordinator + two workers on a Docker
+# network.
+#
+# Usage:
+#   docker compose up
+#   open http://localhost:8000/        # web REPL
+#   docker compose down
+#
+# For a real deployment, build a bundle (./bundle.sh) and use the
+# Dockerfile generated inside it instead of this multi-stage build.
+
+services:
+  nats:
+    image: nats:2
+    command: ["-js"]
+    networks:
+      - smt
+
+  coordinator:
+    build: .
+    command: ["coordinator", "--port", "8000", "--main", ""]
+    environment:
+      SMT_HOST: coordinator
+      SMT_NATS_URL: nats://nats:4222
+      SMT_CLUSTER: servicetalk-local
+      SMT_NATS_STARTUP_TIMEOUT_MS: "60000"
+      SMT_SPAWN_TIMEOUT_MS: "75000"
+      SMT_MAILBOX_SIZE: "1024"
+      SMT_CONTROL_MAILBOX_SIZE: "128"
+      SMT_NATS_MAX_CALL_BYTES: "1048576"
+      SMT_INTERNAL_HTTP_MAX_BYTES: "335544320"
+      SMT_SOURCE_BUNDLE_MAX_BYTES: "268435456"
+      SMT_SOURCE_BUNDLE_MAX_FILES: "10000"
+      SMT_FOREIGN_CC: "cc"
+      SMT_FOREIGN_CARGO: "cargo"
+      SMT_FOREIGN_CFLAGS: ""
+      SMT_FOREIGN_LDFLAGS: ""
+      SMT_FOREIGN_RUST_TARGET: ""
+    depends_on:
+      - nats
+    ports:
+      - "8000:8000"
+    networks:
+      - smt
+
+  worker1:
+    build: .
+    command: ["worker", "--coordinator", "http://coordinator:8000", "--port", "8001"]
+    environment:
+      SMT_HOST: worker1
+      SMT_NATS_URL: nats://nats:4222
+      SMT_CLUSTER: servicetalk-local
+      SMT_NATS_STARTUP_TIMEOUT_MS: "60000"
+      SMT_SPAWN_TIMEOUT_MS: "75000"
+      SMT_MAILBOX_SIZE: "1024"
+      SMT_CONTROL_MAILBOX_SIZE: "128"
+      SMT_NATS_MAX_CALL_BYTES: "1048576"
+      SMT_INTERNAL_HTTP_MAX_BYTES: "335544320"
+      SMT_SOURCE_BUNDLE_MAX_BYTES: "268435456"
+      SMT_SOURCE_BUNDLE_MAX_FILES: "10000"
+      SMT_FOREIGN_CC: "cc"
+      SMT_FOREIGN_CARGO: "cargo"
+      SMT_FOREIGN_CFLAGS: ""
+      SMT_FOREIGN_LDFLAGS: ""
+      SMT_FOREIGN_RUST_TARGET: ""
+    depends_on:
+      - nats
+      - coordinator
+    networks:
+      - smt
+
+  worker2:
+    build: .
+    command: ["worker", "--coordinator", "http://coordinator:8000", "--port", "8001"]
+    environment:
+      SMT_HOST: worker2
+      SMT_NATS_URL: nats://nats:4222
+      SMT_CLUSTER: servicetalk-local
+      SMT_NATS_STARTUP_TIMEOUT_MS: "60000"
+      SMT_SPAWN_TIMEOUT_MS: "75000"
+      SMT_MAILBOX_SIZE: "1024"
+      SMT_CONTROL_MAILBOX_SIZE: "128"
+      SMT_NATS_MAX_CALL_BYTES: "1048576"
+      SMT_INTERNAL_HTTP_MAX_BYTES: "335544320"
+      SMT_SOURCE_BUNDLE_MAX_BYTES: "268435456"
+      SMT_SOURCE_BUNDLE_MAX_FILES: "10000"
+      SMT_FOREIGN_CC: "cc"
+      SMT_FOREIGN_CARGO: "cargo"
+      SMT_FOREIGN_CFLAGS: ""
+      SMT_FOREIGN_LDFLAGS: ""
+      SMT_FOREIGN_RUST_TARGET: ""
+    depends_on:
+      - nats
+      - coordinator
+    networks:
+      - smt
+
+networks:
+  smt:
+    driver: bridge

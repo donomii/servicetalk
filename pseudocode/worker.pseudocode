@@ -1,0 +1,3 @@
+spawn worker-hosted object
+    Preserve existing source deployment and child lifecycle.
+    Supply this worker's identifier to the child for placement inspection.

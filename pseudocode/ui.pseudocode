@@ -1,0 +1,10 @@
+open workspace
+    Prefill the editor with a Smalltalk counter example.
+    Create Counter, increment twice, add ten, and read its value: twelve.
+open object inspector
+    Request current object inspection.
+    Display placement, mailbox depth, root path and unavailable-reference context.
+    Display active calls and outbound waits with their targets and chain identifiers.
+    Preserve variable and method lists; wrap long diagnostic text.
+close inspector
+    Dismiss when Escape is pressed or the backdrop is clicked.

@@ -1,0 +1,12 @@
+runScript(file, coordinatorPort) -> exit status
+    Resolve, read and parse the file; report failures before spawning.
+    Start a separate one-shot coordinator with an isolated broker environment.
+    Bound startup, evaluation and shutdown with an aggregate deadline.
+    Forward output, wait for completion and clean up owned descendants.
+    Return failure if starting or running the child failed; otherwise success.
+
+runTests(optional files) -> exit status
+    Discover executable test files when explicit names are absent.
+    Reject an empty discovery result.
+    Run each file in a separate runtime, continuing after failures.
+    Print each result and the final counts; fail if any file failed.

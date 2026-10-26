@@ -1,0 +1,18 @@
+runCoordinator(port, mainClass, mode, source)
+    Reserve a listening socket and obtain its actual port before spawning.
+    Bind loopback in script mode; preserve serving-mode addresses otherwise.
+    Register coordinator routes, object transport and registry/GC lifecycle.
+    In one-shot modes evaluate source, request child shutdown and exit with
+    the evaluation status. Script mode requests strict error propagation.
+
+workspace evaluation(source, selector) -> output or error
+    Ensure the workspace, call the selected evaluation method, propagate
+    transport failures and remote signals, and return captured output.
+
+inspection and MCP routes
+    Serve MCP tool discovery and invocation alongside existing browser endpoints.
+    Enrich object inspection with sampled root paths and runtime activity.
+
+stale-object probe
+    Clear suspicion after a successful response.
+    Require repeated failure beyond the reconnect grace before eviction.

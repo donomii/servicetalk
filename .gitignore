@@ -1,0 +1,7 @@
+# Cargo build output for Rust foreign classes.  The class binary
+# itself lands in <Name>/<Name> (copied by BuildForeignClass) and
+# is intentionally NOT gitignored — bundle.sh + prebuild expect
+# the binary alongside the manifest.
+**/target/
+Cargo.lock
+servicetalk-rs/target/

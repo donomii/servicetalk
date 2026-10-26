@@ -1,0 +1,11 @@
+Git stores repository directory and last Process.
+initialize: use current directory and no last process.
+directory: get repository directory; directory: path sets it and returns self.
+lastProcess: return the most recent process, including output, status and exitCode.
+run: arguments starts git directly with the supplied argument array in directory, waits, and returns the Process even on failure.
+checked: arguments returns output on zero exit; otherwise signals directory, command, exit code and captured output.
+status, diff, stagedDiff, head, branch, remotes, log: return checked Git query output.
+fetch: remote fetches a remote.
+add: paths stages only supplied paths, after the end-of-options delimiter.
+commit: message commits the staged changes with the exact message argument.
+push: remote branch: name pushes the named branch to the remote, without force.

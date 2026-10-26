@@ -1,0 +1,19 @@
+collect object references(object) -> referenced object identifiers
+    Include references in fields, collection entries and captured arguments.
+    For a block, also include a nonempty lexical parent identifier.
+
+workspace call(selector, arguments) -> output or signal
+    Parse source and serialize workspace evaluation.
+    Capture output and always end capture when evaluation exits.
+    Script evaluation propagates parse errors and uncaught nested signals.
+    Interactive execution retains transcript capture and reports uncaught signals.
+    Return captured output and the normal formatted result.
+
+method execution -> result or signal
+    Catch explicit method returns; propagate uncaught signals to the caller.
+    Apply the same rule to foreign methods and block bodies.
+    Collect parallel-send replies before raising any returned signal.
+
+pulse lifetime
+    Use locally observed arrival time for lease expiry.
+    Use remote sweep identifiers only to order accepted pulses and break cycles.

@@ -1,0 +1,19 @@
+MCP request -> response or notification acknowledgement
+    Validate transport method, origin, protocol version and bounded JSON envelope.
+    Initialize the tools capability, answer pings, list schemas or invoke a tool.
+    Validate required and allowed arguments before execution.
+    Evaluate through the persistent strict workspace; call objects through NATS.
+    List objects, inspect runtime state or return coordinator metrics.
+    Return execution failures as error tool results and protocol failures as RPC errors.
+    Reject invalid request identifiers, malformed initialization and invalid Value kinds.
+    Describe argument fields and read-only tool annotations in discovery.
+
+official SDK interoperability client
+    Connect, negotiate protocol, discover tools and test persistent object operations.
+    Verify live inspection, root path, metrics and nested error handling.
+    Clear the test variable and disconnect; fail the process when a check fails.
+
+Tool arguments
+    Source text, object identifier, method selector and ordinary Value arguments.
+Tool result
+    Text entries and an execution-error flag.

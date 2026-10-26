@@ -1,0 +1,10 @@
+main(arguments)
+    Dispatch existing interactive, serving and application-directory commands.
+    For script FILE, run one executable file and return its exit status.
+    For test FILES, run the independent-file suite and return aggregate status.
+
+coordinator command(arguments)
+    Parse existing coordinator options and optional script file.
+    Reject script combined with expression evaluation or interactive REPL.
+    Validate script, add its containing directory to class lookup, and select
+    strict one-shot script mode.

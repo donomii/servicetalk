@@ -1,0 +1,4 @@
+record pulse arrival(local time)
+    Advance the local arrival timestamp without moving it backwards.
+pulse age(local time) -> elapsed duration
+    Measure elapsed local time since the latest accepted arrival.

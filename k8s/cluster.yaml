@@ -1,0 +1,255 @@
+# Kubernetes reference manifest for a servicetalk cluster.
+#
+# THIS FILE IS A REFERENCE, NOT A DEPLOYABLE.  For real deploys, run
+# k8s/bundle.sh — it generates a per-app manifest with your image ref,
+# replica count, namespace, and Service type already filled in:
+#
+#   ./bundle.sh           myapp dist/myapp
+#   ./k8s/bundle.sh       dist/myapp registry.example/myapp:v1
+#   kubectl apply -f      dist/myapp/kubernetes.yaml
+#
+# This file is what the bundler emits if you ran it with the default
+# arguments and a placeholder image — keep it around to read about the
+# resource shape without invoking the bundler.
+#
+# Components:
+#   nats (Deployment, replicas=1)
+#       Message fabric for all object method calls.
+#   coordinator (Deployment, replicas=1)
+#       The single registry / spawn router / web REPL.  Reachable
+#       in-cluster as DNS name `coordinator` on port 8000.
+#   worker (Deployment, replicas=N)
+#       Identical worker pods; each one registers with the coordinator
+#       and runs object subprocesses locally on its pod IP.  Pods are
+#       interchangeable — `kubectl scale deployment worker --replicas=…`
+#       just works.
+#
+# Plumbing notes:
+#   - Each worker advertises its own pod IP (downward API → SMT_HOST)
+#     so the coordinator and other objects can reach back to it.
+#   - The coordinator advertises the service DNS name "coordinator", so
+#     workers and objects always hit the same pod through the Service.
+#   - Objects do not listen on TCP ports.  They subscribe to NATS subjects
+#     of the form smt.<cluster>.obj.<object-id>.call.
+#
+# Web REPL access:
+#   kubectl port-forward svc/coordinator 8000:8000
+#   open http://localhost:8000/
+# Or expose via NodePort / LoadBalancer / Ingress as needed.
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nats
+  labels:
+    app: servicetalk
+    role: nats
+spec:
+  selector:
+    app: servicetalk
+    role: nats
+  ports:
+    - name: nats
+      port: 4222
+      targetPort: 4222
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nats
+  labels:
+    app: servicetalk
+    role: nats
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: servicetalk
+      role: nats
+  template:
+    metadata:
+      labels:
+        app: servicetalk
+        role: nats
+    spec:
+      containers:
+        - name: nats
+          image: nats:2
+          args: ["-js"]
+          ports:
+            - name: nats
+              containerPort: 4222
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: coordinator
+  labels:
+    app: servicetalk
+    role: coordinator
+spec:
+  type: ClusterIP
+  selector:
+    app: servicetalk
+    role: coordinator
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coordinator
+  labels:
+    app: servicetalk
+    role: coordinator
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate              # registry is in-memory; no rolling
+  selector:
+    matchLabels:
+      app: servicetalk
+      role: coordinator
+  template:
+    metadata:
+      labels:
+        app: servicetalk
+        role: coordinator
+    spec:
+      containers:
+        - name: coordinator
+          image: your-registry.example/your-app:latest
+          imagePullPolicy: IfNotPresent
+          command: ["/app/run"]
+          args:
+            - coordinator
+            - --port=8000
+            - --main=
+          env:
+            - name: SMT_HOST
+              value: coordinator
+            - name: SMT_NATS_URL
+              value: nats://nats:4222
+            - name: SMT_CLUSTER
+              value: servicetalk
+            - name: SMT_NATS_STARTUP_TIMEOUT_MS
+              value: "60000"
+            - name: SMT_SPAWN_TIMEOUT_MS
+              value: "75000"
+            - name: SMT_MAILBOX_SIZE
+              value: "1024"
+            - name: SMT_CONTROL_MAILBOX_SIZE
+              value: "128"
+            - name: SMT_NATS_MAX_CALL_BYTES
+              value: "1048576"
+            - name: SMT_INTERNAL_HTTP_MAX_BYTES
+              value: "335544320"
+            - name: SMT_SOURCE_BUNDLE_MAX_BYTES
+              value: "268435456"
+            - name: SMT_SOURCE_BUNDLE_MAX_FILES
+              value: "10000"
+            - name: SMT_FOREIGN_CC
+              value: cc
+            - name: SMT_FOREIGN_CARGO
+              value: cargo
+            - name: SMT_FOREIGN_CFLAGS
+              value: ""
+            - name: SMT_FOREIGN_LDFLAGS
+              value: ""
+            - name: SMT_FOREIGN_RUST_TARGET
+              value: ""
+          ports:
+            - name: http
+              containerPort: 8000
+          readinessProbe:
+            httpGet:
+              path: /registry
+              port: http
+            initialDelaySeconds: 1
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /registry
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker
+  labels:
+    app: servicetalk
+    role: worker
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: servicetalk
+      role: worker
+  template:
+    metadata:
+      labels:
+        app: servicetalk
+        role: worker
+    spec:
+      containers:
+        - name: worker
+          image: your-registry.example/your-app:latest
+          imagePullPolicy: IfNotPresent
+          command: ["/app/run"]
+          args:
+            - worker
+            - --coordinator=http://coordinator:8000
+            - --port=8001
+          env:
+            - name: SMT_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: SMT_NATS_URL
+              value: nats://nats:4222
+            - name: SMT_CLUSTER
+              value: servicetalk
+            - name: SMT_NATS_STARTUP_TIMEOUT_MS
+              value: "60000"
+            - name: SMT_SPAWN_TIMEOUT_MS
+              value: "75000"
+            - name: SMT_MAILBOX_SIZE
+              value: "1024"
+            - name: SMT_CONTROL_MAILBOX_SIZE
+              value: "128"
+            - name: SMT_NATS_MAX_CALL_BYTES
+              value: "1048576"
+            - name: SMT_INTERNAL_HTTP_MAX_BYTES
+              value: "335544320"
+            - name: SMT_SOURCE_BUNDLE_MAX_BYTES
+              value: "268435456"
+            - name: SMT_SOURCE_BUNDLE_MAX_FILES
+              value: "10000"
+            - name: SMT_FOREIGN_CC
+              value: cc
+            - name: SMT_FOREIGN_CARGO
+              value: cargo
+            - name: SMT_FOREIGN_CFLAGS
+              value: ""
+            - name: SMT_FOREIGN_LDFLAGS
+              value: ""
+            - name: SMT_FOREIGN_RUST_TARGET
+              value: ""
+          ports:
+            - name: worker
+              containerPort: 8001
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: worker
+            initialDelaySeconds: 1
+            periodSeconds: 5

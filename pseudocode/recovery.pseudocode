@@ -1,0 +1,5 @@
+failed liveness probe(object, observation time) -> may evict
+    First failure starts a suspicion window.
+    Repeated failure after the reconnect grace permits eviction.
+successful liveness probe(object)
+    Clear suspicion so a later interruption starts a new window.

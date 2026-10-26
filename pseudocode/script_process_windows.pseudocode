@@ -1,0 +1,5 @@
+configure script child(command)
+    Bound inherited output waits; cancellation terminates the direct child.
+
+cleanup script child(command)
+    No additional descendant containment is available in this implementation.

@@ -1,0 +1,7 @@
+incoming application call
+    Track executing method and preserve call-chain reentrancy.
+    Remove activity on completion, including signaled completion.
+outbound object call
+    Track target and selector while waiting for the reply.
+    Raise transport failures and remote signals to the caller.
+    Remove wait activity on every exit.

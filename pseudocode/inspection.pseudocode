@@ -1,0 +1,12 @@
+runtime inspection(object) -> snapshot
+    Report host, process, worker, pulse timing, mailbox counters and visible references.
+    Include active methods and outbound waits with chain, target and start time.
+    Mark foreign state as potentially containing additional references.
+
+retention explanation(object) -> sampled root path
+    Explore visible references from registered roots, avoiding cycles.
+    Return one root path when found; retain unavailable identifiers and time bounds.
+    Explain that an absent visible path does not establish unreachability.
+
+call tracking
+    Register activity on entry and remove it on success or failure.

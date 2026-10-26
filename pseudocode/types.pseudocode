@@ -1,0 +1,12 @@
+Inspection response
+    Existing object identifier, class, methods and instance variables.
+    Runtime record: host, process, worker, active calls, references, pulse timing, metrics.
+    Retention record: root flag, sampled path, unavailable objects and interpretation note.
+Call activity
+    Identifier, chain, selector, target, executing-or-waiting state and start time.
+MCP request and response
+    Preserve JSON-RPC identifier and version, method/params or result/error.
+MCP tool invocation and result
+    Named tool with typed argument payload; text content with execution-error flag.
+MCP initialization
+    Proposed protocol version, capabilities and client implementation name/version.
