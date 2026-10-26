@@ -45,6 +45,10 @@ func (obj *ObjectServer) runtimeInspection() *RuntimeInspection {
 	host, _ := os.Hostname()
 	result := &RuntimeInspection{Host: host, PID: os.Getpid(), WorkerID: os.Getenv("SMT_WORKER_ID"), Calls: []CallActivity{}, References: obj.collectObjidRefs(), ForeignReferences: obj.foreignBridge != nil, PulseTimeoutMs: obj.pulseTimeout.Milliseconds(), Metrics: obj.metricsResponse()}
 	result.Calls = obj.callActivitySnapshot()
+	result.Prototype = obj.prototypeID
+	result.Promise = obj.promiseSnapshot()
+	if cloneableClass(obj.classDef) && obj.foreignBridge == nil { result.DefinitionVersion = definitionVersion(snapshotDefinition(obj.classDef)) } else {}
+	if session := obj.debugSession(); session != nil { snapshot := session.snapshot(); result.Debug = &snapshot } else {}
 	result.LastSweepID = atomic.LoadInt64(&obj.lastSweepID)
 	result.PulseAgeMs = obj.pulseAge(time.Now()).Milliseconds()
 	sort.Slice(result.Calls, func(i, j int) bool { return result.Calls[i].Started.Before(result.Calls[j].Started) })

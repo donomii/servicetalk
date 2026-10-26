@@ -10,3 +10,23 @@ MCP tool invocation and result
     Named tool with typed argument payload; text content with execution-error flag.
 MCP initialization
     Proposed protocol version, capabilities and client implementation name/version.
+
+InspectResponse adds methodSignatures: selector to ordered parameter names.
+
+NavigationMethod records class, selector, parameters, sends, source, file, line and foreign status. NavigationIndex contains methods and source errors.
+
+WorkspaceResult carries typed result, output and optional error. ObjectWorkspaceRequest carries receiver ID and code. BlockDef optionally captures a selfOverride Value.
+
+InteractionRequest/Result describe typed UI calls. InteractionRecord adds timestamp/class. ResultRequest binds/releases handles. RecordingRequest/Response supplies structured records and exports. InspectorViewRequest/Response supplies target, key and JSON layout.
+
+Define DebugRequest, DebugCommand, DebugSnapshot, DebugHTTPRequest/Response, TraceEvent, TraceSnapshot and TraceRequest as documented in SPEC. Add sender to MessageRequest and optional debug to RuntimeInspection.
+
+SourceRequest carries action/class/source/digest/revision/message. SourceResponse carries canonical file/current source/digest/readOnly/revisions/historicalSource/diff/gitObject/errors. SourceRevision carries ID/unix timestamp/subject.
+
+SpawnRequest optionally carries NativeSnapshot. NativeDefinition/Snapshot and PrototypePatch/Method describe loaded native copies. WireDefinition/Node/Input and WireRun/WiringResponse describe typed message graphs and reports. RuntimeInspection adds prototype and definitionVersion.
+
+PromiseSnapshot carries state, typed target/arguments/result, error, timestamps and reply timeout. InteractionRequest accepts an optional timeoutMs for promise interactions.
+
+WorkbenchDefinition/Tool describe live toolbar actions; WorkbenchResponse and ExamplesResponse carry object identities and editable catalog data.
+
+SelectorSpan/Site describe parsed Unicode source locations. RefactorRequest supplies selectors and optional class; RefactorFile/Edit/Response carry digests, proposed sources, per-line edits, literal references and errors.

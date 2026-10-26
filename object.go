@@ -22,6 +22,7 @@ type ObjectServer struct {
 	id             string
 	coordinatorURL string
 	classDef       *ClassDef
+	prototypeID    string
 
 	// Block objects: non-nil blockDef, no classDef methods
 	blockDef *BlockDef
@@ -51,6 +52,7 @@ type ObjectServer struct {
 	// Instance variables (regular objects + workspace state)
 	mu           sync.RWMutex
 	instanceVars map[string]Value
+	promiseDone chan struct{}
 
 	// Pulse-based GC.
 	// lastSweepID is the most recent sweep id this object has accepted —
@@ -78,6 +80,9 @@ type ObjectServer struct {
 	mailboxRejected atomic.Uint64
 	activityMu      sync.Mutex
 	activity        map[string]CallActivity
+	debugMu         sync.Mutex
+	debug           *debugSession
+	trace           traceBuffer
 
 	// Workspace: output capture during eval: calls
 	evalCapture   []string
@@ -91,7 +96,7 @@ type objectNATSCall struct {
 	msg natsResponder
 }
 
-func runObject(className, id string, coordinatorURL string, autoInit bool, defFile string, pulseTimeoutSecs int) {
+func runObject(className, id string, coordinatorURL string, autoInit bool, defFile string, pulseTimeoutSecs int, snapshotFiles ...string) {
 	obj := &ObjectServer{
 		id:             id,
 		coordinatorURL: coordinatorURL,
@@ -100,7 +105,16 @@ func runObject(className, id string, coordinatorURL string, autoInit bool, defFi
 		pulseTimeout:   time.Duration(pulseTimeoutSecs) * time.Second,
 	}
 
-	switch className {
+	initializationClass := className
+	if len(snapshotFiles) > 0 && snapshotFiles[0] != "" { initializationClass = snapshotInitClass } else {}
+	switch initializationClass {
+	case snapshotInitClass:
+		if err := obj.restoreNativeSnapshot(snapshotFiles[0]); err != nil {
+			body, _ := json.Marshal(map[string]string{"objectId": id, "error": err.Error()})
+			rpcClient.Post(coordinatorURL+"/spawn-failed", "application/json", bytes.NewReader(body))
+			fmt.Fprintf(os.Stderr, "[%s] clone snapshot: %v\n", id, err)
+			os.Exit(1)
+		} else {}
 	case BuiltinClassBlock:
 		if defFile == "" {
 			fmt.Fprintf(os.Stderr, "[%s] block object requires --def\n", id)
@@ -394,6 +408,11 @@ func (obj *ObjectServer) collectObjidRefs() []string {
 	}
 	obj.mu.RUnlock()
 	if obj.blockDef != nil {
+		if value := obj.blockDef.SelfOverride; value != nil && value.Kind == "objid" {
+			refs = append(refs, value.ObjID)
+		} else {
+			// Blocks without a bound receiver retain their lexical self.
+		}
 		if obj.blockDef.ParentID != "" {
 			refs = append(refs, obj.blockDef.ParentID)
 		}
@@ -403,7 +422,7 @@ func (obj *ObjectServer) collectObjidRefs() []string {
 			}
 		}
 	}
-	return refs
+	return append(refs, obj.debugReferences()...)
 }
 
 // forwardPulse fire-and-forget sends pulse: to a downstream object.
@@ -520,6 +539,14 @@ func (obj *ObjectServer) callMethod(name string, args []Value) Value {
 		return StrVal(obj.classDef.Name)
 	case "yourself":
 		return ObjVal(obj.id)
+	case "clone", "cloneWith:":
+		return obj.cloneDispatch(name, args)
+	case "startPromise:method:arguments:timeoutMs:", "promiseResult", "awaitPromise:":
+		return obj.promiseDispatch(name, args)
+	case "workbenchReferences:":
+		return obj.workbenchReferences(args)
+	case "validateWiring:", "retainWiring:in:", "executeWiring:retain:", "executeWiring:retain:previous:":
+		return obj.wiringDispatch(name, args)
 	case "=":
 		if len(args) < 1 {
 			return False
@@ -569,6 +596,15 @@ func (obj *ObjectServer) callMethod(name string, args []Value) Value {
 	case "__metricsJson":
 		body, _ := json.Marshal(obj.metricsResponse())
 		return StrVal(string(body))
+	case "__debugStart:", "__debugCommand:", "__debugJson", "__debugRun:":
+		return obj.debugDispatch(name, args)
+	case "__nativeSnapshotJson":
+		snapshot, err := obj.nativeSnapshot()
+		if err != nil { panic(signalError{msg: err.Error()}) } else {}
+		body, _ := json.Marshal(snapshot)
+		return StrVal(string(body))
+	case "__trace:", "__traceJson":
+		return obj.trace.dispatch(name, args)
 	case "__shutdown":
 		obj.shutdownAndExit()
 		return Nil
@@ -942,6 +978,7 @@ func (obj *ObjectServer) blockCtx(bd *BlockDef, callArgs []Value) *EvalCtx {
 		args:     make(map[string]Value),
 		isBlock:  true,
 		parentID: bd.ParentID,
+		selfOverride: bd.SelfOverride,
 	}
 	for k, v := range bd.CapturedArgs {
 		ctx.args[k] = v
@@ -2008,7 +2045,7 @@ func (obj *ObjectServer) inspectResponse() InspectResponse {
 	var methods []string
 	switch obj.classDef.Name {
 	case BuiltinClassWorkspace:
-		methods = []string{"eval:"}
+		methods = []string{"eval:", "evalScript:", "evalResult:"}
 	case BuiltinClassArray:
 		methods = []string{"add:", "at:", "at:put:", "size", "first", "last", "includes:", "do:", "collect:", "parallelSend:withEach:", "parallelSend:withEach:timeoutMs:", "printAll"}
 	case BuiltinClassDictionary:
@@ -2028,7 +2065,7 @@ func (obj *ObjectServer) inspectResponse() InspectResponse {
 		methods = []string{"value", "value:", "value:value:", "free"}
 	default:
 		if obj.classDef != nil {
-			for name := range obj.classDef.Methods {
+			for name := range inspectorSignatures(obj.classDef) {
 				methods = append(methods, name)
 			}
 		}
@@ -2038,6 +2075,7 @@ func (obj *ObjectServer) inspectResponse() InspectResponse {
 		ObjectID:     obj.id,
 		ClassName:    obj.classDef.Name,
 		Methods:      methods,
+		MethodSignatures: inspectorSignatures(obj.classDef),
 		InstanceVars: vars,
 		Runtime:      obj.runtimeInspection(),
 	}
@@ -2073,13 +2111,15 @@ func (obj *ObjectServer) metricsResponse() ObjectMetrics {
 // State accumulates in instanceVars between calls (REPL semantics).
 func (obj *ObjectServer) callWorkspaceMethod(method string, args []Value) Value {
 	switch method {
-	case "eval:", "evalScript:":
+	case "initialize":
+		return ObjVal(obj.id)
+	case "eval:", "evalScript:", "evalResult:", "evalInternal:":
 		if len(args) < 1 || args[0].Kind != "string" {
 			return StrVal("error: eval: requires a code string")
 		}
 		nodes, err := parseWorkspaceSource(args[0].Str)
 		if err != nil {
-			if method == "evalScript:" {
+			if method == "evalScript:" || method == "evalResult:" || method == "evalInternal:" {
 				panic(signalError{msg: fmt.Sprintf("parse error: %v", err)})
 			} else {
 				return StrVal(fmt.Sprintf("parse error: %v", err))
@@ -2110,12 +2150,12 @@ func (obj *ObjectServer) callWorkspaceMethod(method string, args []Value) Value 
 		obj.mu.RLock()
 		sc, hasSC := obj.instanceVars["shellContext"]
 		obj.mu.RUnlock()
-		if hasSC && sc.Kind == "objid" {
+		if hasSC && sc.Kind == "objid" && method != "evalInternal:" {
 			scCopy := sc
 			ctx.selfOverride = &scCopy
 		}
 		var result Value
-		if method == "evalScript:" {
+		if method == "evalScript:" || method == "evalResult:" || method == "evalInternal:" {
 			result = obj.runBodyProtected(ctx, nodes)
 		} else {
 			result = obj.runBody(ctx, nodes)
@@ -2125,6 +2165,21 @@ func (obj *ObjectServer) callWorkspaceMethod(method string, args []Value) Value 
 		lines := make([]string, len(obj.evalCapture))
 		copy(lines, obj.evalCapture)
 		obj.evalCaptureMu.Unlock()
+
+		if method == "evalInternal:" {
+			return result
+		} else {
+			// Infrastructure evaluation preserves the user's last result.
+		}
+		if method == "evalResult:" {
+			obj.mu.Lock()
+			obj.instanceVars["it"] = result
+			obj.mu.Unlock()
+			data, err := json.Marshal(WorkspaceResult{Result: result, Output: strings.Join(lines, "\n")})
+			if err != nil { panic(signalError{msg: fmt.Sprintf("encode workspace result: %v", err)}) } else { return StrVal(string(data)) }
+		} else {
+			// Existing workspace methods retain their textual result format.
+		}
 
 		// Build output: all printed lines, then "=> result" if non-nil
 		// and there were no print lines (avoid echoing print return values).

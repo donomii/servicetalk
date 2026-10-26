@@ -248,6 +248,11 @@ func TestIntegrationCoordinatorWorkerSpawn(t *testing.T) {
 	if got := strings.TrimSpace(er.Output); got != "1" {
 		t.Fatalf("remote worker eval output = %q, want 1", got)
 	}
+	cloned := testInteraction(t, coordBase, InteractionRequest{Kind: "eval", Code: "workerCopy := c clone. workerCopy add: 9. workerCopy"})
+	if cloned.Error != "" { t.Fatal(cloned.Error) } else {}
+	inspection := cloneTestInspect(t, coordBase, cloned.Result.ObjID)
+	if inspection.Runtime.WorkerID == "" || inspection.InstanceVars["count"].Num != 10 { t.Fatalf("worker clone: %+v", inspection) } else {}
+	if original := sourceTestEval(t, coordBase, "c value"); original != "1" { t.Fatalf("worker clone modified original: %s", original) } else {}
 }
 
 // freePort returns a currently-free TCP port.  There's an unavoidable race

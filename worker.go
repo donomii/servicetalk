@@ -175,6 +175,12 @@ func (w *Worker) spawnLocal(req SpawnRequest) (SpawnResponse, error) {
 	}
 
 	cmd := exec.Command(bin, args...)
+	if req.Snapshot != nil {
+		file, err := snapshotArgumentFile(req.Snapshot)
+		if err != nil { return SpawnResponse{}, err } else {}
+		defer os.Remove(file)
+		cmd.Args = append(cmd.Args, "--snapshot", file)
+	} else {}
 	cmd.Env = append(os.Environ(), "SMT_WORKER_ID="+w.id)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr

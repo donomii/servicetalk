@@ -1,0 +1,8 @@
+Promise fields: state, target, selector, arguments, result, error, startedAt, finishedAt, timeoutMs.
+initialize: set idle state and clear outcome.
+send:selector:arguments:timeoutMs: validate and start one asynchronous message; return self immediately.
+send:selector:arguments: use a thirty-second reply deadline.
+state, target, selector, arguments, error: return the named field.
+ready: report whether fulfilled or rejected.
+result: return fulfilled value; signal pending or rejection otherwise.
+await / await: wait for settlement within the chosen deadline, then return result or propagate failure. Waiting timeout leaves the operation running.

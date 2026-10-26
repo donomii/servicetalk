@@ -47,6 +47,8 @@ const (
 )
 
 type stToken struct {
+	start int
+	end int
 	kind stTokKind
 	text string
 	num  float64
@@ -115,8 +117,11 @@ func isStIdentCont(ch rune) bool {
 
 func (l *stLexer) tokenize() ([]stToken, error) {
 	var toks []stToken
+	start := 0
 	for {
+		if len(toks)>0 { toks[len(toks)-1].start=start; toks[len(toks)-1].end=l.pos } else {}
 		l.skipTrivia()
+		start=l.pos
 		if l.pos >= len(l.src) {
 			toks = append(toks, stToken{kind: stEOF, line: l.line})
 			return toks, nil
@@ -379,6 +384,8 @@ func (l *stLexer) readString(line int) stToken {
 // ---- parser ----
 
 type stParser struct {
+	recordSelectors bool
+	selectorSites []SelectorSite
 	toks []stToken
 	pos  int
 }
@@ -566,6 +573,7 @@ func (p *stParser) parseClass() (*Node, error) {
 //   binopHeader  [ body ]        → (method op   (p) body...)
 //   keywordHeader [ body ]       → (method a:b: (p q) body...)
 func (p *stParser) parseMethod() (*Node, error) {
+	headerStart := p.pos
 	startLine := p.peek().line
 	var name string
 	var params []*Node
@@ -602,6 +610,7 @@ func (p *stParser) parseMethod() (*Node, error) {
 	if _, ok := p.accept(stLBracket); !ok {
 		return nil, p.errAt(p.peek(), "expected `[` to open method body for `%s`", name)
 	}
+	p.noteMethodSelector(name,p.toks[headerStart:p.pos-1])
 	body, err := p.parseBlockBody(stRBracket)
 	if err != nil {
 		return nil, err
@@ -824,7 +833,7 @@ func (p *stParser) parseCascade() (*Node, error) {
 		msgs := []*Node{first}
 		for p.peek().kind == stSemi {
 			p.advance() // ';'
-			sel, args, line, err := p.parseCascadeMessage()
+			sel, args, line, err := p.parseCascadeMessage(true)
 			if err != nil {
 				return nil, err
 			}
@@ -871,12 +880,14 @@ func (p *stParser) parseCascade() (*Node, error) {
 // parseCascadeMessage parses one receiver-less message tail — unary,
 // binary, or keyword — and returns its combined selector plus argument
 // expressions.  Used for the messages after each ';' in a cascade.
-func (p *stParser) parseCascadeMessage() (selector string, args []*Node, line int, err error) {
+func (p *stParser) parseCascadeMessage(skipOuter ...bool) (selector string, args []*Node, line int, err error) {
 	t := p.peek()
+	capture := len(skipOuter)==0 || !skipOuter[0]
 	line = t.line
 	switch t.kind {
 	case stIdent:
 		p.advance()
+		if capture { p.noteSelector(t.text,"send",[]stToken{t}) } else {}
 		return t.text, nil, line, nil
 	case stBinop:
 		p.advance()
@@ -884,11 +895,14 @@ func (p *stParser) parseCascadeMessage() (selector string, args []*Node, line in
 		if err != nil {
 			return "", nil, line, err
 		}
+		if capture { p.noteSelector(t.text,"send",[]stToken{t}) } else {}
 		return t.text, []*Node{rhs}, line, nil
 	case stKeyword:
 		var sb strings.Builder
+		var selectorTokens []stToken
 		for p.peek().kind == stKeyword {
 			k := p.advance()
+			selectorTokens=append(selectorTokens,k)
 			sb.WriteString(k.text)
 			a, err := p.parseBinary()
 			if err != nil {
@@ -896,6 +910,7 @@ func (p *stParser) parseCascadeMessage() (selector string, args []*Node, line in
 			}
 			args = append(args, a)
 		}
+		if capture { p.noteSelector(sb.String(),"send",selectorTokens) } else {}
 		return sb.String(), args, line, nil
 	}
 	return "", nil, line, p.errAt(t, "expected a message after ';' in cascade, got %q", t.text)
@@ -966,9 +981,11 @@ func (p *stParser) parseKeyword() (*Node, error) {
 	}
 	var sb strings.Builder
 	var args []*Node
+	var selectorTokens []stToken
 	firstLine := p.peek().line
 	for p.peek().kind == stKeyword {
 		k := p.advance()
+		selectorTokens=append(selectorTokens,k)
 		sb.WriteString(k.text)
 		a, err := p.parseBinary()
 		if err != nil {
@@ -976,7 +993,9 @@ func (p *stParser) parseKeyword() (*Node, error) {
 		}
 		args = append(args, a)
 	}
-	return p.buildSend(recv, sb.String(), args, firstLine), nil
+	result := p.buildSend(recv, sb.String(), args, firstLine)
+	p.noteParsedSend(result,sb.String(),selectorTokens)
+	return result, nil
 }
 
 // binary send: unary (BINOP unary)*
@@ -999,6 +1018,7 @@ func (p *stParser) parseBinary() (*Node, error) {
 			sym(op.text, op.line),
 			right,
 		)
+		p.noteSelector(op.text,"send",[]stToken{op})
 	}
 	return left, nil
 }
@@ -1013,6 +1033,7 @@ func (p *stParser) parseUnary() (*Node, error) {
 		// A bare identifier here is a unary selector.
 		t := p.advance()
 		recv = p.buildSend(recv, t.text, nil, t.line)
+		p.noteParsedSend(recv,t.text,[]stToken{t})
 	}
 	return recv, nil
 }

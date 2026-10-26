@@ -56,13 +56,31 @@ tr:hover td{background:#f5f5f5;cursor:pointer}
 .mths{color:#555;font-size:11px;margin-top:10px;line-height:1.9}
 .mths button{display:inline-block;background:#f0f0f0;border:1px solid #ddd;padding:1px 7px;margin:2px}
 #mcall{margin-top:12px}#mcall input,#mcall select{max-width:100%;padding:5px;font:inherit}#mselector{width:100%}.marg{display:flex;gap:6px;margin:6px 0}.marg input{flex:1;min-width:0}#mresult{white-space:pre-wrap;overflow-wrap:anywhere;margin-top:10px}.objlink{border:0;background:none;color:#2471a3;text-decoration:underline;cursor:pointer}
+#navigation{position:fixed;inset:8px;background:#fff;z-index:8;border:1px solid #bbb;display:flex;flex-direction:column}#navigation[hidden]{display:none}#nav-toolbar{display:flex;gap:6px;padding:8px;flex-wrap:wrap}#nav-search{min-width:80px;flex:1}#nav-body{display:flex;flex:1;min-height:0}#nav-graph{flex:1;min-width:0;background:#f6f8fa;touch-action:none}#nav-detail{width:38%;min-width:180px;padding:10px;overflow:auto;overflow-wrap:anywhere}#nav-detail h4{margin:12px 0 6px}#nav-detail .btn{margin:3px;white-space:normal;text-align:left}#nav-detail pre{max-height:50vh;overflow:auto;font-size:12px;margin-top:10px}.source-current{background:#fff0b4}@media(max-width:650px){#nav-body{flex-direction:column}#nav-graph{min-height:45%}#nav-detail{width:100%;height:50%}}
+#ow{margin-top:16px;border-top:1px solid #ddd;padding-top:10px}#ow h4{margin-bottom:6px}#ow-code{display:block;width:100%;min-height:110px;resize:vertical;font:inherit;padding:8px;margin:8px 0}#ow-method{max-width:100%;padding:4px}#ow-args .marg{flex-wrap:wrap}#ow-args input{min-width:90px}#ow-result{white-space:pre-wrap;overflow-wrap:anywhere;margin-top:8px}#ow-result pre{white-space:pre-wrap}#ow-suggestions .btn{margin:4px}#ow-signature,#ow-target{color:#555}
+.result-actions{display:flex;gap:5px;flex-wrap:wrap;margin:7px 0}.result-actions input{max-width:150px;min-width:90px}.ev-res pre{white-space:pre-wrap}#recording-panel{position:fixed;inset:20px;background:white;border:1px solid #ccc;padding:12px;z-index:12;display:flex;flex-direction:column;gap:10px}#recording-panel[hidden]{display:none}#recording-list{max-height:35%;overflow:auto;overflow-wrap:anywhere}.record-line{padding:6px;border-bottom:1px solid #eee}#recording-source{flex:1;min-height:140px;font:inherit;padding:10px;resize:none}#hdr{flex-wrap:wrap}
+.view-tabs,.view-tools,.view-row{display:flex;gap:7px;flex-wrap:wrap}.view-tools{margin:8px 0}.view-node{min-width:0;max-width:100%;margin:6px 0}.view-node>label{display:block;font-weight:bold}.view-node pre{white-space:pre-wrap;overflow-wrap:anywhere}.view-column{display:flex;flex-direction:column}.view-body{background:#f8fafb;border:1px solid #ddd;padding:9px;margin:6px 0}.view-value>span{font-size:24px}.view-table{max-width:100%;overflow:auto}.view-table td{overflow-wrap:anywhere;max-width:260px}.view-editor{width:100%;min-height:230px;font:inherit}.view-error{color:#b33}.view-textarea textarea{width:100%;min-height:90px}
+#result-shelf{position:fixed;inset:20px;background:white;border:1px solid #ccc;padding:12px;z-index:12;overflow:auto}#result-shelf[hidden]{display:none}.result-card{padding:10px 0;border-bottom:1px solid #ddd;overflow-wrap:anywhere}
+</style>
+<style>
+#wiring-panel{display:flex;flex-direction:column}#wiring-panel[hidden]{display:none}#wiring-body{display:flex;flex:1;min-height:0;gap:12px}#wiring-graph{flex:1;min-width:0;min-height:300px;background:#f4f7fa;touch-action:none}#wiring-detail{width:33%;overflow:auto;min-width:220px;padding:8px}#wiring-detail input{max-width:100%}#wiring-detail .btn{margin:6px}#wiring-object{min-width:100px;max-width:400px}#wiring-status{overflow-wrap:anywhere}@media(max-width:650px){#wiring-body{flex-direction:column;overflow:auto}#wiring-graph{min-height:45vh}#wiring-detail{width:100%;overflow:visible}}
+</style>
+<style>
+#source-panel{display:flex;flex-direction:column;gap:10px}#source-panel[hidden]{display:none}#source-title{overflow-wrap:anywhere}#source-body{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:14px;flex:1;min-height:0}#source-editor{width:100%;height:100%;resize:none;min-height:200px}#source-history-pane{overflow:auto;min-width:0}#source-history{display:flex;flex-direction:column;gap:5px}#source-history button{white-space:normal;text-align:left}#source-preview{white-space:pre-wrap;overflow-wrap:anywhere;padding:8px;background:#f6f8fa}#source-message{flex:1;min-width:100px}@media(max-width:650px){#source-body{grid-template-columns:minmax(0,1fr);overflow:auto}#source-editor{height:45vh}#source-history-pane{overflow:visible}}
+</style>
+<style>
+.runtime-panel{position:fixed;inset:12px;z-index:14;background:#fff;border:1px solid #bbb;padding:14px;overflow:auto}.runtime-panel[hidden]{display:none}.runtime-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}.runtime-panel pre{white-space:pre-wrap;overflow-wrap:anywhere}.runtime-panel input,.runtime-panel select,.runtime-panel textarea{max-width:100%;font:inherit;padding:5px}.runtime-panel .marg{flex-wrap:wrap}.runtime-panel .marg label{min-width:100px}.runtime-panel .marg input{min-width:70px}.runtime-status{white-space:pre-wrap;margin:10px 0;color:#555}.debug-columns{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}.debug-current{background:#fff0b4;border-left:3px solid #c0392b;padding:7px}#debugger-code{width:100%;min-height:90px}#debugger-statements{max-height:35vh;overflow:auto}.trace-event{border-bottom:1px solid #ddd;padding:12px 0;overflow-wrap:anywhere}.trace-heading,.trace-endpoints{display:flex;gap:12px;flex-wrap:wrap}.trace-heading{justify-content:space-between}.trace-event small{display:block;color:#888;margin-top:6px}@media(max-width:650px){.debug-columns{grid-template-columns:minmax(0,1fr)}}
+</style>
+<style>
+#examples-body{display:grid;grid-template-columns:220px minmax(0,1fr);gap:16px}#examples-list{display:flex;flex-direction:column;gap:8px}#examples-list .btn{text-align:left;white-space:normal}#example-editor label{display:block;margin-bottom:10px}#example-editor input,#example-editor textarea{display:block;width:100%}#example-source{min-height:200px}#example-check{min-height:85px}#example-description{min-height:65px}#example-result{overflow-wrap:anywhere}#example-result pre{white-space:pre-wrap}@media(max-width:650px){#examples-body{grid-template-columns:minmax(0,1fr)}#examples-list{flex-direction:row;flex-wrap:wrap}}
 </style>
 </head>
 <body>
 
 <div id="hdr">
-  <h1>servicetalk</h1>
+  <h1 id="workbench-title">servicetalk</h1>
   <small>ctrl+enter to run</small>
+  <span id="workbench-tools" style="display:flex;gap:8px;flex-wrap:wrap"></span><button class="btn" onclick="openWorkbench()">Workbench</button><span id="recording-status"></span><span id="workbench-status"></span>
 </div>
 
 <div id="main">
@@ -75,7 +93,7 @@ c add: 10.
 c value</textarea>
     <div id="bar">
       <button class="btn btn-run" onclick="doEval()">&#9654; Eval</button>
-      <button class="btn" onclick="document.getElementById('out').innerHTML=''">&#x2715; Clear</button>
+      <button class="btn" onclick="clearResults()">&#x2715; Clear</button>
       <span id="hint">ctrl+enter</span>
     </div>
   </div>
@@ -94,19 +112,37 @@ c value</textarea>
   </div>
 </div>
 
+<section id="navigation" hidden><div id="nav-toolbar"><button class="btn" onclick="navMode='methods';refreshNavigation()">Methods</button><button class="btn" onclick="navMode='objects';refreshNavigation()">Objects</button><input id="nav-search" aria-label="Find class or selector" placeholder="Class or selector" oninput="if(navMode==='methods')renderNavigation()"><button class="btn" id="nav-fit">Fit graph</button><button class="btn" onclick="refreshNavigation()">Refresh</button><button class="btn" onclick="closeNavigation()">Close</button></div><div id="nav-body"><svg id="nav-graph" aria-label="Relationship graph"></svg><div id="nav-detail"></div></div></section>
+<section id="result-shelf" hidden><button class="btn" onclick="document.getElementById('result-shelf').hidden=true">Close results</button><div id="result-shelf-list"></div></section>
+<datalist id="result-choices"></datalist>
+<section id="recording-panel" hidden><div><button class="btn" id="recording-script">Script</button><button class="btn" id="recording-test">Test</button><button class="btn" id="recording-download">Download</button><button class="btn" id="recording-load">Load into REPL</button><button class="btn" onclick="document.getElementById('recording-panel').hidden=true">Close</button></div><div id="recording-list"></div><textarea id="recording-source" aria-label="Recorded script"></textarea></section>
 <div id="mbg" onclick="closeM()"></div>
+<section id="refactor-panel" class="runtime-panel" hidden><div class="runtime-toolbar"><strong>Rename selector</strong><button class="btn" onclick="closeRefactor()">Close</button></div><div class="runtime-toolbar"><label>From <input id="refactor-from" aria-label="Original selector"></label><label>To <input id="refactor-to" aria-label="New selector"></label><label>Scope <select id="refactor-scope" aria-label="Refactoring scope"></select></label><button class="btn" onclick="previewRefactor()">Preview changes</button></div><div id="refactor-results"></div></section>
+<section id="workbench-panel" class="runtime-panel" hidden><div class="runtime-toolbar"><strong>Workbench</strong><button class="btn" onclick="saveWorkbench()">Save tools</button><button class="btn" onclick="openWorkbench()">Reload</button><button class="btn" onclick="resetWorkbench()">Restore default tools</button><button class="btn" onclick="inspectWorkbench()">Inspect workbench object</button><button class="btn" onclick="document.getElementById('workbench-panel').hidden=true">Close</button></div><textarea id="workbench-editor" aria-label="Workbench definition" style="width:100%;height:65vh"></textarea><div id="workbench-message" class="runtime-status"></div></section>
+<section id="examples-panel" class="runtime-panel" hidden><div class="runtime-toolbar"><strong>Examples</strong><button class="btn" onclick="newExample()">New example</button><button class="btn" onclick="inspectExample()">Inspect example</button><button class="btn" onclick="inspectExample(true)">Inspect workspace</button><button class="btn" onclick="closeExamples()">Close</button></div><div id="examples-body"><nav id="examples-list"></nav><div id="example-editor"><label>Title<input id="example-title" aria-label="Example title"></label><label>Description<textarea id="example-description" aria-label="Example description"></textarea></label><label>Source<textarea id="example-source" aria-label="Example source"></textarea></label><label>Check<textarea id="example-check" aria-label="Example check"></textarea></label><div class="runtime-toolbar"><button class="btn" id="example-save">Save example</button><button class="btn btn-run" id="example-run" onclick="runExample()">Run and check</button><button class="btn" onclick="resetExample()">Reset workspace</button></div><div id="examples-status" class="runtime-status"></div><div id="example-result"></div></div></div></section>
+<section id="wiring-panel" class="runtime-panel" hidden><div class="runtime-toolbar"><strong id="wiring-owner">Message graph</strong><button class="btn" id="wiring-inspect">Inspect graph object</button><button class="btn" onclick="closeWiring()">Close</button></div><div class="runtime-toolbar"><select id="wiring-object" aria-label="New node receiver"></select><button class="btn" onclick="addWiringNode()">Add node</button><button class="btn" id="wiring-save">Save graph</button><button class="btn" onclick="runWiring()">Run graph</button><button class="btn" onclick="runWiringPromise()">Run asynchronously</button><button class="btn" onclick="runWiring(true)">Resume from failure</button><button class="btn" onclick="fitWiring();renderWiring()">Fit graph</button></div><div id="wiring-status" class="runtime-status"></div><div id="wiring-body"><svg id="wiring-graph" aria-label="Message wiring graph"></svg><div id="wiring-detail"></div></div><datalist id="wiring-node-options"></datalist><datalist id="wiring-method-options"></datalist></section>
+<section id="clone-panel" class="runtime-panel" hidden><div class="runtime-toolbar"><strong id="clone-title">Clone and edit</strong><button class="btn" onclick="closeClone()">Close</button></div><p>The copy gets its own fields and loaded methods. Object references stay shared.</p><div id="clone-status" class="runtime-status"></div><div class="debug-columns"><div><h4>Fields</h4><div id="clone-fields"></div></div><div><h4>Method override (optional)</h4><label>Selector <input id="clone-method" list="clone-method-choices" oninput="cloneMethodSelected()"></label><datalist id="clone-method-choices"></datalist><label>Parameters, separated by commas <input id="clone-params"></label><textarea id="clone-code" aria-label="Derived method body" style="display:block;width:100%;min-height:160px;margin:12px 0" placeholder="Smalltalk method body"></textarea></div></div><button class="btn" onclick="deriveClone()">Create derived object</button></section>
+<section id="source-panel" class="runtime-panel" hidden><div class="runtime-toolbar"><strong id="source-title"></strong><button class="btn" id="source-save" onclick="saveSource()">Save definition</button><button class="btn" onclick="sourceDiff()">Working diff</button><button class="btn" onclick="openSource(sourceState.class)">Refresh history</button><button class="btn" onclick="closeSource()">Close</button></div><div id="source-status" class="runtime-status"></div><div id="source-body"><textarea id="source-editor" aria-label="Class definition" spellcheck="false" oninput="rememberSourceDraft()"></textarea><div id="source-history-pane"><h4>Git history</h4><div id="source-git"></div><div id="source-history"></div><button class="btn" id="source-restore" hidden onclick="restoreSourceRevision()">Copy revision to editor</button><pre id="source-preview"></pre></div></div><div class="runtime-toolbar"><input id="source-message" aria-label="Commit message" placeholder="Commit message"><button class="btn" id="source-commit" onclick="commitSource()">Commit this file</button></div></section>
+<section id="debugger-panel" class="runtime-panel" hidden><div class="runtime-toolbar"><strong id="debugger-target">Native method debugger</strong><button class="btn" onclick="refreshDebugger()">Refresh</button><button class="btn" onclick="closeDebugger()">Close</button></div><label>Method <select id="debugger-method"></select></label><div id="debugger-args"></div><button class="btn" id="debugger-start">Start paused</button><div class="runtime-status" id="debugger-status"></div><section id="debugger-frame" hidden><div class="debug-columns"><div><h4>Statements</h4><div id="debugger-statements"></div><label for="debugger-code">Replacement for current statement (optional)</label><textarea id="debugger-code"></textarea><div id="debugger-result"></div></div><div><h4>Arguments</h4><div id="debugger-bindings"></div><h4>Receiver fields</h4><div id="debugger-fields"></div><div id="debugger-return-value"></div></div></div><div id="debugger-actions" class="runtime-toolbar"><button class="btn" data-action="step">Step</button><button class="btn" data-action="continue">Continue</button><button class="btn" data-action="retry">Retry statement</button><button class="btn" data-action="return">Return value</button><button class="btn" data-action="abort">Abort</button></div></section></section>
+<section id="trace-panel" class="runtime-panel" hidden><div class="runtime-toolbar"><strong>Message trace</strong><button class="btn" onclick="configureTrace('start')">Start tracing</button><button class="btn" onclick="configureTrace('stop')">Stop tracing</button><button class="btn" onclick="refreshTrace()">Refresh</button><button class="btn" onclick="configureTrace('clear')">Clear</button><button class="btn" onclick="exportTrace()">Download JSON</button><button class="btn" onclick="closeTrace()">Close</button></div><div class="runtime-toolbar"><input id="trace-filter" aria-label="Filter messages" placeholder="Method, object or signal" oninput="renderTrace()"><input id="trace-chain" aria-label="Call chain" placeholder="Call chain" oninput="renderTrace()"><button class="btn" onclick="document.getElementById('trace-chain').value='';renderTrace()">All chains</button></div><div id="trace-status" class="runtime-status"></div><div id="trace-list"></div></section>
 <div id="modal">
   <h3 id="mtitle"></h3>
   <div id="mruntime" style="white-space:pre-wrap;overflow-wrap:anywhere;margin-bottom:12px"></div>
+  <div id="mpromise"></div>
+  <div id="mviews"></div>
+  <div id="mproperties"></div>
   <div id="mvars"></div>
   <div class="mths" id="mmths"></div>
   <form id="mcall" onsubmit="sendObjectMessage(event)">
     <label for="mselector">Method</label>
     <input id="mselector" required oninput="prepareArguments()" placeholder="Select or enter a method">
+    <div id="msignature"></div>
     <div id="margs"></div>
     <button class="btn btn-run" id="msend">Send</button>
+    <button type="button" class="btn" id="mpromise-send" onclick="sendObjectPromise()">Send asynchronously</button>
   </form>
   <div id="mresult" role="status"></div>
+  <section id="ow"><h4>Object workspace</h4><div id="ow-target"></div><div id="ow-suggestions"></div><label>Build an expression <select id="ow-method" onchange="workspaceArguments()"></select></label><div id="ow-signature"></div><div id="ow-args"></div><button class="btn" onclick="insertWorkspaceMethod()">Insert method</button><textarea id="ow-code" aria-label="Object expression" oninput="rememberWorkspaceDraft()"></textarea><button class="btn btn-run" id="ow-run" onclick="runObjectWorkspace()">Run expression</button><span> Ctrl+Enter</span><div id="ow-result" role="status"></div></section>
 </div>
 
 <script>
@@ -130,23 +166,19 @@ async function doEval() {
   out.scrollTop = out.scrollHeight;
 
   try {
-    const r = await fetch('/eval', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({code: src})
-    });
-    const d = await r.json();
+    const d = await performInteraction({kind:'eval',code:src});
     const res = el.querySelector('.ev-wait');
     if (d.error) {
       res.className = 'ev-err';
       res.textContent = 'error: ' + d.error;
     } else {
       res.className = 'ev-res';
-      res.textContent = d.output;
+      renderResult(res, d);
     }
   } catch(e) {
-    el.querySelector('.ev-wait').className = 'ev-err';
-    el.querySelector('.ev-wait').textContent = 'network error: ' + e.message;
+    const failed = el.lastElementChild;
+    failed.className = 'ev-err';
+    failed.textContent = e.message;
   }
   out.scrollTop = out.scrollHeight;
 }
@@ -171,6 +203,8 @@ async function refreshObjs() {
 }
 
 let inspectedId = null;
+let methodSignatures = {};
+let inspectorMetadata = {};
 let inspectionVersion = 0;
 async function showInspect(id, preserveCall = false) {
   const version = ++inspectionVersion;
@@ -178,6 +212,7 @@ async function showInspect(id, preserveCall = false) {
   if (!preserveCall) {
     document.getElementById('mselector').value = '';
     document.getElementById('margs').innerHTML = '';
+    document.getElementById('msignature').textContent = '';
     document.getElementById('mresult').textContent = '';
   }
   try {
@@ -187,11 +222,14 @@ async function showInspect(id, preserveCall = false) {
     if (version !== inspectionVersion || inspectedId !== id) return;
     document.getElementById('mtitle').textContent = d.className + '   ' + id;
     const runtime = d.runtime || {};
+    const debugBusy = runtime.debug && ['queued','running','paused'].includes(runtime.debug.state);
     const retention = d.retention || {};
     const details = [
       'Host: ' + (runtime.host || 'unknown') + '  PID: ' + (runtime.pid || 'unknown'),
       'Placement: ' + (runtime.workerId ? 'worker ' + runtime.workerId : 'coordinator host'),
       'Mailbox: ' + ((runtime.metrics || {}).mailboxDepth || 0),
+      runtime.prototype ? 'Cloned from: ' + runtime.prototype : '',
+      runtime.definitionVersion ? 'Definition: ' + runtime.definitionVersion.slice(0,12) : '',
       retention.root ? 'Retention: GC root' : 'Root path: ' + ((retention.path || []).join(' → ') || 'no visible path'),
       (retention.unavailable || []).length ? 'Unavailable: ' + retention.unavailable.join(', ') : '',
       runtime.foreignReferences ? 'Foreign-held references require the class pulse handler.' : '',
@@ -199,6 +237,7 @@ async function showInspect(id, preserveCall = false) {
       ...(runtime.calls || []).map(c => c.state + ' ' + c.method + ' → ' + c.target + '  since ' + c.started + '  chain ' + c.chainId)
     ];
     document.getElementById('mruntime').textContent = details.filter(Boolean).join('\n');
+    renderPromise(id,runtime.promise,version);
 
     const vd = document.getElementById('mvars');
     vd.innerHTML = '';
@@ -222,8 +261,32 @@ async function showInspect(id, preserveCall = false) {
     }
 
     const methods = [...(d.methods || [])].sort();
+    methodSignatures = d.methodSignatures || {};
+    inspectorMetadata = {};
+    document.getElementById('mproperties').textContent = '';
+    if (!debugBusy && methods.includes('inspectorMetadata')) {
+      try {
+        const metadata = await inspectorCall(id, 'inspectorMetadata', []);
+        if (version !== inspectionVersion || inspectedId !== id) return;
+        if (metadata.kind !== 'string') throw Error('inspectorMetadata must return a JSON string');
+        inspectorMetadata = JSON.parse(metadata.str);
+        if (!inspectorMetadata || typeof inspectorMetadata !== 'object') throw Error('Invalid inspector metadata');
+        await renderProperties(id, inspectorMetadata.properties || [], version);
+      } catch (error) {
+        if (version !== inspectionVersion || inspectedId !== id) return;
+        inspectorMetadata = {};
+        document.getElementById('mproperties').textContent = 'Properties: ' + error.message;
+      }
+    }
+    if (version !== inspectionVersion || inspectedId !== id) return;
     const md = document.getElementById('mmths');
     md.innerHTML = '';
+    md.appendChild(navButton('Browse methods', () => { closeM(); openNavigation(d.className); }));
+    md.appendChild(navButton('Object graph', () => { closeM(); openNavigation('', 'objects'); }));
+    md.appendChild(navButton('Debug method', () => openDebugger(id, methods, d.methodSignatures || {})));
+    md.appendChild(navButton('Clone', () => cloneInspectedObject(id)));
+    if (d.className === 'Wiring') md.appendChild(navButton('Open graph', () => { closeM(); openWiring(id); })); else {}
+    if (runtime.definitionVersion) md.appendChild(navButton('Clone and edit', () => openClone(id))); else {}
     methods.forEach(method => {
       const button = document.createElement('button');
       button.className = 'btn';
@@ -239,22 +302,108 @@ async function showInspect(id, preserveCall = false) {
       md.appendChild(button);
     });
 
+    updateObjectWorkspace(id, d, inspectorMetadata);
+    if (!debugBusy) { await loadInspectorViews(id, d, version); } else { document.getElementById('mviews').textContent = 'Debugger: ' + runtime.debug.state + ' ' + runtime.debug.method; }
+    if(version!==inspectionVersion || inspectedId!==id)return;else{}
     document.getElementById('mbg').style.display = 'block';
     document.getElementById('modal').style.display = 'block';
   } catch(_) {}
+}
+
+async function inspectorCall(id, method, args) {
+  const response = await fetch('/mcp', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({jsonrpc:'2.0',id:1,method:'tools/call',params:{name:'call',arguments:{objectId:id,method,args}}})
+  });
+  const reply = await response.json();
+  if (reply.error) throw Error(reply.error.message);
+  if (!response.ok || reply.result.isError) throw Error((reply.result.content || []).map(c => c.text || '').join('\n'));
+  return JSON.parse(reply.result.content[0].text);
+}
+
+async function renderProperties(id, properties, version) {
+  if (!Array.isArray(properties)) throw Error('properties must be an array');
+  const container = document.getElementById('mproperties');
+  for (const property of properties) {
+    if (typeof property.name !== 'string' || typeof property.getter !== 'string') throw Error('A property needs a name and getter');
+    const row = document.createElement('div');
+    row.className = 'marg';
+    const label = document.createElement('span');
+    label.className = 'ivk';
+    label.textContent = property.name;
+    row.appendChild(label);
+    try {
+      const value = await inspectorCall(id, property.getter, []);
+      if (version !== inspectionVersion || inspectedId !== id) return;
+      const kind = property.type === "char" ? "character" : property.type || value.kind;
+      if (property.setter && ['number','string','bool','nil','objid','character'].includes(kind)) {
+        propertyEditor(row, id, property, value, kind);
+      } else {
+        const display = document.createElement('span');
+        display.textContent = fmtVal(value);
+        row.appendChild(value.kind === 'objid' ? objectLink(value.objid) : display);
+      }
+    } catch (error) {
+      row.appendChild(document.createTextNode('Error: ' + error.message));
+    }
+    if (version !== inspectionVersion || inspectedId !== id) return;
+    container.appendChild(row);
+  }
+}
+
+function propertyEditor(row, id, property, value, kind) {
+  const type = document.createElement('select');
+  type.hidden = true;
+  const option = document.createElement('option');
+  option.value = kind;
+  type.appendChild(option);
+  const input = document.createElement('input');
+  input.setAttribute('aria-label', property.name);
+  input.value = value.kind === 'string' ? value.str || '' : value.kind === 'objid' ? value.objid : value.kind === 'character' ? String.fromCodePoint(value.char) : fmtVal(value);
+  input.disabled = kind === 'nil';
+  const save = document.createElement('button');
+  save.className = 'btn';
+  save.textContent = 'Set';
+  save.setAttribute('aria-label', 'Set ' + property.name);
+  save.onclick = () => saveProperty(id, property, row);
+  input.onkeydown = event => { if (event.key === 'Enter') { event.preventDefault(); save.click(); } };
+  row.append(type, input, save);
+}
+
+async function saveProperty(id, property, row) {
+  const send = document.getElementById('msend');
+  if (send.disabled) return;
+  send.disabled = true;
+  const result = document.getElementById('mresult');
+  result.textContent = 'Setting ' + property.name + '…';
+  try {
+    const response = await performInteraction({kind:'call',objectId:id,method:property.setter,args:[argumentValue(row)]});
+    if(response.error) throw Error(response.error); else {}
+    if (inspectedId !== id) return;
+    await showInspect(id, true);
+    renderResult(result, response);
+  } catch (error) {
+    if (inspectedId === id) result.textContent = 'Error: ' + error.message;
+  } finally {
+    send.disabled = false;
+  }
 }
 
 function objectLink(id) {
   const button = document.createElement('button');
   button.className = 'objlink';
   button.textContent = '#' + id;
-  button.onclick = () => showInspect(id);
+  button.onclick = () => { closeExamples(); document.getElementById('recording-panel').hidden=true;document.getElementById('result-shelf').hidden=true;showInspect(id); };
   return button;
 }
 
 function prepareArguments() {
   const selector = document.getElementById('mselector').value.trim();
-  const count = (selector.match(/:/g) || []).length || (/^[^a-zA-Z0-9_]+$/.test(selector) ? 1 : 0);
+  const inferred = methodSignatures[selector];
+  const returnType = ((inspectorMetadata.methods || {})[selector] || {}).returns;
+  document.getElementById('msignature').textContent = returnType ? 'Returns: ' + returnType : '';
+  const described = ((inspectorMetadata.methods || {})[selector] || {}).arguments || [];
+  const count = inferred ? inferred.length : ((selector.match(/:/g) || []).length || (/^[^a-zA-Z0-9_]+$/.test(selector) ? 1 : 0));
   const container = document.getElementById('margs');
   container.innerHTML = '';
   for (let i = 0; i < count; i++) {
@@ -262,7 +411,7 @@ function prepareArguments() {
     row.className = 'marg';
     const type = document.createElement('select');
     type.setAttribute('aria-label', 'Argument ' + (i + 1) + ' type');
-    ['number', 'string', 'bool', 'nil', 'objid', 'char'].forEach(kind => {
+    ['number', 'string', 'bool', 'nil', 'objid', 'character', 'result'].forEach(kind => {
       const option = document.createElement('option');
       option.value = kind;
       option.textContent = {bool:'Boolean',objid:'Object ID',char:'Character'}[kind] || kind;
@@ -270,8 +419,13 @@ function prepareArguments() {
     });
     const input = document.createElement('input');
     input.setAttribute('aria-label', 'Argument ' + (i + 1));
-    input.placeholder = 'Argument ' + (i + 1);
-    type.onchange = () => { input.disabled = type.value === 'nil'; };
+    const argument = described[i] || {};
+    const name = argument.name || (inferred || [])[i] || 'Argument ' + (i + 1);
+    input.placeholder = name;
+    input.setAttribute('aria-label', name);
+    if ([...type.options].some(option => option.value === argument.type)) type.value = argument.type;
+    input.disabled = type.value === 'nil';
+    type.onchange = () => { input.disabled = type.value === 'nil'; configureResultInput(type,input); };
     row.append(type, input);
     container.appendChild(row);
   }
@@ -281,6 +435,7 @@ function argumentValue(row) {
   const kind = row.querySelector('select').value;
   const text = row.querySelector('input').value;
   switch (kind) {
+    case 'result': return retainedArgument(text);
     case 'number':
       if (!text.trim() || !Number.isFinite(Number(text))) throw Error('Enter a valid number.');
       return {kind, num:Number(text)};
@@ -292,7 +447,7 @@ function argumentValue(row) {
     case 'objid':
       if (!text.trim()) throw Error('Enter an object ID.');
       return {kind, objid:text.trim()};
-    case 'char':
+    case 'character':
       if ([...text].length !== 1) throw Error('Enter one character.');
       return {kind, char:text.codePointAt(0)};
   }
@@ -308,21 +463,11 @@ async function sendObjectMessage(event) {
   try {
     const method = document.getElementById('mselector').value.trim();
     if (!method) throw Error('Choose a method.');
-    const args = [...document.querySelectorAll('.marg')].map(argumentValue);
-    const response = await fetch('/mcp', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({jsonrpc:'2.0',id:1,method:'tools/call',params:{name:'call',arguments:{objectId:id,method,args}}})
-    });
-    const reply = await response.json();
-    if (reply.error) throw Error(reply.error.message);
-    if (!response.ok || reply.result.isError) throw Error((reply.result.content || []).map(c => c.text || '').join('\n'));
+    const args = [...document.querySelectorAll('#margs .marg')].map(argumentValue);
+    const response = await performInteraction({kind:'call',objectId:id,method,args});
+    if(response.error) throw Error(response.error); else {}
     if (inspectedId !== id) return;
-    const value = JSON.parse(reply.result.content[0].text);
-    result.textContent = fmtVal(value);
-    if (value.kind === 'objid') {
-      result.textContent = '';
-      result.appendChild(objectLink(value.objid));
-    }
+    renderResult(result,response);
     await showInspect(id, true);
     await refreshObjs();
   } catch (error) {
@@ -335,15 +480,17 @@ async function sendObjectMessage(event) {
 function fmtVal(v) {
   if (!v || v.kind === 'nil') return 'nil';
   switch(v.kind) {
-    case 'number': return String(v.num);
-    case 'string': return '"' + v.str + '"';
+    case 'number': return String(v.num ?? 0);
+    case 'string': return '"' + (v.str || '') + '"';
     case 'objid':  return '#' + v.objid;
-    case 'bool':   return String(v.bool);
+    case 'bool':   return String(v.bool ?? false);
+    case 'character':   return String.fromCodePoint(v.char ?? 0);
   }
   return 'nil';
 }
 
 function closeM() {
+  if(typeof workbenchObject!=='undefined'&&inspectedId===workbenchObject)loadWorkbench();else{}
   inspectedId = null;
   inspectionVersion++;
   document.getElementById('mbg').style.display = 'none';
@@ -360,5 +507,17 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeM(); })
 setInterval(refreshObjs, 2000);
 refreshObjs();
 </script>
+<script src="/navigation.js"></script>
+<script src="/interaction.js"></script>
+<script src="/views.js"></script>
+<script src="/object-workspace.js"></script>
+<script src="/debugger.js"></script>
+<script src="/trace.js"></script>
+<script src="/source-history.js"></script>
+<script src="/cloning.js"></script>
+<script src="/wiring.js"></script>
+<script src="/promises.js"></script>
+<script src="/workbench.js"></script>
+<script src="/refactoring.js"></script>
 </body>
 </html>`

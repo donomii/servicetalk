@@ -1,0 +1,4 @@
+Verify unary, binary, keyword, nested and cascade selector replacement.
+Verify comments, Unicode, field names, local parameters, literal arrays and quotes remain intact.
+Reject syntax/arity changes and conflicting definitions.
+Verify real coordinator preview leaves disk unchanged, selected save changes new object dispatch, and stale previews cannot overwrite files.

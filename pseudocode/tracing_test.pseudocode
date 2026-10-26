@@ -1,0 +1,4 @@
+Enable tracing before creating new object processes; verify sender IDs, shared chain,
+typed replies and signaled failures. Stop freezes new collection; clear empties records.
+Overflow the per-object buffer and verify exact capacity and discarded count.
+Clear during an active call; its later reply must not resurrect discarded history.

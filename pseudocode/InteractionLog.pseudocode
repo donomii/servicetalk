@@ -1,0 +1,1 @@
+Fields records and retained, both Arrays. append: stores a record string. retain: keeps a referenced object reachable. entries returns records. size reports count. clear replaces both arrays.

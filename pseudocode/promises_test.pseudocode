@@ -1,0 +1,4 @@
+Pending inspection test: hold an HTTP reply, verify responsive workspace and pending inspection, reject premature result/clone, time out one await, then release and verify eventual typed result and settled clone.
+Typed results test: asynchronously clone an object, verify identity and retention; verify copied arguments and rejection of repeated sends.
+Failure tests: propagate native signals and transport deadlines through await and MCP errors.
+Foreign test: asynchronously invoke a foreign method and preserve its numeric result.

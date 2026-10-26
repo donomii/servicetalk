@@ -1,0 +1,3 @@
+POST /workspace validates receiver, reuses or creates a rooted ordinary ObjectWorkspace keyed by receiver identity, evaluates quoted Smalltalk source, and returns a typed value plus captured text or error. Each receiver has independent persistent scratch state.
+
+Use evalInternal: for the outer expression so object workspace infrastructure does not overwrite the main last result.

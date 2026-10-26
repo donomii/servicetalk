@@ -74,6 +74,9 @@ type Coordinator struct {
 	staleFailures map[string]time.Time
 
 	metrics coordinatorCounterSet
+	trace traceBuffer
+	traceEnabled atomic.Bool
+	sources sourceStore
 }
 
 // Mode constants for runCoordinator.  "serve" blocks forever (daemon / web
@@ -119,11 +122,37 @@ func runCoordinator(port int, mainClass string, mode string, evalExpr string) {
 	mux.HandleFunc("/deregister", c.handleDeregister)
 	mux.HandleFunc("/spawn", c.handleSpawn)
 	mux.HandleFunc("/registry", c.handleRegistry)
+	mux.HandleFunc("/navigation", c.handleNavigation)
+	mux.HandleFunc("/relationships", c.handleRelationships)
+	mux.HandleFunc("/navigation.js", func(w http.ResponseWriter, r *http.Request) { w.Header().Set("Content-Type", "text/javascript"); fmt.Fprint(w, navigationJS) })
 	mux.HandleFunc("/metrics", c.handleMetrics)
 	mux.HandleFunc("/mcp", c.handleMCP)
 	mux.HandleFunc("/transcript", c.handleTranscript)
 	mux.HandleFunc("/message", c.handleMessage) // coordinator as Smalltalk object
 	mux.HandleFunc("/eval", c.handleEval)
+	mux.HandleFunc("/workspace", c.handleObjectWorkspace)
+	mux.HandleFunc("/interaction", c.handleInteraction)
+	mux.HandleFunc("/result", c.handleResult)
+	mux.HandleFunc("/recording", c.handleRecording)
+	mux.HandleFunc("/view", c.handleInspectorView)
+	mux.HandleFunc("/debugger", c.handleDebugger)
+	mux.HandleFunc("/trace", c.handleTrace)
+	mux.HandleFunc("/source", c.handleSource)
+	mux.HandleFunc("/wiring", c.handleWiring)
+	mux.HandleFunc("/workbench", c.handleWorkbench)
+	mux.HandleFunc("/refactor", c.handleRefactor)
+	mux.HandleFunc("/refactoring.js", func(w http.ResponseWriter, r *http.Request) { w.Header().Set("Content-Type", "text/javascript"); fmt.Fprint(w, refactoringJS) })
+	mux.HandleFunc("/examples", c.handleExamples)
+	mux.HandleFunc("/workbench.js", func(w http.ResponseWriter, r *http.Request) { w.Header().Set("Content-Type", "text/javascript"); fmt.Fprint(w, workbenchJS) })
+	mux.HandleFunc("/promises.js", func(w http.ResponseWriter, r *http.Request) { w.Header().Set("Content-Type", "text/javascript"); fmt.Fprint(w, promisesJS) })
+	mux.HandleFunc("/wiring.js", func(w http.ResponseWriter, r *http.Request) { w.Header().Set("Content-Type", "text/javascript"); fmt.Fprint(w, wiringJS) })
+	mux.HandleFunc("/cloning.js", func(w http.ResponseWriter, r *http.Request) { w.Header().Set("Content-Type", "text/javascript"); fmt.Fprint(w, cloningJS) })
+	mux.HandleFunc("/source-history.js", func(w http.ResponseWriter, r *http.Request) { w.Header().Set("Content-Type", "text/javascript"); fmt.Fprint(w, sourceHistoryJS) })
+	mux.HandleFunc("/debugger.js", func(w http.ResponseWriter, r *http.Request) { w.Header().Set("Content-Type", "text/javascript"); fmt.Fprint(w, debuggerJS) })
+	mux.HandleFunc("/trace.js", func(w http.ResponseWriter, r *http.Request) { w.Header().Set("Content-Type", "text/javascript"); fmt.Fprint(w, traceJS) })
+	mux.HandleFunc("/interaction.js", func(w http.ResponseWriter, r *http.Request) { w.Header().Set("Content-Type", "text/javascript"); fmt.Fprint(w, interactionJS) })
+	mux.HandleFunc("/views.js", func(w http.ResponseWriter, r *http.Request) { w.Header().Set("Content-Type", "text/javascript"); fmt.Fprint(w, inspectorViewsJS) })
+	mux.HandleFunc("/object-workspace.js", func(w http.ResponseWriter, r *http.Request) { w.Header().Set("Content-Type", "text/javascript"); fmt.Fprint(w, objectWorkspaceJS) })
 	mux.HandleFunc("/inspect", c.handleSelfInspect) // coordinator self-inspection
 	mux.HandleFunc("/object/", c.handleObjectDebug)
 	mux.HandleFunc("/spawn-failed", c.handleSpawnFailed)
@@ -801,6 +830,7 @@ func (c *Coordinator) handleRegister(w http.ResponseWriter, r *http.Request) {
 	c.markRegistryDirty()
 
 	// Signal any goroutine waiting for this object to appear
+	if c.traceEnabled.Load() { _, _ = c.callObjectID(req.ObjectID, "__trace:", []Value{StrVal("start")}, inspectionTimeout) } else {}
 	if ch, ok := c.spawnWaiters.Load(req.ObjectID); ok {
 		select {
 		case ch.(chan error) <- nil:
@@ -931,7 +961,7 @@ func (c *Coordinator) handleSpawn(w http.ResponseWriter, r *http.Request) {
 		pulseTimeoutSecs = envInt("SMT_PULSE_TIMEOUT_SECS", 60)
 	}
 
-	resp, err := c.spawnObject(req.ClassName, req.BlockDef, req.AutoInit, pulseTimeoutSecs)
+	resp, err := c.spawnObject(req.ClassName, req.BlockDef, req.AutoInit, pulseTimeoutSecs, req.Snapshot)
 	if err != nil {
 		json.NewEncoder(w).Encode(SpawnResponse{Error: err.Error()})
 		return
@@ -964,7 +994,11 @@ func (c *Coordinator) handleTranscript(w http.ResponseWriter, r *http.Request) {
 // blockDef:  inline block definition (only for __block__); written to temp file locally
 // autoInit:  pass --init flag so the process self-initializes on startup
 // pulseTimeoutSecs:  idle timeout before the process exits (0 = never)
-func (c *Coordinator) spawnObject(className string, blockDef *BlockDef, autoInit bool, pulseTimeoutSecs int) (SpawnResponse, error) {
+func (c *Coordinator) spawnObject(className string, blockDef *BlockDef, autoInit bool, pulseTimeoutSecs int, snapshots ...*NativeSnapshot) (SpawnResponse, error) {
+	snapshot := nativeSnapshotArgument(snapshots)
+	if snapshot != nil {
+		if err := validateNativeSnapshot(snapshot); err != nil { return SpawnResponse{}, err } else if autoInit || blockDef != nil || userToBuiltinClass(className) != snapshot.Definition.Name { return SpawnResponse{}, fmt.Errorf("clone spawn requires matching class, no initializer and no separate block definition") } else {}
+	} else {}
 	start := time.Now()
 	var resp SpawnResponse
 	var err error
@@ -974,16 +1008,16 @@ func (c *Coordinator) spawnObject(className string, blockDef *BlockDef, autoInit
 	worker := c.reserveWorker()
 	if worker != nil {
 		defer c.releaseWorker(worker.ID)
-		resp, err = c.spawnOnWorker(worker, className, blockDef, autoInit, pulseTimeoutSecs)
+		resp, err = c.spawnOnWorker(worker, className, blockDef, autoInit, pulseTimeoutSecs, snapshot)
 		return resp, err
 	}
 
-	resp, err = c.spawnLocal(className, blockDef, autoInit, pulseTimeoutSecs)
+	resp, err = c.spawnLocal(className, blockDef, autoInit, pulseTimeoutSecs, snapshot)
 	return resp, err
 }
 
 // spawnLocal starts an object process on this machine via exec.Command.
-func (c *Coordinator) spawnLocal(className string, blockDef *BlockDef, autoInit bool, pulseTimeoutSecs int) (SpawnResponse, error) {
+func (c *Coordinator) spawnLocal(className string, blockDef *BlockDef, autoInit bool, pulseTimeoutSecs int, snapshots ...*NativeSnapshot) (SpawnResponse, error) {
 	id := newUUID()
 
 	// Register the waiter BEFORE spawning to avoid any race
@@ -1033,6 +1067,12 @@ func (c *Coordinator) spawnLocal(className string, blockDef *BlockDef, autoInit 
 	}
 
 	cmd := exec.Command(bin, args...)
+	if snapshot := nativeSnapshotArgument(snapshots); snapshot != nil {
+		file, err := snapshotArgumentFile(snapshot)
+		if err != nil { return SpawnResponse{}, err } else {}
+		defer os.Remove(file)
+		cmd.Args = append(cmd.Args, "--snapshot", file)
+	} else {}
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Start(); err != nil {
@@ -1101,8 +1141,9 @@ func (c *Coordinator) releaseWorker(workerID string) {
 }
 
 // spawnOnWorker delegates object spawning to a reserved worker.
-func (c *Coordinator) spawnOnWorker(worker *WorkerEntry, className string, blockDef *BlockDef, autoInit bool, pulseTimeoutSecs int) (SpawnResponse, error) {
+func (c *Coordinator) spawnOnWorker(worker *WorkerEntry, className string, blockDef *BlockDef, autoInit bool, pulseTimeoutSecs int, snapshots ...*NativeSnapshot) (SpawnResponse, error) {
 	req := SpawnRequest{
+		Snapshot:         nativeSnapshotArgument(snapshots),
 		ClassName:        className,
 		BlockDef:         blockDef,
 		AutoInit:         autoInit,

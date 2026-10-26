@@ -1,0 +1,5 @@
+Execute real native, primitive and C-backed message graphs; verify typed links/results.
+Verify object-valued results are retained through the graph and remain inspectable.
+Signal at a dependent node, repair the external receiver, resume and prove prior
+successful effects occur once. Completed resume must not repeat object creation.
+Reject stale resume after definition edits, missing/cyclic/duplicate connections.

@@ -1,0 +1,26 @@
+sourceDefinition(class) -> source record or error
+  Require a class discovered by the source browser. Read its selected definition,
+  resolve filesystem paths and digest the source. Mark embedded/foreign definitions
+  read-only in the native editor.
+
+validateSourceDefinition(class, file, source)
+  Parse exactly one class in the file's native syntax. Require the same name.
+  Resolve superclass declarations and reject unavailable parents and cycles.
+
+sourceStore.save(file, expected digest, source)
+  Serialize writes, reread and compare the digest, preserve permissions, write/sync
+  a sibling temporary file, then atomically replace. Clean up the temporary file.
+
+sourceGit(file, selector, arguments) -> typed result and Git object ID
+  Create/reuse a rooted ordinary Git object for the source directory.
+  Send directory configuration and the requested Git method with typed arguments.
+
+POST /source(action, class, source, digest, revision, message) -> SourceResponse
+  read: current definition and latest thirty Git file revisions.
+  save: validate and compare/write; return updated source/digest and history.
+  revision: validate full hexadecimal revision, read historical file via Git.
+  diff: return the selected file's working diff from Git.
+  commit: require message and current digest; stage/commit only this file via Git.
+  Preserve source success independently of unavailable Git metadata.
+
+Saving changes subsequent class loads. Existing object processes retain loaded code.

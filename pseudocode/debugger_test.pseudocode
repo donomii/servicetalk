@@ -1,0 +1,6 @@
+Run actual coordinator and object subprocesses.
+Verify initial pause has no effects, step advances once, argument edits and replacement
+use the held context, continuation executes remaining statements and early return.
+Reject stale commands, invalid syntax, unsupported methods and duplicate sessions.
+Repair a signal without replaying earlier effects; explicit return skips remaining work.
+Abort releases the normal mailbox and leaves inspection/control usable.

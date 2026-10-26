@@ -1,0 +1,4 @@
+debugExpression(syntax node) -> display text
+  Render literals, assignments, returns, message sends, arrays and object IDs
+  as readable Smalltalk. Preserve unknown forms using their source syntax form.
+  This describes the loaded method body, not a newer file on disk.

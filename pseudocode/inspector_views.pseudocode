@@ -1,0 +1,1 @@
+Ensure a rooted InspectorView for a receiver and view key; initialize its target and JSON definition once; return the live edited definition on subsequent reads.

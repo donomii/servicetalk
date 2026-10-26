@@ -1,3 +1,5 @@
 spawn worker-hosted object
     Preserve existing source deployment and child lifecycle.
     Supply this worker's identifier to the child for placement inspection.
+
+Serialize an incoming NativeSnapshot into a temporary file and pass --snapshot to the child before registration; clean up the file afterward.

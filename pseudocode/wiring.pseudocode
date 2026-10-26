@@ -1,0 +1,10 @@
+Parse and validate a message graph: unique node IDs, selectors, typed literals or
+connections, existing dependencies, acyclic order, at most 128 nodes.
+Each node has receiver input, selector, argument inputs, label and position.
+Resolve dependencies deterministically. Execute using the evaluator's typed dispatch.
+Retain literal object references and object results in the Wiring object's Array.
+Record each successful result and order. On a signal store the failed-node report
+and re-signal to the caller. Resume skips successful nodes and retries the failed one.
+Reject resuming a changed graph. Completed runs resume without repeating effects.
+GET /wiring creates/reuses the main ordinary Wiring object or reads a specified one.
+Return its ID, definition and run report; normal interactions perform saves and runs.

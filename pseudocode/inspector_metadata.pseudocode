@@ -1,0 +1,2 @@
+
+Collect method parameter names from class through ancestors; subclass methods win. Return independent copies.

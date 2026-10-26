@@ -1,0 +1,16 @@
+nativeSnapshot(receiver) -> loaded definition hierarchy and shallow state
+  Copy fields, array/dictionary storage, block definition and lexical references.
+  Reject external runtime state unless the class provides its own clone behavior.
+clone / cloneWith:(prototype patch) -> new object reference
+  Prefer a user-defined clone method. Otherwise preserve the loaded hierarchy.
+  Validate field edits and method selector/parameter/source overrides.
+  Spawn a separate object from the snapshot without initialize; preserve super sends.
+  References stay shared; origin metadata does not add a GC root/reference.
+NativeDefinition -> name, vars, methods and superclass.
+NativeSnapshot -> definition, fields, array, dictionary, block, origin object.
+Validate snapshot Values, class support, block/class match and bounded syntax nodes.
+Serialize to a temporary private file for local/worker child initialization.
+Restore before registration; remove the file after use or completion.
+Inspect origin and deterministic loaded-definition digest.
+
+Reject cloning an unresolved Promise; settled Promise fields and result references can be copied.

@@ -613,6 +613,7 @@ func (ctx *EvalCtx) evalBlock(node *Node) Value {
 		ParentID:        parentID,
 		CapturedArgs:    captured,
 		CaptureObjectID: captureObjectID,
+		SelfOverride: ctx.selfOverride,
 	}
 
 	reqBody, _ := json.Marshal(SpawnRequest{ClassName: BuiltinClassBlock, BlockDef: bd})

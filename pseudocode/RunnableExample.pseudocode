@@ -1,0 +1,7 @@
+RunnableExample fields: title, description, source, check, workspace, lastRun.
+initialize: initialize editable text and allocate a separate workspace.
+Text getters/setters and updateTitle:description:source:check: expose editable documentation.
+run: evaluate source with typed result and transcript; preserve that response; execute check without replacing the source result; propagate any failure; return the source response.
+workspace and result: expose scratch object and last typed value.
+reset: replace workspace and clear lastRun.
+inspectorMetadata: expose editable text properties.

@@ -1,0 +1,3 @@
+renderPromise: show state, message, receiver, argument collection and outcome using the inspection snapshot. Link object values to inspectors. Offer reusable result retrieval. Refresh pending snapshots while the same inspector remains open.
+sendObjectPromise: read the inspector's typed message form; start a retained asynchronous interaction; inspect its Promise.
+runWiringPromise: save changed graph, start run asynchronously, open Promise inspector.

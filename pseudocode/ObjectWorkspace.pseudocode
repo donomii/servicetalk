@@ -1,0 +1,1 @@
+Fields target and workspace. initialize creates a native scratch workspace. target: binds self; target reads receiver. evaluate: returns typed result/transcript JSON. result returns it. bindings returns the scratch workspace object.

@@ -1,0 +1,7 @@
+Spawn native parent/child, change parent source, clone old instance and verify old
+super-send behavior while a fresh instance uses new behavior. Verify separate PIDs,
+independent fields, matching definition digests and origin metadata.
+Derive a method and fields; clone the derived object again; preserve the original.
+Verify independent Array/Dictionary storage and shared object-valued references.
+Reject Process copying without an explicit resource protocol. Worker integration
+also clones state and verifies worker placement and independent original state.

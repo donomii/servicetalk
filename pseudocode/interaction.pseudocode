@@ -1,0 +1,5 @@
+Run typed eval/call/workspace requests. Validate call arguments, retain successful results under unique workspace handles, and optionally append request/result/error/timestamp to an InteractionLog. Retain referenced objects. Bind/release handles through validated names. Internal workspace evaluation preserves user it and shell binding.
+
+kind promise validates a normal typed call, creates and starts a Promise in the workspace, and retains its returned identity.
+
+kind example executes the example object, decodes its WorkspaceResult and retains the typed outcome.

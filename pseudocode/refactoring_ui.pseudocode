@@ -1,0 +1,8 @@
+openRefactor(class, selector)
+    Open original/replacement selectors and local/all-native scope controls.
+previewRefactor
+    Request parsed changes and display per-file edits, proposed source and literals.
+    Save selected files through source API with their original digest.
+    Show saved status or error and link to source editing/Git history.
+closeRefactor
+    Hide the panel.

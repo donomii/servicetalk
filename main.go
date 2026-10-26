@@ -180,6 +180,7 @@ func runObjectCmd(args []string) {
 	coord := fs.String("coordinator", "http://localhost:8000", "coordinator URL")
 	init := fs.Bool("init", false, "call initialize on startup (entry-point objects only)")
 	def := fs.String("def", "", "block definition JSON file (internal use)")
+	snapshot := fs.String("snapshot", "", "native clone snapshot JSON file (internal use)")
 	pulseTimeout := fs.Int("pulse-timeout", 60, "shut down if no pulse received within this many seconds (0 disables)")
 	var paths pathFlag
 	fs.Var(&paths, "path", "directory to search for class files (repeatable; also via SMT_PATH)")
@@ -192,7 +193,7 @@ func runObjectCmd(args []string) {
 		fmt.Fprintln(os.Stderr, "object: --class and --id are required")
 		os.Exit(1)
 	}
-	runObject(*class, *id, *coord, *init, *def, *pulseTimeout)
+	runObject(*class, *id, *coord, *init, *def, *pulseTimeout, *snapshot)
 }
 
 // runReplCmd is the explicit `smt repl` form — same Smalltalk REPL

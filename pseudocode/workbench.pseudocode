@@ -1,0 +1,7 @@
+parseWorkbench: validate title, tool identities, labels, supported actions and typed references; return definition.
+workbenchReferences: validate JSON and create a retained Array of target and argument objects.
+workbench: ensure a rooted ordinary Workbench and read its current definition.
+handleWorkbench: expose the live workbench identity and definition through GET.
+readExample: read editable text and scratch workspace identity from a live example.
+listExamples: traverse the workbench's owned example Array in order and describe each entry.
+handleExamples: expose catalog data through GET.

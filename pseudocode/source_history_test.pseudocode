@@ -1,0 +1,6 @@
+Create a temporary repository through the ordinary Git object, using explicit argv.
+Read file history; spawn an old instance, save a new definition and spawn a new one.
+Verify old/new behavior coexist across actual object processes.
+Reject stale saves, wrong class names, cycles, syntax errors and extra executable forms.
+Stage an unrelated file, commit the selected definition, verify unrelated staging stays.
+Read the initial revision and verify exact original source. Reject unknown class paths.

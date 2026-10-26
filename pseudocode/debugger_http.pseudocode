@@ -1,0 +1,4 @@
+POST /debugger(request) -> {snapshot, error}
+  Bound the body. Validate start arguments using the MCP Value validator.
+  Map start/read/command to the receiver's ordinary debugger control messages.
+  Return the typed snapshot or the original operation error.

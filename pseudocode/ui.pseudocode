@@ -21,3 +21,26 @@ method buttons
     Sort selectors alphabetically before rendering.
     Unary button clicks invoke immediately; other methods prepare arguments.
     Ignore method clicks while a call is pending.
+
+Use native method parameter names and optional inspectorMetadata JSON for typed inputs.
+Read declared property getters through MCP. Set and Enter call setters, then refresh every property.
+Display read-only properties and getter/setter errors; never mutate raw fields.
+Show optional declared return type alongside method inputs. Render omitted JSON scalar fields as zero, empty string or false.
+
+Header and inspector link to method browser and object graph. Responsive graph/detail overlay offers search, mode switches, fit, refresh and close.
+
+Inspector adds assisted workspace controls and refreshes their receiver context after inspection.
+
+Main output and explicit method/property calls preserve typed results. Add result shelf, recording controls and view area. Add retained-result arguments and character wire support.
+
+Add debugger and message trace panels. Inspector Debug method opens the selected receiver. Skip automatic property/view calls during an active debug session; fields and debugger control remain available.
+
+Source panel contains class editor, history, revision preview, working diff, saved-file commit message/action and Git object link, with responsive stacked panes.
+
+Add Clone and Clone and edit to inspectors; display definition version/origin. Add the Wiring editor and an Open graph action for Wiring instances.
+
+Inspector adds asynchronous send and a snapshot-based Promise panel; graph toolbar adds asynchronous run.
+
+Toolbar comes from Workbench; fixed editor access remains available. Examples support isolated run/check, editing and object inspection.
+
+Selector refactoring panel contains original/replacement names, class scope, preview and per-file save controls.

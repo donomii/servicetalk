@@ -210,6 +210,7 @@ func (obj *ObjectServer) replyToNATSControlCall(req MessageRequest, msg natsResp
 }
 
 func (obj *ObjectServer) replyToNATSCall(req MessageRequest, msg natsResponder) {
+	traceGeneration := obj.trace.begin(obj.id, req)
 	finish := obj.trackCall(req.MsgID, req.ChainID, req.Method, obj.id, "executing")
 	defer finish()
 	prev := obj.setActiveChain(req.ChainID)
@@ -218,10 +219,13 @@ func (obj *ObjectServer) replyToNATSCall(req MessageRequest, msg natsResponder) 
 		return obj.callMethod(req.Method, req.Args)
 	})
 	obj.callsCompleted.Add(1)
+	obj.trace.finish(traceGeneration, reply)
 	_ = msg.Respond(replyBytes(reply))
 }
 
 func (obj *ObjectServer) rejectNATSCall(req MessageRequest, msg natsResponder, reason string) {
+	traceGeneration := obj.trace.begin(obj.id, req)
+	obj.trace.finish(traceGeneration, ReplyRequest{MsgID: req.MsgID, Signaled: true, SignalMsg: reason, Result: Nil})
 	runtimeCounters.queueFull.Add(1)
 	obj.mailboxRejected.Add(1)
 	_ = msg.Respond(replyBytes(ReplyRequest{
@@ -233,7 +237,7 @@ func (obj *ObjectServer) rejectNATSCall(req MessageRequest, msg natsResponder, r
 
 func isControlMethod(method string) bool {
 	switch method {
-	case "pulse:", "class", "__inspectJson", "__metricsJson":
+	case "pulse:", "class", "__inspectJson", "__metricsJson", "__debugStart:", "__debugCommand:", "__debugJson", "__trace:", "__traceJson", "__nativeSnapshotJson":
 		return true
 	default:
 		return false
@@ -275,9 +279,11 @@ func (c *Coordinator) startNATSReceiver() error {
 	subject := natsSubjectForObject(coordinatorID)
 	return activeTransport.Subscribe(subject, func(req MessageRequest, msg natsResponder) {
 		runtimeCounters.callsIn.Add(1)
+		traceGeneration := c.trace.begin(coordinatorID, req)
 		reply := dispatchToReply(req.MsgID, func() Value {
 			return c.dispatchCoordinatorMethod(req.Method, req.Args)
 		})
+		c.trace.finish(traceGeneration, reply)
 		_ = msg.Respond(replyBytes(reply))
 	})
 }
@@ -287,6 +293,10 @@ func sendNATSCall(subject string, method string, args []Value, timeout time.Dura
 }
 
 func sendNATSCallWithChain(subject string, method string, args []Value, timeout time.Duration, chainID string) (ReplyRequest, error) {
+	return sendNATSCallFrom(subject, method, args, timeout, chainID, "")
+}
+
+func sendNATSCallFrom(subject string, method string, args []Value, timeout time.Duration, chainID, sender string) (ReplyRequest, error) {
 	if subject == "" {
 		return ReplyRequest{}, fmt.Errorf("missing NATS subject")
 	}
@@ -295,6 +305,7 @@ func sendNATSCallWithChain(subject string, method string, args []Value, timeout 
 		chainID = msgID
 	}
 	req := MessageRequest{
+		Sender: sender,
 		MsgID:   msgID,
 		ChainID: chainID,
 		Method:  method,
@@ -341,7 +352,7 @@ func (obj *ObjectServer) sendMessageNATS(entry ObjectEntry, method string, args 
 func (obj *ObjectServer) sendMessageNATSWithTimeout(entry ObjectEntry, method string, args []Value, timeout time.Duration) Value {
 	finish := obj.trackCall(newUUID(), obj.currentChainID(), method, entry.ID, "waiting")
 	defer finish()
-	reply, err := sendNATSCallWithChain(entry.Subject, method, args, timeout, obj.currentChainID())
+	reply, err := sendNATSCallFrom(entry.Subject, method, args, timeout, obj.currentChainID(), obj.id)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "[%s] sendMessage NATS error: %v\n", obj.id, err)
 		panic(signalError{msg: fmt.Sprintf("send %s to object %s: %v", method, entry.ID, err)})
@@ -357,6 +368,8 @@ func messageCallTimeout(method string, args []Value) time.Duration {
 	const responseOverhead = 5 * time.Second
 	argumentIndex := -1
 	switch method {
+	case "await:", "awaitPromise:":
+		argumentIndex = 0
 	case "parallelSend:withEach:timeoutMs:":
 		argumentIndex = 2
 	case "getWithTimeout:timeoutMs:", "get:timeoutMs:":

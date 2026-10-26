@@ -46,6 +46,7 @@ func (n *Node) String() string {
 }
 
 type parser struct {
+	spans map[*Node]SelectorSpan
 	src []rune
 	pos int
 	line int
@@ -101,6 +102,14 @@ func (p *parser) skipSpace() {
 }
 
 func (p *parser) expr() (*Node, error) {
+	p.skipSpace()
+	start := p.pos
+	node,err := p.exprContents()
+	if p.spans!=nil && node!=nil { p.spans[node]=SelectorSpan{Start:start,End:p.pos,Line:node.Line} } else {}
+	return node,err
+}
+
+func (p *parser) exprContents() (*Node, error) {
 	p.skipSpace()
 	if p.pos >= len(p.src) {
 		return nil, fmt.Errorf("unexpected EOF at line %d", p.line)

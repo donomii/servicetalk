@@ -17,3 +17,17 @@ method execution -> result or signal
 pulse lifetime
     Use locally observed arrival time for lease expiry.
     Use remote sweep identifiers only to order accepted pulses and break cycles.
+
+Include inherited native selectors and independent parameter-name snapshots in inspection.
+
+Native workspace evalResult: returns result/transcript JSON and stores successful it without printString. initialize returns self. Restore bound receiver in block contexts and include it in pulse references.
+
+evalInternal: runs protected serialized workspace code, returning its typed Value while preserving it and ignoring shellContext.
+
+Maintain a debugger session and trace buffer. Dispatch debugger/trace control messages and include debugger-held argument/result references in pulse propagation.
+
+Restore native snapshot state before receiving/registering. clone/cloneWith: prefer class methods, otherwise clone loaded state. Expose snapshot JSON and wiring engine primitives.
+
+Promise runtime primitives start and await independent message operations; promiseDone signals settlement.
+
+workbenchReferences: validates toolbar data and retains referenced targets and arguments.

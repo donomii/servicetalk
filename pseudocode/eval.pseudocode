@@ -1,0 +1,2 @@
+
+Block creation includes the current self override for later evaluation and nested closures.

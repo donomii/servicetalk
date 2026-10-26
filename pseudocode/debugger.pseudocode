@@ -1,0 +1,23 @@
+startDebug(receiver, method, arguments) -> snapshot or error
+  Require a native method and its exact argument count; validate typed values.
+  Reject a second active session. Retain the method, defining class and arguments.
+  Queue execution on the receiver's normal mailbox; reject a full mailbox.
+
+runDebug(session) -> value
+  Hold a native evaluator context for this invocation.
+  Pause before the first outer statement. Step pauses before the next statement.
+  Continue preserves the frame and runs until return, signal or end.
+  An uncaught signal pauses at the same statement. Earlier effects remain.
+  Apply edited arguments and declared receiver fields only at a pause.
+  Replacement Smalltalk evaluates in place of that statement for this invocation.
+  Retry repeats the statement. Return supplies a result. Abort ends execution.
+  Expire an unattended pause after ten minutes and release the mailbox.
+
+debugCommand(session ID, revision, action, edits, replacement, value) -> snapshot/error
+  Validate syntax, field/argument names and Value kinds before accepting.
+  Reject stale revisions and nonpaused frames; accept one command per pause.
+
+debugDispatch(selector, JSON request) -> JSON snapshot
+  __debugStart:, __debugCommand:, __debugJson are control messages.
+  __debugRun: executes in the normal mailbox.
+  Snapshots preserve typed arguments/results; these references join pulse tracing.

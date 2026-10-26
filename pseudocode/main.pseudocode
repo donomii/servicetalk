@@ -8,3 +8,5 @@ coordinator command(arguments)
     Reject script combined with expression evaluation or interactive REPL.
     Validate script, add its containing directory to class lookup, and select
     strict one-shot script mode.
+
+Internal object --snapshot supplies a native clone bootstrap file; ordinary starts are unchanged.

@@ -1,0 +1,1 @@
+Fields target and definition. Accessors read/write target and JSON definition. Inspector metadata exposes the definition as an editable property.

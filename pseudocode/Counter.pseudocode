@@ -1,0 +1,4 @@
+
+Expose count property through value getter and count: setter. Describe numeric arguments in inspectorMetadata.
+
+inspectorViews describes a live value, increment/decrement/reset actions and count editor.

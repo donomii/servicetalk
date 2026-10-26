@@ -1,0 +1,7 @@
+Method browser: search definitions, select implementors and syntactic senders, read source and follow sends. Object graph: sample registry with bounded concurrency, connect named references, lexical owners, roots, active waits and placements. Spring graph: draggable clickable boxes, directed labelled links, repulsion and springs; fit, pan, zoom, keyboard activation; stop animation on close.
+
+Method source offers Edit source / Git history for its class.
+
+Display a distinct cloned-from edge from runtime prototype metadata.
+
+Native method source offers Rename selector with class and selector prefilled.

@@ -84,6 +84,7 @@ type ObjectEntry struct {
 // ---- Wire types ----
 
 type MessageRequest struct {
+	Sender string `json:"sender,omitempty"`
 	MsgID   string  `json:"msgId"`
 	ChainID string  `json:"chainId,omitempty"`
 	Method  string  `json:"method"`
@@ -109,6 +110,7 @@ type RegisterRequest struct {
 }
 
 type SpawnRequest struct {
+	Snapshot         *NativeSnapshot `json:"snapshot,omitempty"`
 	ClassName        string        `json:"className"`
 	DefFile          string        `json:"defFile,omitempty"`          // block def file path (local spawn only)
 	BlockDef         *BlockDef     `json:"blockDef,omitempty"`         // inline block definition (for remote spawn)
@@ -143,6 +145,7 @@ type DeregisterRequest struct {
 // BlockDef is the serialised definition of a block closure.
 // Written to a temp file by the spawning object; read on block startup.
 type BlockDef struct {
+	SelfOverride *Value `json:"selfOverride,omitempty"`
 	Params          []string         `json:"params"`
 	Body            []*Node          `json:"body"`
 	ParentID        string           `json:"parentId"`
@@ -262,6 +265,7 @@ type InspectResponse struct {
 	ObjectID     string           `json:"objectId"`
 	ClassName    string           `json:"className"`
 	Methods      []string         `json:"methods"`
+	MethodSignatures map[string][]string `json:"methodSignatures,omitempty"`
 	InstanceVars map[string]Value `json:"instanceVars"`
 	Runtime      *RuntimeInspection `json:"runtime,omitempty"`
 	Retention    *RetentionInspection `json:"retention,omitempty"`
@@ -278,6 +282,10 @@ type CallActivity struct {
 }
 
 type RuntimeInspection struct {
+	Promise *PromiseSnapshot `json:"promise,omitempty"`
+	Prototype string `json:"prototype,omitempty"`
+	DefinitionVersion string `json:"definitionVersion,omitempty"`
+	Debug *DebugSnapshot `json:"debug,omitempty"`
 	Host string `json:"host"`
 	PID int `json:"pid"`
 	WorkerID string `json:"workerId"`
@@ -356,4 +364,299 @@ func newUUID() string {
 	b := make([]byte, 8)
 	rand.Read(b)
 	return fmt.Sprintf("%x", b)
+}
+
+// NavigationMethod indexes a definition and its syntactic message sends.
+type NavigationMethod struct {
+	Class string `json:"class"`
+	Selector string `json:"selector"`
+	Params []string `json:"params"`
+	Sends []string `json:"sends"`
+	Source string `json:"source"`
+	File string `json:"file"`
+	Line int `json:"line"`
+	Foreign bool `json:"foreign"`
+}
+
+type NavigationIndex struct {
+	Methods []NavigationMethod `json:"methods"`
+	Errors []string `json:"errors"`
+}
+
+// WorkspaceResult preserves value identity alongside captured transcript text.
+type WorkspaceResult struct {
+	Result Value `json:"result"`
+	Output string `json:"output"`
+	Error string `json:"error,omitempty"`
+}
+
+type ObjectWorkspaceRequest struct {
+	ObjectID string `json:"objectId"`
+	Code string `json:"code"`
+}
+
+// Interactive UI requests share the runtime's typed Value protocol.
+type InteractionRequest struct {
+ TimeoutMs float64 `json:"timeoutMs,omitempty"`
+ Kind string `json:"kind"`
+ ObjectID string `json:"objectId"`
+ Code string `json:"code"`
+ Method string `json:"method"`
+ Args []Value `json:"args"`
+ RecordingID string `json:"recordingId"`
+}
+type InteractionResult struct {
+ Result Value `json:"result"`
+ Output string `json:"output"`
+ Handle string `json:"handle,omitempty"`
+ Error string `json:"error,omitempty"`
+ RecordingError string `json:"recordingError,omitempty"`
+}
+type InteractionRecord struct {
+ Request InteractionRequest `json:"request"`
+ Response InteractionResult `json:"response"`
+ ResultClass string `json:"resultClass,omitempty"`
+ At time.Time `json:"at"`
+}
+type ResultRequest struct {
+ Action string `json:"action"`
+ Handle string `json:"handle"`
+ Name string `json:"name"`
+}
+type RecordingRequest struct {
+ Action string `json:"action"`
+ ObjectID string `json:"objectId"`
+}
+type RecordingResponse struct {
+ ObjectID string `json:"objectId,omitempty"`
+ Records []InteractionRecord `json:"records"`
+ Script string `json:"script"`
+ Test string `json:"test"`
+ Error string `json:"error,omitempty"`
+}
+type InspectorViewRequest struct {
+ Target string `json:"target"`
+ Key string `json:"key"`
+ Definition json.RawMessage `json:"definition"`
+}
+type InspectorViewResponse struct {
+ ObjectID string `json:"objectId,omitempty"`
+ Definition json.RawMessage `json:"definition,omitempty"`
+ Error string `json:"error,omitempty"`
+}
+
+// Debugger frames preserve the native evaluator context between statements.
+type DebugRequest struct {
+ ObjectID string `json:"objectId"`
+ Method string `json:"method"`
+ Args []Value `json:"args"`
+}
+type DebugCommand struct {
+ ID string `json:"id"`
+ Revision uint64 `json:"revision"`
+ Action string `json:"action"`
+ Code string `json:"code,omitempty"`
+ Arguments map[string]Value `json:"arguments,omitempty"`
+ Fields map[string]Value `json:"fields,omitempty"`
+ Value Value `json:"value"`
+}
+type DebugSnapshot struct {
+ ID string `json:"id"`
+ ObjectID string `json:"objectId"`
+ Method string `json:"method"`
+ State string `json:"state"`
+ Index int `json:"index"`
+ Revision uint64 `json:"revision"`
+ Arguments map[string]Value `json:"arguments"`
+ Statements []string `json:"statements"`
+ Result Value `json:"result"`
+ Error string `json:"error,omitempty"`
+ Deadline time.Time `json:"deadline"`
+}
+type DebugHTTPRequest struct {
+ Action string `json:"action"`
+ DebugRequest
+ Command DebugCommand `json:"command"`
+}
+type DebugHTTPResponse struct {
+ Snapshot DebugSnapshot `json:"snapshot"`
+ Error string `json:"error,omitempty"`
+}
+
+// Trace records describe one received message and its eventual reply.
+type TraceEvent struct {
+ ID string `json:"id"`
+ ChainID string `json:"chainId"`
+ Sender string `json:"sender"`
+ Receiver string `json:"receiver"`
+ Method string `json:"method"`
+ Args []Value `json:"args"`
+ Started time.Time `json:"started"`
+ Finished time.Time `json:"finished"`
+ DurationMs float64 `json:"durationMs"`
+ State string `json:"state"`
+ Result Value `json:"result"`
+ Error string `json:"error,omitempty"`
+}
+type TraceSnapshot struct {
+ Enabled bool `json:"enabled"`
+ Events []TraceEvent `json:"events"`
+ Dropped uint64 `json:"dropped"`
+ Errors []string `json:"errors,omitempty"`
+}
+type TraceRequest struct { Action string `json:"action"` }
+
+// Source changes retain a digest for conflict detection and Git revision identity.
+type SourceRequest struct {
+ Action string `json:"action"`
+ Class string `json:"class"`
+ Source string `json:"source"`
+ Digest string `json:"digest"`
+ Revision string `json:"revision"`
+ Message string `json:"message"`
+}
+type SourceRevision struct {
+ ID string `json:"id"`
+ Timestamp string `json:"timestamp"`
+ Subject string `json:"subject"`
+}
+type SourceResponse struct {
+ Class string `json:"class"`
+ File string `json:"file"`
+ Source string `json:"source"`
+ Digest string `json:"digest"`
+ ReadOnly bool `json:"readOnly"`
+ Revisions []SourceRevision `json:"revisions"`
+ HistoricalSource string `json:"historicalSource"`
+ Diff string `json:"diff"`
+ GitObject string `json:"gitObject"`
+ GitError string `json:"gitError,omitempty"`
+ Error string `json:"error,omitempty"`
+}
+
+// Native clones carry the loaded method hierarchy and shallow runtime-visible state.
+type NativeDefinition struct {
+ Name string `json:"name"`
+ Vars []string `json:"vars"`
+ Methods map[string]*MethodDef `json:"methods"`
+ Superclass *NativeDefinition `json:"superclass,omitempty"`
+}
+type NativeSnapshot struct {
+ Definition *NativeDefinition `json:"definition"`
+ Fields map[string]Value `json:"fields"`
+ Array []Value `json:"array,omitempty"`
+ Dictionary map[string]Value `json:"dictionary,omitempty"`
+ Block *BlockDef `json:"block,omitempty"`
+ Prototype string `json:"prototype,omitempty"`
+}
+type PrototypeMethod struct {
+ Name string `json:"name"`
+ Params []string `json:"params"`
+ Source string `json:"source"`
+}
+type PrototypePatch struct {
+ Fields map[string]Value `json:"fields,omitempty"`
+ Methods []PrototypeMethod `json:"methods,omitempty"`
+}
+
+// Message graphs connect typed values and prior message results.
+type WireInput struct {
+ Value *Value `json:"value,omitempty"`
+ From string `json:"from,omitempty"`
+}
+type WireNode struct {
+ ID string `json:"id"`
+ Label string `json:"label,omitempty"`
+ Target WireInput `json:"target"`
+ Method string `json:"method"`
+ Args []WireInput `json:"args"`
+ X float64 `json:"x,omitempty"`
+ Y float64 `json:"y,omitempty"`
+}
+type WireDefinition struct { Nodes []WireNode `json:"nodes"` }
+type WireRun struct {
+ DefinitionVersion string `json:"definitionVersion"`
+ Results map[string]Value `json:"results"`
+ Order []string `json:"order"`
+ State string `json:"state"`
+ FailedNode string `json:"failedNode,omitempty"`
+ Error string `json:"error,omitempty"`
+}
+type WiringResponse struct {
+ ObjectID string `json:"objectId"`
+ Definition WireDefinition `json:"definition"`
+ Run WireRun `json:"run"`
+ Error string `json:"error,omitempty"`
+}
+
+// Promise state retains typed receiver, argument collection and outcome identities.
+type PromiseSnapshot struct {
+ State string `json:"state"`
+ Target Value `json:"target"`
+ Method string `json:"method"`
+ Arguments Value `json:"arguments"`
+ Result Value `json:"result"`
+ Error string `json:"error,omitempty"`
+ StartedAt string `json:"startedAt"`
+ FinishedAt string `json:"finishedAt"`
+ TimeoutMs float64 `json:"timeoutMs"`
+}
+
+// Live workbench tools are data owned by an ordinary object.
+type WorkbenchTool struct {
+ ID string `json:"id"`
+ Label string `json:"label"`
+ Action string `json:"action"`
+ ObjectID string `json:"objectId,omitempty"`
+ Method string `json:"method,omitempty"`
+ Args []Value `json:"args,omitempty"`
+}
+type WorkbenchDefinition struct {
+ Title string `json:"title"`
+ Tools []WorkbenchTool `json:"tools"`
+}
+type WorkbenchResponse struct {
+ ObjectID string `json:"objectId"`
+ Definition WorkbenchDefinition `json:"definition"`
+ Error string `json:"error,omitempty"`
+}
+type ExampleDescription struct {
+ ObjectID string `json:"objectId"`
+ Title string `json:"title"`
+ Description string `json:"description"`
+ Source string `json:"source"`
+ Check string `json:"check"`
+ Workspace string `json:"workspace"`
+}
+type ExamplesResponse struct {
+ Workbench string `json:"workbench"`
+ Examples []ExampleDescription `json:"examples"`
+ Error string `json:"error,omitempty"`
+}
+
+// Selector locations use rune offsets so editing preserves Unicode source text.
+type SelectorSpan struct { Start int; End int; Line int }
+type SelectorSite struct { Selector string; Kind string; Spans []SelectorSpan }
+type RefactorRequest struct {
+ From string `json:"from"`
+ To string `json:"to"`
+ Class string `json:"class,omitempty"`
+}
+type RefactorEdit struct {
+ Line int `json:"line"`
+ Kind string `json:"kind"`
+ Before string `json:"before"`
+ After string `json:"after"`
+}
+type RefactorFile struct {
+ Class string `json:"class"`
+ File string `json:"file"`
+ Digest string `json:"digest"`
+ Source string `json:"source"`
+ Edits []RefactorEdit `json:"edits"`
+ Literals []int `json:"literals"`
+}
+type RefactorResponse struct {
+ Files []RefactorFile `json:"files"`
+ Errors []string `json:"errors"`
 }

@@ -1,0 +1,3 @@
+Present typed retained results with inspect, reuse, argument selection, naming and release controls. Keep a result shelf. Start/stop a live recording; display ordered steps and editable script/test exports; download or load into REPL.
+
+Result counts tolerate a toolbar without a Results tool and preserve a custom button label.

@@ -1,0 +1,2 @@
+Run Thermometer in an isolated real MCP runtime.
+Verify stored/computed conversion, setter rejection without state mutation, metadata and parameter names.

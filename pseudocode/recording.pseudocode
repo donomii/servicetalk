@@ -1,0 +1,5 @@
+Read records from an ordinary InteractionLog. Generate Smalltalk scripts and tests, map created object identities to replay variables, preserve per-receiver scratch workspaces and verify expected failures, values and result classes.
+
+Promise interactions export ordinary asynchronous sends with receiver, selector, copied arguments and timeout.
+
+Example replay calls run followed by result, preserving the source result identity.

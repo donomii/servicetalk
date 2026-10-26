@@ -1,0 +1,7 @@
+promiseDispatch(receiver, operation, arguments): require a Promise definition; route start, result or wait.
+startPromise(receiver, target, selector, arguments, timeout): validate typed inputs and registered target; copy and retain arguments; atomically reject reuse or record pending state; start one independent message and return receiver.
+runPromise: send with a new chain and explicit deadline; track active wait; settle once with typed result, remote signal, transport failure or recovered execution failure.
+promiseSnapshot: read public state, target, selector, retained arguments, result/error and timestamps consistently.
+promiseResult: return fulfillment; propagate rejection; signal if no outcome exists.
+awaitPromise: wait for completion or the caller's timeout without cancelling the operation.
+promiseExpression: serialize an asynchronous interaction as an ordinary Promise send for replay and browser execution.

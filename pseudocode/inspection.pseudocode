@@ -10,3 +10,9 @@ retention explanation(object) -> sampled root path
 
 call tracking
     Register activity on entry and remove it on success or failure.
+
+Include the current debugger snapshot in RuntimeInspection.
+
+Expose immutable clone origin and hash of the loaded native method hierarchy.
+
+Runtime inspection includes a consistent PromiseSnapshot without waiting for a normal mailbox call.

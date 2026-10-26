@@ -1,0 +1,7 @@
+selectorLocations(source, file, selector) -> sites, literal lines, error
+    Smalltalk: record source spans for parsed method headers and explicit sends.
+    Exclude syntax folded to constructors, transcript or JSON forms.
+    Collect matching string values, including literal-array elements.
+    S-expressions: record method and send selectors and cascade messages.
+    Preserve quoted forms, field declarations and method/block parameter lists.
+    Return Unicode source ranges without changing the evaluator AST.

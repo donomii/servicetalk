@@ -1,7 +1,7 @@
 "Programmatic Git access using explicit arguments, without a shell."
 class Git [
     | directory lastProcess stagingArguments invocationArguments sshEnabled sshIdentity sshAgent sshConfig |
-
+    inspectorViews [ ^ '{"views":[{"id":"repository","title":"Repository","body":{"kind":"column","children":[{"kind":"input","label":"Directory","getter":"directory","setter":"directory:","type":"string"},{"kind":"row","children":[{"kind":"action","text":"Status","method":"status"},{"kind":"action","text":"Diff","method":"diff"},{"kind":"action","text":"Log","method":"log"}]}]}}]}' ]
     initialize [ directory := '.'. lastProcess := nil. sshEnabled := false. sshIdentity := ''. sshAgent := ''. sshConfig := '' ]
     directory: path [ directory := path. ^ self ]
     directory [ ^ directory ]
@@ -53,6 +53,13 @@ class Git [
     branch [ ^ self checked: #('branch' '--show-current') ]
     remotes [ ^ self checked: #('remote' '-v') ]
     log [ ^ self checked: #('log' '-10' '--oneline') ]
+    history: path [ ^ self checked: {'log'. '-30'. '--format=%H%x00%ct%x00%s'. '--'. path} ]
+    version: revision file: path [ ^ self checked: {'show'. (revision , ':' , path)} ]
+    diff: path [ ^ self checked: {'diff'. '--no-ext-diff'. '--'. path} ]
+    commitFile: path message: message [
+        self add: {path}.
+        ^ self checked: {'commit'. '--only'. '-m'. message. '--'. path}
+    ]
     fetch: remote [ ^ self checked: {'fetch'. '--'. remote} ]
     add: paths [
         stagingArguments := #('add' '--').

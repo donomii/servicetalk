@@ -1,0 +1,1 @@
+Read object-supplied view descriptions. Render tabbed nested controls: layouts, values, text, code, editable inputs, sliders, actions, lists and tables. Invoke ordinary getters and actions, preserve typed object cells, isolate control errors, and allow editing/inspection of the backing view object.

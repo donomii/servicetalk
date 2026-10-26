@@ -1,0 +1,7 @@
+Wiring fields: definition JSON, retained Array, lastRun JSON.
+initialize: empty graph, reference Array and empty report.
+definition: read graph. definition:source: validate, retain literal references, store.
+retained / lastRun: expose reference ownership and latest execution report.
+run: start new retention set, retain graph inputs, execute graph.
+resume: continue the same graph using the previous execution report and references.
+inspectorMetadata and inspectorViews expose graph, report and explicit run/resume actions.

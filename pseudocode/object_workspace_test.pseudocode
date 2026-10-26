@@ -1,0 +1,1 @@
+Real-process integration tests verify isolation, self binding through nested calls/closures, retained identity and it, error preservation and captured transcript. Verify pulse references include the bound receiver.

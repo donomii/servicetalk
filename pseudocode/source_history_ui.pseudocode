@@ -1,0 +1,8 @@
+Open the class source panel from a method's source display.
+Show editable current definition, file revisions and an inspectable Git object link.
+Keep per-class drafts and base digests when switching/closing/refreshing.
+Selecting history displays old source; copying it to editor is separate from saving.
+Save sends current draft/digest and reports the new-object behavior change.
+Working diff displays saved file differences. Commit requires a saved buffer and
+message; only the selected file is committed. Late responses cannot replace a
+different class's editor. Layout stacks on small screens; text stays inside panes.

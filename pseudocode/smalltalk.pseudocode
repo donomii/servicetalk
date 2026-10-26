@@ -1,0 +1,11 @@
+ParseSmalltalk(source) -> shared evaluator nodes or error
+    Lex identifiers, keywords, operators, literals, punctuation and source positions.
+    Skip whitespace and double-quoted comments.
+    Parse classes, fields, superclass names and unary/binary/keyword method bodies.
+    Parse assignment, return, closures, arrays and messages with unary, binary, keyword and cascade precedence.
+    Fold constructors, transcript output and JSON operations into evaluator forms.
+    Optionally record exact selector token ranges for method headers and explicit sends.
+ParseSmalltalkClassSource(source) -> class definition or error
+    Parse source and extract its class definition through the shared class parser.
+parseWorkspaceSource(source) -> shared evaluator nodes or error
+    Use the Smalltalk front end for interactive workspace expressions.

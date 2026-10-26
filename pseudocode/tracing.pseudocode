@@ -1,0 +1,15 @@
+TraceBuffer stores enabled flag, generation, bounded events and dropped count.
+begin(receiver, message) -> generation
+  If enabled and not control traffic, record sender, receiver, arguments, chain,
+  start time and running state; discard oldest beyond 1000 entries.
+finish(generation, reply)
+  Complete the matching event with result/signal, timestamp and elapsed duration.
+  Ignore completions after clear or replacement of the trace generation.
+configure(start/stop/clear)
+  Start clears and enables; stop disables new entries; clear invalidates history.
+snapshot -> copied event list, enabled flag and dropped count.
+Coordinator start/stop/clear applies to all registered objects; registering objects
+join active tracing before spawn completion. Object failures remain individually visible.
+GET /trace aggregates events in time order, with optional receiver and chain filters.
+POST /trace controls collection. Object messages __trace: and __traceJson expose
+the same records. Historical references do not keep objects alive.

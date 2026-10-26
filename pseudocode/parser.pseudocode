@@ -1,0 +1,5 @@
+Parse(source) -> expression nodes or error
+    Parse lists, symbols, signed numbers and escaped strings; skip semicolon comments.
+    Track source lines and optionally record half-open Unicode ranges per node.
+Node.String -> readable S-expression
+    Render each node's literal value or nested children with required quoting.

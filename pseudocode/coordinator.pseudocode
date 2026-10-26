@@ -16,3 +16,21 @@ inspection and MCP routes
 stale-object probe
     Clear suspicion after a successful response.
     Require repeated failure beyond the reconnect grace before eviction.
+
+Serve navigation index, graph relationship inspection and navigation script endpoints.
+
+Serve POST /workspace and the assisted object-workspace browser script.
+
+Serve interaction, result, recording and view endpoints plus their browser scripts.
+
+Register debugger and trace HTTP/UI routes. Enable tracing on newly registering objects before notifying spawn waiters.
+
+Register the source editing/history API and script; sourceStore serializes definition replacements.
+
+Spawn accepts an optional validated NativeSnapshot, requires matching class and no autoInit/blockDef, and forwards it through local/worker paths. Serve clone/wiring scripts and the graph-object read endpoint.
+
+Serve the Promise browser renderer at /promises.js.
+
+Serve live workbench/catalog data and workbench browser rendering.
+
+Serve selector refactoring previews and their browser script.

@@ -1,0 +1,9 @@
+loadWorkbench: read current live definition and render tool buttons in declared order.
+runWorkbenchTool: open a built-in browser tool, inspect a target, or perform a typed object call and expose its reusable result.
+open/save/resetWorkbench: edit JSON, save through ordinary messages, restore defaults and inspect the owner object.
+openExamples/selectExample: read catalog, preserve per-example browser drafts and populate editable text controls.
+saveExample: atomically update all documentation text through one native method.
+runExample: save changes, execute source and check, display status/transcript and reusable typed result.
+resetExample: replace the selected example's scratch workspace.
+newExample: add an editable initial example returning 42.
+inspectExample: open the example or its workspace as an ordinary object.

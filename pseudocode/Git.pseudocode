@@ -17,3 +17,7 @@ SSH authentication
     run prepends the per-invocation Git SSH command override when enabled.
     remote: url: and remote: pushURL: set repository remote URLs.
     checkAuth: probes remote refs and signals failure through checked:.
+
+inspectorViews supplies editable directory and Status, Diff, Log actions using ordinary methods.
+
+history: path returns thirty file commits with full revision/time/subject; version:file: reads historical source; diff: limits working changes to one path; commitFile:message: stages and commits only the selected file while preserving unrelated staged changes.

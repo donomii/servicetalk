@@ -1,0 +1,7 @@
+Open debugger from inspector: choose method and typed arguments, start paused.
+Display running definition, highlighted statement, arguments, fields, result/signal.
+Poll active frames without replacing edits while the pause revision is unchanged.
+Step/continue/retry submit optional replacement and typed edits for the current frame.
+Return supplies a typed result; abort works even if editor inputs are invalid.
+Close stops polling; reopen reads the same session. Stale responses cannot replace
+a different receiver's frame. The header reopens the last selected receiver.

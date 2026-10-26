@@ -1,0 +1,4 @@
+Open trace browser; start/stop collection, refresh, clear, download JSON.
+Filter by method/object/signal text; follow one call chain or return to all chains.
+Render wrapping cards with sender/receiver links, arguments, result/error, duration,
+message ID and timestamp. Object-valued results remain inspectable links.

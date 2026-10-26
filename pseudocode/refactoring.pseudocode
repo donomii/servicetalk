@@ -1,0 +1,13 @@
+refactorSelector(source, file, from, to) -> proposed source, edits, literal lines, error
+    Require distinct selectors with the same category and argument count.
+    Parse selector locations and reject conflicting method definitions.
+    Replace only matching selector spans, from the end of source backwards.
+    Preserve all other text and report each definition/send by line.
+
+refactorPreview(request) -> files and errors
+    Read requested native class definitions with their digests.
+    Build and validate each proposed class without writing.
+    Return source, edits, literal references and per-class errors.
+
+handleRefactor(request) -> preview response
+    Require a bounded POST JSON request and return the parsed preview.

@@ -1,0 +1,5 @@
+Clone invokes the ordinary clone message and opens the retained result.
+Clone and edit reads the native snapshot, displays typed fields and optional method
+override selector, parameters and body. Submit cloneWith: and inspect the derived object.
+Explain shallow reference sharing. Preserve the original object and class files.
+Inspectors show loaded-definition digest and origin; graphs add a cloned-from edge.

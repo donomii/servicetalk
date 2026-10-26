@@ -1,0 +1,7 @@
+Open the ordinary graph object; list live receivers and add method nodes.
+Selecting a node exposes receiver/method/typed arguments and available parameter names.
+Connect an output socket to a receiver/argument socket, or select a prior result in
+the editor. Apply edits, drag nodes, fit graph, or remove a node and clear its edges.
+Save through definition:. Run saves changes first; resume explicitly continues failure.
+Render node results/errors and object links. Inspect the graph object itself.
+Stack graph and detail panes on narrow windows. Closing rereads saved state on reopen.

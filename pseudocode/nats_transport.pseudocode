@@ -5,3 +5,9 @@ outbound object call
     Track target and selector while waiting for the reply.
     Raise transport failures and remote signals to the caller.
     Remove wait activity on every exit.
+
+Carry optional sender identity on object sends. Record received normal calls and replies/errors with chain IDs. Debug configuration/read/commands and trace configuration/read use the control lane.
+
+__nativeSnapshotJson is a control message so definition/state inspection remains available.
+
+await: and awaitPromise: requests allow their requested waiting duration plus transport reply overhead.

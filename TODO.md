@@ -247,3 +247,28 @@ handle, roughly in order of user-visible value:
 
 ✅ Shipped.  `smt object` accepts `--verbose`; child processes still
 inherit `SMT_VERBOSE=1` from the parent when spawned normally.
+
+## Interactive environment roadmap — agreed 2026-10-26
+
+Work from the top. Preserve system integration and separate objects/processes across languages and operating systems. Self-host as much of the GUI as possible. No private-interface restrictions.
+
+1. **Method navigation and relationship graph — implemented.** Browse implementors, senders and source. Add draggable boxes with spring layout for method relationships, object pointers, lexical owners, roots and placement. Keep different edge meanings explicit.
+2. **Assisted object workspace — implemented.** ObjectWorkspace supplies isolated scratch bindings, self, reusable it, property-read shortcuts, and a typed expression builder in the inspector.
+3. **Reusable result objects — implemented.** Results retain identity; inspect them, pass them as arguments and build further operations from them.
+4. **Object-specific views — implemented.** Head toward a full GUI with useful views supplied by objects.
+5. **Observed types / LiveTyping — optional.** Keep available as a future option; no immediate priority.
+6. **Record interactions as scripts/tests — implemented.** Turn useful exploration into repeatable work.
+7. **Edit and resume debugging — native experiment implemented.** Pause a selected native method between statements; edit arguments/fields, replace the current statement, step or continue the held frame. Signals offer retry, supplied return or abort. Foreign methods keep their normal runtime execution.
+8. **Message tracing — implemented.** Bounded per-object call/reply/signal records, chain following, object links, filters and JSON export; new objects join active tracing.
+9. **Method change history — implemented through class-file history.** Source browser opens Git revisions, working diffs and editable definitions; copy historical source into the editor and commit the selected file using the Git object.
+10. **Explicit recovery operations — implemented in debugger and wiring.** Failed native statements support retry/replacement, supplied return and abort. Wiring resumes from the failed node while retaining completed results.
+11. **Clone and experiment — implemented.** Native clones have separate state storage and preserve loaded methods/superclasses across local and worker spawning. Referenced objects remain shared; resource-owning and foreign objects can supply their own clone method.
+12. **Visual wiring / Fabrik — implemented.** Ordinary Wiring objects own typed message graphs. Connect output sockets to receiver/argument inputs, arrange boxes, run the graph and inspect results.
+13. **Constraints between properties / ThingLab — deferred.** Record the idea; do not implement yet.
+14. **Inspectable, editable GUI objects — implemented.** Workbench owns toolbar definitions and custom object-message tools; InspectorView, InteractionLog, Wiring and RunnableExample own their live GUI state. Their definitions can be edited through ordinary messages and inspectors; browser rendering remains the platform boundary.
+15. **Semantic refactoring — selector rename implemented.** Parsed previews locate native definitions and sends, preserve bindings/comments/literals, flag literal references for review, and save selected files through the digest-checked source editor with Git history. Broader transformations remain suitable for AI assistance.
+16. **Runnable documentation/examples — implemented.** Editable RunnableExample objects own isolated workspaces, executable checks and typed results. The Examples browser includes seven working demonstrations and supports adding examples.
+17. **Inspectable promises — implemented.** Ordinary Promise objects retain the receiver, argument snapshot and typed result/error, expose state and await operations, and remain inspectable while calls run. Inspector messages and wiring runs can execute asynchronously.
+18. **Changing behavior — native definition editor implemented.** Saved definitions apply to new object processes; old and new native instances coexist, verified with subprocess tests. Foreign source continues through its existing language/build tools; no live cross-language code replacement is assumed.
+19. **Prototypes / class versions — native experiment implemented.** Derive an object's fields and method overrides without editing a class file; derived objects can be cloned again. Loaded definition digests distinguish coexisting behavior versions. No live foreign-runtime rewriting is assumed.
+20. **Object mobility — research recorded in SPEC.** Native snapshot copies can spawn on workers. Preserving identity would need mailbox quiescence, subject/registry handoff, in-flight-call accounting and resource-specific transfer adapters. Arbitrary cross-language/OS migration remains outside this research-only item.

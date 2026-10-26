@@ -1,0 +1,4 @@
+
+Store Celsius, expose Celsius and Fahrenheit getters/setters. Reject values below absolute zero. Publish property and typed argument metadata.
+
+inspectorViews supplies temperature controls and a Readings table. readings returns JSON values computed through celsius/fahrenheit.
