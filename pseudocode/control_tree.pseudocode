@@ -1,0 +1,4 @@
+ControlProperties describes typed properties; ControlState carries serialized properties and typed children; ControlPlan carries parsed properties, extra JSON, child plans and identity.
+parseViewControls: parse wrapper or bare root into a bounded, validated tree; reject duplicate identities, malformed values, unsupported kinds, invalid columns/slider ranges and child-bearing leaves.
+controlClass: map kinds to Button, Label, Input, Row, Column or generic Control.
+describeControlTree: snapshot each control on the inspection channel; preserve properties, recursively expand children, reject cycles/shared children and bounds violations.

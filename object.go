@@ -545,6 +545,8 @@ func (obj *ObjectServer) callMethod(name string, args []Value) Value {
 		return obj.promiseDispatch(name, args)
 	case "workbenchReferences:":
 		return obj.workbenchReferences(args)
+	case "__replaceView:", "__describeView", "__viewRoot", "__viewRoot:", "__controlState", "__controlOwner", "__controlOwner:", "__describeControl", "__controlConfigure:owner:children:", "__controlChildren:", "__controlAdd:", "__controlRemove:":
+		return obj.controlDispatch(name, args)
 	case "validateWiring:", "retainWiring:in:", "executeWiring:retain:", "executeWiring:retain:previous:":
 		return obj.wiringDispatch(name, args)
 	case "=":

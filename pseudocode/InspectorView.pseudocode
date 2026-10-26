@@ -1,1 +1,7 @@
-Fields target and definition. Accessors read/write target and JSON definition. Inspector metadata exposes the definition as an editable property.
+Fields: target, definition metadata, root control reference.
+initialize: empty column definition; lazy root.
+target: read/replace inspected receiver. effectiveReceiver returns target. view returns self.
+root: lazily convert stored layout to live controls; root: attach an unowned control tree.
+definition: export current live control tree with identities and view metadata.
+definition: (setter): validate and reconcile JSON into native controls, preserving compatible IDs and extra properties.
+inspectorMetadata: editable definition plus root reference.

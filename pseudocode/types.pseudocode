@@ -30,3 +30,5 @@ PromiseSnapshot carries state, typed target/arguments/result, error, timestamps 
 WorkbenchDefinition/Tool describe live toolbar actions; WorkbenchResponse and ExamplesResponse carry object identities and editable catalog data.
 
 SelectorSpan/Site describe parsed Unicode source locations. RefactorRequest supplies selectors and optional class; RefactorFile/Edit/Response carry digests, proposed sources, per-line edits, literal references and errors.
+
+Add ControlProperties (wire properties), ControlState (serialized properties/children) and ControlPlan (validated reconciliation tree).

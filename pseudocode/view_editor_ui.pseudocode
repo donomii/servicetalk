@@ -7,3 +7,5 @@ toggleViewDesignerJSON: validate and switch representations while preserving ext
 saveViewDesigner: validate and send definition: to InspectorView; refresh live receiver and preview.
 reloadViewDesigner: read stored definition and discard both visual and raw drafts.
 closeViewDesigner: remember drafts by view object and dismiss.
+
+Show live control identity, inspector link, inherited/explicit receiver and Wiring action selection. Read authoritative definition after save, retain control IDs on edits/moves, strip IDs on duplicate, and preserve only unsaved drafts.

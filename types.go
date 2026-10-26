@@ -445,6 +445,32 @@ type InspectorViewResponse struct {
  Error string `json:"error,omitempty"`
 }
 
+// Live controls retain their receivers, children, arguments and Wiring objects.
+type ControlProperties struct {
+ Kind string `json:"kind"`
+ ControlID string `json:"controlId,omitempty"`
+ Label string `json:"label,omitempty"`
+ Text string `json:"text,omitempty"`
+ Getter string `json:"getter,omitempty"`
+ Setter string `json:"setter,omitempty"`
+ Method string `json:"method,omitempty"`
+ Type string `json:"type,omitempty"`
+ Receiver string `json:"receiver,omitempty"`
+ Wiring string `json:"wiring,omitempty"`
+ Refresh bool `json:"refresh,omitempty"`
+ Args []Value `json:"args,omitempty"`
+}
+type ControlState struct {
+ Properties json.RawMessage `json:"properties"`
+ Children []Value `json:"children"`
+}
+type ControlPlan struct {
+ Properties ControlProperties
+ Raw map[string]json.RawMessage
+ Children []*ControlPlan
+ Object Value
+}
+
 // Debugger frames preserve the native evaluator context between statements.
 type DebugRequest struct {
  ObjectID string `json:"objectId"`

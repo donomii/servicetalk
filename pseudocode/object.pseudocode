@@ -31,3 +31,7 @@ Restore native snapshot state before receiving/registering. clone/cloneWith: pre
 Promise runtime primitives start and await independent message operations; promiseDone signals settlement.
 
 workbenchReferences: validates toolbar data and retains referenced targets and arguments.
+
+Dispatch live Control/InspectorView serialization and ownership primitives.
+
+Control ownership reads/writes and validated configuration use the inspection channel with locked field snapshots/replacement. This lets layout saves complete while a control awaits its inherited receiver.

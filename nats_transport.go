@@ -237,7 +237,7 @@ func (obj *ObjectServer) rejectNATSCall(req MessageRequest, msg natsResponder, r
 
 func isControlMethod(method string) bool {
 	switch method {
-	case "pulse:", "class", "__inspectJson", "__metricsJson", "__debugStart:", "__debugCommand:", "__debugJson", "__trace:", "__traceJson", "__nativeSnapshotJson":
+	case "pulse:", "class", "__inspectJson", "__metricsJson", "__debugStart:", "__debugCommand:", "__debugJson", "__trace:", "__traceJson", "__nativeSnapshotJson", "__controlState", "__controlOwner", "__controlOwner:", "__controlConfigure:owner:children:":
 		return true
 	default:
 		return false

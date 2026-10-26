@@ -1,0 +1,8 @@
+controlState: snapshot ordinary control fields and Array contents without application getters; combine authoritative properties with extra rendering options; return properties and typed children.
+configureControl: validate imported properties, retain arguments/children/receiver/graph, and replace coherent fields.
+changeControlChildren: validate layout kind, unique tree ownership and bounds before replacing child references; assign new owners and detach removed children.
+controlDispatch: route live-control and InspectorView primitives, requiring compatible fields.
+
+Control ownership reads/writes and validated configuration use the inspection channel with locked field snapshots/replacement. This lets layout saves complete while a control awaits its inherited receiver.
+
+Removing a subtree detaches its root while preserving ownership within it. Controls reused elsewhere in the new layout are removed from the detached tree. Internal configuration accepts nil for a detached owner.

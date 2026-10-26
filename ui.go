@@ -290,6 +290,7 @@ async function showInspect(id, preserveCall = false) {
     md.appendChild(navButton('Debug method', () => openDebugger(id, methods, d.methodSignatures || {})));
     md.appendChild(navButton('Clone', () => cloneInspectedObject(id)));
     if (d.className === 'Wiring') md.appendChild(navButton('Open graph', () => { closeM(); openWiring(id); })); else {}
+    if (vars.kind && vars.children && vars.owner) md.appendChild(navButton('Open control in designer', () => openControlDesigner(id))); else {}
     if (runtime.definitionVersion) md.appendChild(navButton('Clone and edit', () => openClone(id))); else {}
     methods.forEach(method => {
       const button = document.createElement('button');

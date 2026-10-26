@@ -1,0 +1,7 @@
+Render selected live identity and Inspect control object; offer optional inherited receiver with live registry suggestions.
+Render message/Wiring action choice, graph selector and link to Wiring editor.
+copyControlTree: remove identities recursively from duplicated subtrees.
+receiveLiveControlView: refresh a clean, unfocused designer from changed live definitions; preserve selection by control ID.
+openControlDesigner: follow a control's view/target, open its view and select its tree entry.
+
+Automatic updates preserve focused text, selection and numeric inputs while allowing updates after button clicks.

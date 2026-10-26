@@ -1,0 +1,11 @@
+Fields: kind, label, text, receiver, getter, setter, selector, arguments, children, owner, wiring, refresh, valueType, options.
+initialize: create empty argument/child Arrays and default value properties.
+Get/set label, text, receiver, getter, setter, method (selector), arguments, wiring, refresh, valueType, options. Read kind, owner and children.
+effectiveReceiver: use explicit receiver, otherwise ask owner; unattached returns nil.
+view: follow owner to InspectorView; unattached returns nil.
+read: return text or send getter with arguments to effectiveReceiver.
+write(value): send setter with value, or signal an unconfigured setter.
+invoke: run Wiring when assigned, otherwise send selector with arguments; propagate signals.
+children/add/remove: validate and replace child ownership through tree operations.
+state/definition: export own properties/child references or the recursive tree.
+inspectorMetadata: expose properties and references for ordinary inspection/editing.

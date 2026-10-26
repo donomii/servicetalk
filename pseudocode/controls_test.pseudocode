@@ -1,0 +1,9 @@
+Verify legacy JSON creates live classes, ordinary property edits export, actions/read/write execute, and reordering preserves identity.
+Reject unrelated IDs without changing the tree; removal detaches ownership.
+Compose controls with ordinary messages; reject cycles, shared children and leaf parents; verify reparenting and receiver signals.
+Verify inherited/explicit receivers, Wiring execution and retained object references.
+Exercise a foreign C receiver and simultaneous layout exports, reads and actions to detect mailbox cycles.
+
+Control ownership reads/writes and validated configuration use the inspection channel with locked field snapshots/replacement. This lets layout saves complete while a control awaits its inherited receiver. Concurrent render/save/read/invoke tests verify completion and exactly one receiver mutation per invocation.
+
+Removing a subtree detaches its root while preserving ownership within it. Controls reused elsewhere in the new layout are removed from the detached tree. Internal configuration accepts nil for a detached owner. Tests retain and inspect a removed row while lifting one child into the saved view.

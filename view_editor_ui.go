@@ -5,19 +5,19 @@ let viewEditorState=null;
 const viewEditorDrafts=new Map();
 const viewEditorRawDrafts=new Map();
 function openViewDesigner(view,id){
- viewEditorState={objectId:view.objectId,target:id,definition:visualCopy(viewEditorDrafts.get(view.objectId)||view.definition),path:[],raw:false};
+ viewEditorState={objectId:view.objectId,target:id,definition:visualCopy(viewEditorDrafts.get(view.objectId)||view.definition),path:[],raw:false,dirty:viewEditorDrafts.has(view.objectId)};
  document.getElementById('view-designer').hidden=false;document.getElementById('view-designer-status').textContent='';renderViewDesigner();if(viewEditorRawDrafts.has(view.objectId)){toggleViewDesignerJSON();document.getElementById('view-design-json').value=viewEditorRawDrafts.get(view.objectId);}else{}
 }
-function closeViewDesigner(){if(viewEditorState){viewEditorDrafts.set(viewEditorState.objectId,visualCopy(viewEditorState.definition));if(viewEditorState.raw)viewEditorRawDrafts.set(viewEditorState.objectId,document.getElementById('view-design-json').value);else viewEditorRawDrafts.delete(viewEditorState.objectId);}else{}document.getElementById('view-designer').hidden=true;}
+function closeViewDesigner(){if(viewEditorState){if(viewEditorState.dirty)viewEditorDrafts.set(viewEditorState.objectId,visualCopy(viewEditorState.definition));else viewEditorDrafts.delete(viewEditorState.objectId);if(viewEditorState.raw)viewEditorRawDrafts.set(viewEditorState.objectId,document.getElementById('view-design-json').value);else viewEditorRawDrafts.delete(viewEditorState.objectId);}else{}document.getElementById('view-designer').hidden=true;}
 function viewEditorRoot(){return viewEditorState.definition.body||viewEditorState.definition;}
-function viewEditorChanged(){viewEditorDrafts.set(viewEditorState.objectId,visualCopy(viewEditorState.definition));document.getElementById('view-designer-status').textContent='Unsaved changes';renderViewOutline();previewViewDesigner();}
+function viewEditorChanged(){viewEditorState.dirty=true;viewEditorDrafts.set(viewEditorState.objectId,visualCopy(viewEditorState.definition));document.getElementById('view-designer-status').textContent='Unsaved changes';renderViewOutline();previewViewDesigner();}
 function renderViewDesigner(){
  const properties=document.getElementById('view-design-properties');properties.replaceChildren();
  const title=visualField(properties,'View title',viewEditorState.definition.title,value=>{viewEditorState.definition.title=value;viewEditorChanged();});
  title.placeholder='View title';const node=visualNodeAt(viewEditorRoot(),viewEditorState.path);properties.append(toolElement('h4','Selected control'));
- visualField(properties,'Control kind',node.kind||'column',value=>{node.kind=value;if(['row','column'].includes(value)&&!node.children)node.children=[];else{}viewEditorChanged();renderViewDesigner();},visualKinds);
+ visualField(properties,'Control kind',node.kind||'column',value=>{node.kind=value;if(['row','column'].includes(value)&&!node.children)node.children=[];else if(!['row','column'].includes(value))delete node.children;else{}viewEditorChanged();renderViewDesigner();},visualKinds);
  visualField(properties,'Control label',node.label,value=>{node.label=value;viewEditorChanged();});
- renderViewControlProperties(properties,node);
+ renderControlIdentity(properties,node);renderViewControlProperties(properties,node);
  document.getElementById('view-design-visual').hidden=viewEditorState.raw;document.getElementById('view-design-json').hidden=!viewEditorState.raw;document.getElementById('view-design-mode').textContent=viewEditorState.raw?'Visual editor':'Edit JSON';
  renderViewOutline();previewViewDesigner();
 }
@@ -31,14 +31,14 @@ function selectViewControl(path){if(!visualValid(document.getElementById('view-d
 function renderViewControlProperties(parent,node){
  const kind=node.kind||'column';
  if(['text','code','action','value'].includes(kind))visualField(parent,kind==='action'?'Button text':'Literal text',node.text,value=>{node.text=value;viewEditorChanged();});else{}
- if(!['row','column','action'].includes(kind)){const getter=visualField(parent,'Getter method',node.getter,value=>{node.getter=value;viewEditorChanged();});visualMethodChoices(getter,viewEditorState.target).catch(error=>getter.title=error.message);}else{}
+ if(!['row','column','action'].includes(kind)){const getter=visualField(parent,'Getter method',node.getter,value=>{node.getter=value;viewEditorChanged();});visualMethodChoices(getter,selectedControlReceiver()).catch(error=>getter.title=error.message);}else{}
  if(['input','textarea','slider'].includes(kind)){
-  const setter=visualField(parent,'Setter method',node.setter,value=>{node.setter=value;viewEditorChanged();});visualMethodChoices(setter,viewEditorState.target).catch(error=>setter.title=error.message);
+  const setter=visualField(parent,'Setter method',node.setter,value=>{node.setter=value;viewEditorChanged();});visualMethodChoices(setter,selectedControlReceiver()).catch(error=>setter.title=error.message);
   visualField(parent,'Value type',node.type||'',value=>{if(value)node.type=value;else delete node.type;viewEditorChanged();},[{value:'',label:'Infer from getter'},'number','string','bool','nil','objid','character']);
  }else{}
  if(kind==='slider')for(const [key,fallback]of [['min',0],['max',100],['step',1]])visualField(parent,key==='min'?'Minimum':key==='max'?'Maximum':'Step',node[key]??fallback,value=>{if(!value.trim()||!Number.isFinite(Number(value)))throw Error('Enter a finite number.');else{}node[key]=Number(value);viewEditorChanged();});else{}
  if(kind==='action'){
-  const method=visualField(parent,'Action method',node.method,value=>{node.method=value;viewEditorChanged();});visualMethodChoices(method,viewEditorState.target).catch(error=>method.title=error.message);
+  renderControlAction(parent,node);
   visualField(parent,'Refresh after action',String(!!node.refresh),value=>{node.refresh=value==='true';viewEditorChanged();},[{value:'false',label:'No'},{value:'true',label:'Yes'}]);
  }else{}
  if(!['row','column'].includes(kind))visualArguments(parent,node,viewEditorChanged);else{}
@@ -62,7 +62,7 @@ function changeViewControl(action){
  if(!visualValid(document.getElementById('view-designer'))||!viewEditorState.path.length)return;else{}
  const path=viewEditorState.path,parentPath=path.slice(0,-1),index=path.at(-1),parent=visualNodeAt(viewEditorRoot(),parentPath),node=parent.children[index];
  if(action==='remove'){parent.children.splice(index,1);viewEditorState.path=parentPath;}
- else if(action==='copy'){parent.children.splice(index+1,0,visualCopy(node));viewEditorState.path=[...parentPath,index+1];}
+ else if(action==='copy'){parent.children.splice(index+1,0,copyControlTree(node));viewEditorState.path=[...parentPath,index+1];}
  else if(action==='out'){if(!parentPath.length)return;else{}const grandPath=parentPath.slice(0,-1),parentIndex=parentPath.at(-1),grand=visualNodeAt(viewEditorRoot(),grandPath);parent.children.splice(index,1);grand.children.splice(parentIndex+1,0,node);viewEditorState.path=[...grandPath,parentIndex+1];}
  else if(action==='in'){const previous=parent.children[index-1];if(!previous||!['row','column'].includes(previous.kind||'column')){document.getElementById('view-designer-status').textContent='Move a row or column directly above this control first.';return;}else{}previous.children=previous.children||[];previous.children.push(node);parent.children.splice(index,1);viewEditorState.path=[...parentPath,index-1,previous.children.length-1];}
  else{const next=index+(action==='up'?-1:1);if(next<0||next>=parent.children.length)return;else{}[parent.children[index],parent.children[next]]=[parent.children[next],parent.children[index]];viewEditorState.path=[...parentPath,next];}
@@ -85,8 +85,8 @@ function toggleViewDesignerJSON(){
 async function saveViewDesigner(){
  try{if(!visualValid(document.getElementById('view-designer')))return;else{}const definition=visualValidateView(viewEditorState.raw?JSON.parse(document.getElementById('view-design-json').value):viewEditorState.definition);
   const response=await performInteraction({kind:'call',objectId:viewEditorState.objectId,method:'definition:',args:[{kind:'string',str:JSON.stringify(definition)}]});if(response.error)throw Error(response.error);else{}
-  viewEditorState.definition=visualCopy(definition);if(viewEditorState.raw)viewEditorState.path=[];else{}viewEditorDrafts.set(viewEditorState.objectId,visualCopy(definition));viewEditorRawDrafts.delete(viewEditorState.objectId);document.getElementById('view-designer-status').textContent='Saved';await showInspect(viewEditorState.target,true);renderViewDesigner();
+  const saved=await inspectorCall(viewEditorState.objectId,'definition',[]);viewEditorState.definition=JSON.parse(saved.str);viewEditorState.dirty=false;if(viewEditorState.raw)document.getElementById('view-design-json').value=JSON.stringify(viewEditorState.definition,null,2);else{}if(viewEditorState.raw)viewEditorState.path=[];else{}viewEditorDrafts.delete(viewEditorState.objectId);viewEditorRawDrafts.delete(viewEditorState.objectId);document.getElementById('view-designer-status').textContent='Saved';await showInspect(viewEditorState.target,true);renderViewDesigner();
  }catch(error){document.getElementById('view-designer-status').textContent=error.message;}
 }
-async function reloadViewDesigner(){try{const saved=await inspectorCall(viewEditorState.objectId,'definition',[]);viewEditorState.definition=JSON.parse(saved.str);viewEditorState.path=[];viewEditorState.raw=false;viewEditorDrafts.delete(viewEditorState.objectId);viewEditorRawDrafts.delete(viewEditorState.objectId);renderViewDesigner();document.getElementById('view-designer-status').textContent='Reloaded';}catch(error){document.getElementById('view-designer-status').textContent=error.message;}}
+async function reloadViewDesigner(){try{const saved=await inspectorCall(viewEditorState.objectId,'definition',[]);viewEditorState.definition=JSON.parse(saved.str);viewEditorState.path=[];viewEditorState.raw=false;viewEditorState.dirty=false;viewEditorDrafts.delete(viewEditorState.objectId);viewEditorRawDrafts.delete(viewEditorState.objectId);renderViewDesigner();document.getElementById('view-designer-status').textContent='Reloaded';}catch(error){document.getElementById('view-designer-status').textContent=error.message;}}
 `

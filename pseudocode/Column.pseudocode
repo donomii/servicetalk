@@ -1,0 +1,1 @@
+Inherit Control state and public messages. Initialize inherited fields and set kind to column.

@@ -2,3 +2,5 @@ visualEditorJS: compose shared editor helpers, toolbar builder and view designer
 visualArguments: edit ordered typed values, resolve retained results, report invalid values, add/remove arguments and notify the owner of changes.
 visualMethodChoices: read receiver relationships and offer sorted selectors.
 visualValidateView: validate supported controls, children/argument arrays, table column keys, required action selectors, slider bounds and nesting depth; preserve unknown fields.
+
+Include live-control editor helpers. Accept Wiring-backed actions without a message selector.

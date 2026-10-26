@@ -1,0 +1,9 @@
+replaceViewControls: validate incoming tree and every existing ID before mutation. Reuse compatible control identities, allocate others, configure descendants and owners, replace root/metadata, detach removed controls.
+ensureViewRoot: lazily convert a legacy JSON definition when no root exists.
+describeViewControls: export current root tree with saved metadata, retaining bare-root or wrapped shape.
+attachViewRoot: validate an unowned bounded control tree, assign view ownership and detach previous root.
+viewControlDispatch: expose root access, tree import and tree export to ordinary InspectorView methods.
+
+Control ownership reads/writes and validated configuration use the inspection channel with locked field snapshots/replacement. This lets layout saves complete while a control awaits its inherited receiver.
+
+Removing a subtree detaches its root while preserving ownership within it. Controls reused elsewhere in the new layout are removed from the detached tree. Internal configuration accepts nil for a detached owner.

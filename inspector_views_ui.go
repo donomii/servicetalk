@@ -1,7 +1,8 @@
 package main
 
-const inspectorViewsJS = `const selectedViews=new Map();
+const inspectorViewsJS = `const selectedViews=new Map();let liveViewTimer;
 async function loadInspectorViews(id,inspection,version){
+  clearTimeout(liveViewTimer);
   const container=document.getElementById('mviews');container.replaceChildren();
   if(!(inspection.methods||[]).includes('inspectorViews'))return;else{}
   try{
@@ -21,12 +22,22 @@ async function loadInspectorViews(id,inspection,version){
         if(view.error)throw Error(view.error);else{}
         if(version!==inspectionVersion || choice!==selectionVersion)return;else{}
         tabButtons.get(definition.id).textContent=view.definition.title||definition.title||definition.id;
-        body.replaceChildren();
+        async function render(){body.replaceChildren();
         const controls=document.createElement('div');controls.className='view-tools';
         controls.appendChild(navButton('Inspect view object',()=>showInspect(view.objectId)));
         controls.appendChild(navButton('Edit layout',()=>editInspectorView(view,id,body,version)));
         body.appendChild(controls);
         await renderViewNode(view.definition.body||view.definition,id,body,version,0);
+        }
+        await render();let last=JSON.stringify(view.definition);
+        async function watch(){
+          if(version!==inspectionVersion||choice!==selectionVersion||!body.isConnected)return;else{}
+          try{const value=await inspectorCall(view.objectId,'definition',[]);if(version!==inspectionVersion||choice!==selectionVersion)return;else{}
+            const definition=JSON.parse(value.str),next=JSON.stringify(definition);view.definition=definition;receiveLiveControlView(view);
+            if(next!==last&&!(body.contains(document.activeElement)&&document.activeElement.matches('input,textarea,select'))){last=next;tabButtons.get(selectedViews.get(id)).textContent=definition.title||selectedViews.get(id);await render();}else{}
+          }catch(error){body.title=error.message;}finally{if(version===inspectionVersion&&choice===selectionVersion)liveViewTimer=setTimeout(watch,1000);else{}}
+        }
+        clearTimeout(liveViewTimer);liveViewTimer=setTimeout(watch,1000);
       }catch(error){if(version===inspectionVersion)body.textContent=error.message;else{}}
     }
     definitions.forEach(definition=>{if(!definition.id)throw Error('view requires id');else{const tab=navButton(definition.title||definition.id,()=>select(definition));tabButtons.set(definition.id,tab);tabs.appendChild(tab);}});
@@ -41,7 +52,8 @@ function viewValue(container,value){
   if(value && value.kind==='objid'){container.appendChild(objectLink(value.objid));}
   else{container.appendChild(document.createTextNode(value && value.kind?fmtVal(value):typeof value==='object'?JSON.stringify(value):String(value??'')));}
 }
-async function viewRead(node,id){
+async function viewRead(node,id,preview=false){
+  if(node.controlId&&!preview)return inspectorCall(node.controlId,'read',[]);else{}
   if(node.getter)return inspectorCall(id,node.getter,node.args||[]);
   else return {kind:'string',str:node.text||''};
 }
@@ -50,21 +62,22 @@ async function viewAction(id,method,args,result){
   renderResult(result,response);
   if(response.error)return false;else{return true;}
 }
-async function renderViewNode(node,id,parent,version,depth,decorate,path=[]){
+async function renderViewNode(node,id,parent,version,depth,decorate,path=[],inheritedReceiver=id){
   if(depth>16)throw Error('View nesting exceeds 16 levels');else{}
   const element=document.createElement('div');element.className='view-node view-'+(node.kind||'column');parent.appendChild(element);
   if(decorate)decorate(element,node,path);else{}
+  const receiver=node.receiver||inheritedReceiver;
   if(node.label){const label=document.createElement('label');label.textContent=node.label;element.appendChild(label);}else{}
   try{
     switch(node.kind||'column'){
       case 'row':case 'column':
-        for(const [index,child]of (node.children||[]).entries())await renderViewNode(child,id,element,version,depth+1,decorate,[...path,index]);
+        for(const [index,child]of (node.children||[]).entries())await renderViewNode(child,id,element,version,depth+1,decorate,[...path,index],receiver);
         break;
       case 'text':case 'value':case 'code':{
-        const value=await viewRead(node,id);const output=document.createElement(node.kind==='code'?'pre':'span');viewValue(output,value);element.appendChild(output);break;
+        const value=await viewRead(node,receiver,!!decorate);const output=document.createElement(node.kind==='code'?'pre':'span');viewValue(output,value);element.appendChild(output);break;
       }
       case 'input':case 'slider':case 'textarea':{
-        const value=await viewRead(node,id);const kind=node.type||value.kind;const row=document.createElement('div');row.className='marg';
+        const value=await viewRead(node,receiver,!!decorate);const kind=node.type||value.kind;const row=document.createElement('div');row.className='marg';
         const type=document.createElement('select');type.hidden=true;const option=document.createElement('option');option.value=kind;type.appendChild(option);
         const input=document.createElement(node.kind==='textarea'?'textarea':'input');input.setAttribute('aria-label',node.label||node.setter||node.getter);
         input.value=value.kind==='string'?value.str||'':value.kind==='objid'?value.objid:fmtVal(value);
@@ -74,7 +87,7 @@ async function renderViewNode(node,id,parent,version,depth,decorate,path=[]){
         const apply=navButton('Apply',async()=>{apply.disabled=true;try{
           let argument;
           if(node.kind==='textarea')argument={kind:'string',str:input.value};else argument=argumentValue(row);
-          const ok=await viewAction(id,node.setter,[argument],status);
+          const ok=await viewAction(node.controlId||receiver,node.controlId?'write:':node.setter,[argument],status);
           if(ok && version===inspectionVersion)await showInspect(id,true);else{}
         }catch(error){status.textContent=error.message;}finally{apply.disabled=false;}});
         input.onkeydown=event=>{if(event.key==='Enter' && node.kind!=='textarea'){event.preventDefault();apply.click();}else{}};
@@ -84,13 +97,13 @@ async function renderViewNode(node,id,parent,version,depth,decorate,path=[]){
       case 'action':{
         const result=document.createElement('div');
         const button=navButton(node.text||node.method,async()=>{button.disabled=true;try{
-          const ok=await viewAction(id,node.method,node.args||[],result);
+          const ok=await viewAction(node.controlId||node.wiring||receiver,node.controlId?'invoke':node.wiring?'run':node.method,node.controlId||node.wiring?[]:node.args||[],result);
           if(ok && node.refresh && version===inspectionVersion)await showInspect(id,true);else{}
         }catch(error){result.textContent=error.message;}finally{button.disabled=false;}});
         element.append(button,result);break;
       }
       case 'table':case 'list':{
-        const value=await viewRead(node,id);
+        const value=await viewRead(node,receiver,!!decorate);
         const data=value.kind==='string'?JSON.parse(value.str||'[]'):[];
         if(!Array.isArray(data))throw Error('Table/list getter must return a JSON array');else{}
         if(node.kind==='list'){data.forEach(item=>{const row=document.createElement('div');viewValue(row,item);element.appendChild(row);});}

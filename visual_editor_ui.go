@@ -1,6 +1,6 @@
 package main
 
-const visualEditorJS = visualEditorCommonJS + workbenchEditorJS + viewEditorJS
+const visualEditorJS = visualEditorCommonJS + workbenchEditorJS + viewEditorJS + controlEditorJS
 
 const visualEditorCommonJS = `
 const visualKinds=['column','row','text','value','code','input','slider','textarea','action','table','list'];
@@ -38,7 +38,7 @@ function visualValidateView(definition){
   if(node.args!==undefined&&!Array.isArray(node.args))throw Error('Arguments must be an array.');else{}
   if(node.children!==undefined&&!Array.isArray(node.children))throw Error('Children must be an array.');else{}
   if(node.columns!==undefined&&(!Array.isArray(node.columns)||node.columns.some(column=>!column||typeof column.key!=='string')))throw Error('Each table column needs a key.');else{}
-  if(node.kind==='action'&&!node.method)throw Error('An action needs a method.');else{}
+  if(node.kind==='action'&&(node.action==='wiring'?!node.wiring:!node.wiring&&!node.method))throw Error('An action needs a method or a Wiring object.');else{}
   if(['slider'].includes(node.kind)&&(!(Number(node.step??1)>0)||Number(node.min??0)>Number(node.max??100)))throw Error('Slider step must be positive and minimum must not exceed maximum.');else{}
   for(const child of node.children||[])visit(child,depth+1);
  }

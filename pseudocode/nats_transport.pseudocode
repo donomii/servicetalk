@@ -11,3 +11,7 @@ Carry optional sender identity on object sends. Record received normal calls and
 __nativeSnapshotJson is a control message so definition/state inspection remains available.
 
 await: and awaitPromise: requests allow their requested waiting duration plus transport reply overhead.
+
+Route __controlState through the inspection channel so layout export cannot deadlock against actions resolving owner receivers.
+
+Control ownership reads/writes and validated configuration use the inspection channel with locked field snapshots/replacement. This lets layout saves complete while a control awaits its inherited receiver.

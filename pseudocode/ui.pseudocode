@@ -46,3 +46,5 @@ Toolbar comes from Workbench; fixed editor access remains available. Examples su
 Selector refactoring panel contains original/replacement names, class scope, preview and per-file save controls.
 
 Add responsive Workbench visual editor and View designer panels, selection trees, property controls, live previews, JSON mode, save/reload/close actions and layout editing controls.
+
+Offer Open control in designer when inspecting a live control.

@@ -14,9 +14,9 @@ func (c *Coordinator) inspectorView(request InspectorViewRequest) (InspectorView
  target,err:=c.callObjectID(view.ObjID,"target",nil,inspectionTimeout)
  if err!=nil {return InspectorViewResponse{},err}else if target.Kind=="nil" {
   if _,err=c.callObjectID(view.ObjID,"target:",[]Value{ObjVal(request.Target)},inspectionTimeout);err!=nil{return InspectorViewResponse{},err}else{}
-  if _,err=c.callObjectID(view.ObjID,"definition:",[]Value{StrVal(string(request.Definition))},inspectionTimeout);err!=nil{return InspectorViewResponse{},err}else{}
+  if _,err=c.callObjectID(view.ObjID,"definition:",[]Value{StrVal(string(request.Definition))},evalTimeout());err!=nil{return InspectorViewResponse{},err}else{}
  }else{}
- definition,err:=c.callObjectID(view.ObjID,"definition",nil,inspectionTimeout)
+ definition,err:=c.callObjectID(view.ObjID,"definition",nil,evalTimeout())
  if err!=nil {return InspectorViewResponse{},err}else if !json.Valid([]byte(definition.Str)){return InspectorViewResponse{},fmt.Errorf("view %s contains invalid JSON",view.ObjID)}else{}
  return InspectorViewResponse{ObjectID:view.ObjID,Definition:json.RawMessage(definition.Str)},nil
 }
