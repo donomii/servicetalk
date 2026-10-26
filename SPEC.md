@@ -243,3 +243,14 @@ in fields and results are links to their inspectors. The modal fits narrow scree
 Inspector methods are sorted alphabetically on every refresh. Clicking a unary
 method immediately invokes it and displays the result; methods with arguments
 open the argument inputs and use Send. Method clicks are ignored during a call.
+
+Git authentication is configurable per object. `useSSH` enables noninteractive
+OpenSSH (BatchMode=yes); `sshIdentityFile:`, `sshAgent:` and `sshConfigFile:`
+select an existing identity file, agent socket and SSH configuration file. Empty
+strings clear each override. `sshCommand` reports the command without reading
+key material; paths are individually quoted for Git’s SSH command handling.
+`useDefaultAuth` returns to Git’s configured authentication. Overrides apply
+only to this object’s calls and are not written to global Git configuration.
+`remote: name url: url` and `remote: name pushURL: url` persist repository remote
+URLs. `checkAuth: remote` probes access using ls-remote and reports Git failures.
+SSH host verification remains enabled. Existing keys/agents supply credentials.

@@ -9,3 +9,11 @@ fetch: remote fetches a remote.
 add: paths stages only supplied paths, after the end-of-options delimiter.
 commit: message commits the staged changes with the exact message argument.
 push: remote branch: name pushes the named branch to the remote, without force.
+SSH authentication
+    Keep per-object enabled flag, identity file, agent socket and config file.
+    useSSH enables batch SSH; useDefaultAuth restores normal Git authentication.
+    sshIdentityFile:, sshAgent:, sshConfigFile: set or clear overrides and enable SSH.
+    sshCommand builds the SSH command with separately quoted paths.
+    run prepends the per-invocation Git SSH command override when enabled.
+    remote: url: and remote: pushURL: set repository remote URLs.
+    checkAuth: probes remote refs and signals failure through checked:.

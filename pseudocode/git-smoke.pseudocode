@@ -6,3 +6,5 @@ Push to the bare remote, compare the remote head, and fetch it.
 Change a file and check diff, log and remotes.
 Verify checked operations signal nonzero exit and startup failures, while run returns the Process for inspection.
 Clear the workspace reference, disconnect and remove temporary repositories.
+Verify SSH controls, clearing overrides, remote URL management and auth probes.
+Exercise a quoted missing config path containing shell metacharacters and verify failure without command substitution.
