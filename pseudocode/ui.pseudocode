@@ -48,3 +48,6 @@ Selector refactoring panel contains original/replacement names, class scope, pre
 Add responsive Workbench visual editor and View designer panels, selection trees, property controls, live previews, JSON mode, save/reload/close actions and layout editing controls.
 
 Offer Open control in designer when inspecting a live control.
+
+
+The page composes the shared visual theme and layout behavior. Render a header, ordered tool sidebar, labelled expression/output area and searchable object list. The inspector separates Interface, Methods, State and Workspace into tab panels. Keep object actions in an expandable group and runtime details collapsed. Preserve section on refresh and give newly opened dialogs keyboard focus.

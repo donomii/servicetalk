@@ -15,7 +15,7 @@ async function loadInspectorViews(id,inspection,version){
     let selectionVersion=0;const tabButtons=new Map();
     async function select(definition){
       const choice=++selectionVersion;
-      selectedViews.set(id,definition.id);
+      selectedViews.set(id,definition.id);for(const [key,button]of tabButtons)button.setAttribute('aria-pressed',String(key===definition.id));
       body.textContent='Loading…';
       try{
         const view=await uiPost('/view',{target:id,key:definition.id,definition});
@@ -24,6 +24,7 @@ async function loadInspectorViews(id,inspection,version){
         tabButtons.get(definition.id).textContent=view.definition.title||definition.title||definition.id;
         async function render(){body.replaceChildren();
         const controls=document.createElement('div');controls.className='view-tools';
+        const title=document.createElement('strong');title.textContent=view.definition.title||definition.title||definition.id;controls.appendChild(title);
         controls.appendChild(navButton('Inspect view object',()=>showInspect(view.objectId)));
         controls.appendChild(navButton('Edit layout',()=>editInspectorView(view,id,body,version)));
         body.appendChild(controls);

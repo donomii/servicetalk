@@ -4,9 +4,9 @@ const workbenchJS = `
 let workbenchObject='',workbenchDefinition=null,exampleCatalog=[],exampleSelected='',exampleDrafts=new Map();
 async function loadWorkbench(){
  try{const response=await fetch('/workbench').then(r=>r.json());if(response.error)throw Error(response.error);else{}
-  workbenchObject=response.objectId;workbenchDefinition=response.definition;document.getElementById('workbench-title').textContent=response.definition.title;
+  workbenchObject=response.objectId;workbenchDefinition=response.definition;document.getElementById('workbench-name').textContent=response.definition.title==='servicetalk'?'Workbench':response.definition.title;
   const container=document.getElementById('workbench-tools');container.replaceChildren();
-  for(const tool of response.definition.tools){const button=toolButton(tool.label,()=>runWorkbenchTool(tool));button.dataset.label=tool.label;if(tool.action==='results')button.id='results-toggle';else if(tool.action==='record')button.id='record-toggle';else{}container.append(button);}
+  for(const tool of response.definition.tools){const button=toolButton(tool.label,()=>runWorkbenchTool(tool));button.dataset.label=tool.label;button.dataset.action=tool.action;if(tool.action==='results')button.id='results-toggle';else if(tool.action==='record')button.id='record-toggle';else{}container.append(button);}
   updateResultChoices();const record=document.getElementById('record-toggle');if(record&&activeRecording)record.textContent='Stop recording';else{}
   document.getElementById('workbench-status').textContent='';
  }catch(error){document.getElementById('workbench-status').textContent=error.message;}

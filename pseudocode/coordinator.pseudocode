@@ -36,3 +36,5 @@ Serve live workbench/catalog data and workbench browser rendering.
 Serve selector refactoring previews and their browser script.
 
 Serve the combined visual editor browser script at /visual-editor.js.
+
+ensureWorkspace: reuse the current live workspace or the sole recovered pinned workspace before spawning a new workspace.

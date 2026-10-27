@@ -1,0 +1,1 @@
+Verify that a restarted coordinator adopts its main workspace identity, excludes unpinned examples/non-workspace roots, rejects multiple main candidates, and ignores dead roots.

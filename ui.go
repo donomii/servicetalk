@@ -77,17 +77,18 @@ tr:hover td{background:#f5f5f5;cursor:pointer}
 <style>
 #view-designer{z-index:16}.visual-columns{display:grid;grid-template-columns:minmax(180px,1fr) minmax(0,2fr);gap:24px}.visual-design-columns{display:grid;grid-template-columns:minmax(150px,1fr) minmax(220px,1.3fr) minmax(0,2fr);gap:24px}.visual-columns section,.visual-design-columns section{min-width:0;overflow-wrap:anywhere}.visual-field{display:flex;flex-direction:column;gap:4px;margin:10px 0}.visual-field input,.visual-field select{width:100%;min-width:0}.visual-arguments .marg input{width:100%;min-width:0}.visual-arguments .marg select{min-width:0}.visual-arguments h4{margin-bottom:8px}#tool-outline,#view-design-tree{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}#tool-outline button,#view-design-tree button{white-space:normal;text-align:left;overflow-wrap:anywhere}#tool-outline button[aria-pressed=true],#view-design-tree button[aria-pressed=true]{background:#e3eefb;border-color:#3673ad}#view-design-preview{margin-top:12px;overflow-wrap:anywhere}#view-design-preview .visual-preview-control{border:1px dashed #b9c5d1;padding:8px;cursor:pointer;min-width:0}#view-design-preview .visual-selected{outline:2px solid #3673ad;outline-offset:-2px;background:#f1f7ff}#view-design-preview .view-row{flex-wrap:wrap}#view-design-preview .marg input{min-width:0;width:100%}#view-design-preview .view-table{overflow:auto}.visual-design-columns h4,.visual-columns h4{margin:8px 0 12px}@media(max-width:1000px){.visual-design-columns{grid-template-columns:minmax(0,1fr) minmax(0,2fr)}.visual-design-columns>section:last-child{grid-column:1 / -1}}@media(max-width:650px){.visual-columns,.visual-design-columns{grid-template-columns:minmax(0,1fr)}.visual-design-columns>section:last-child{grid-column:auto}}
 </style>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>` + workbenchThemeCSS + `</style>
 </head>
 <body>
 
-<div id="hdr">
-  <h1 id="workbench-title">servicetalk</h1>
-  <small>ctrl+enter to run</small>
-  <span id="workbench-tools" style="display:flex;gap:8px;flex-wrap:wrap"></span><button class="btn" onclick="openWorkbench()">Workbench</button><span id="recording-status"></span><span id="workbench-status"></span>
-</div>
+<header id="hdr"><h1>servicetalk</h1><span id="workbench-name">Workbench</span><span id="connection-status" role="status">Connecting</span></header>
+<aside id="tool-rail" aria-label="Workbench tools"><span class="rail-label">Tools</span><nav id="workbench-tools"></nav><span id="recording-status"></span><span id="workbench-status"></span><div class="rail-config"><button class="btn" onclick="openWorkbench()">Customize tools</button></div></aside>
+<div class="page-heading"><h2>Playground</h2><span>Smalltalk workspace</span></div>
 
 <div id="main">
   <div id="left">
+    <div class="pane-heading"><strong>Expression</strong><kbd>Ctrl + Enter</kbd></div>
     <textarea id="code">"Spawn a counter and poke it"
 c := Counter new.
 c increment.
@@ -95,21 +96,22 @@ c increment.
 c add: 10.
 c value</textarea>
     <div id="bar">
-      <button class="btn btn-run" onclick="doEval()">&#9654; Eval</button>
-      <button class="btn" onclick="clearResults()">&#x2715; Clear</button>
+      <button class="btn btn-run" onclick="doEval()">Run expression</button>
+      <button class="btn" onclick="clearResults()">Clear output</button>
       <span id="hint">ctrl+enter</span>
     </div>
   </div>
   <div id="right">
+    <div class="pane-heading"><strong>Output</strong></div>
     <div id="out"></div>
   </div>
 </div>
 
 <div id="objs">
-  <div id="objs-hdr"><span>Live Objects</span><span id="ocount">&ndash;</span></div>
+  <div id="objs-hdr"><span><strong>Live objects</strong><span id="ocount">&ndash;</span></span><input id="object-filter" aria-label="Find live objects" placeholder="Find class or object…" oninput="renderObjectList()"><label><input id="object-internals" type="checkbox" onchange="renderObjectList()">Runtime objects</label></div>
   <div id="objs-scroll">
     <table>
-      <thead><tr><th>Class</th><th>ID</th></tr></thead>
+      <thead><tr><th>Class</th><th>Object</th><th aria-label="Actions"></th></tr></thead>
       <tbody id="otbody"></tbody>
     </table>
   </div>
@@ -129,14 +131,11 @@ c value</textarea>
 <section id="source-panel" class="runtime-panel" hidden><div class="runtime-toolbar"><strong id="source-title"></strong><button class="btn" id="source-save" onclick="saveSource()">Save definition</button><button class="btn" onclick="sourceDiff()">Working diff</button><button class="btn" onclick="openSource(sourceState.class)">Refresh history</button><button class="btn" onclick="closeSource()">Close</button></div><div id="source-status" class="runtime-status"></div><div id="source-body"><textarea id="source-editor" aria-label="Class definition" spellcheck="false" oninput="rememberSourceDraft()"></textarea><div id="source-history-pane"><h4>Git history</h4><div id="source-git"></div><div id="source-history"></div><button class="btn" id="source-restore" hidden onclick="restoreSourceRevision()">Copy revision to editor</button><pre id="source-preview"></pre></div></div><div class="runtime-toolbar"><input id="source-message" aria-label="Commit message" placeholder="Commit message"><button class="btn" id="source-commit" onclick="commitSource()">Commit this file</button></div></section>
 <section id="debugger-panel" class="runtime-panel" hidden><div class="runtime-toolbar"><strong id="debugger-target">Native method debugger</strong><button class="btn" onclick="refreshDebugger()">Refresh</button><button class="btn" onclick="closeDebugger()">Close</button></div><label>Method <select id="debugger-method"></select></label><div id="debugger-args"></div><button class="btn" id="debugger-start">Start paused</button><div class="runtime-status" id="debugger-status"></div><section id="debugger-frame" hidden><div class="debug-columns"><div><h4>Statements</h4><div id="debugger-statements"></div><label for="debugger-code">Replacement for current statement (optional)</label><textarea id="debugger-code"></textarea><div id="debugger-result"></div></div><div><h4>Arguments</h4><div id="debugger-bindings"></div><h4>Receiver fields</h4><div id="debugger-fields"></div><div id="debugger-return-value"></div></div></div><div id="debugger-actions" class="runtime-toolbar"><button class="btn" data-action="step">Step</button><button class="btn" data-action="continue">Continue</button><button class="btn" data-action="retry">Retry statement</button><button class="btn" data-action="return">Return value</button><button class="btn" data-action="abort">Abort</button></div></section></section>
 <section id="trace-panel" class="runtime-panel" hidden><div class="runtime-toolbar"><strong>Message trace</strong><button class="btn" onclick="configureTrace('start')">Start tracing</button><button class="btn" onclick="configureTrace('stop')">Stop tracing</button><button class="btn" onclick="refreshTrace()">Refresh</button><button class="btn" onclick="configureTrace('clear')">Clear</button><button class="btn" onclick="exportTrace()">Download JSON</button><button class="btn" onclick="closeTrace()">Close</button></div><div class="runtime-toolbar"><input id="trace-filter" aria-label="Filter messages" placeholder="Method, object or signal" oninput="renderTrace()"><input id="trace-chain" aria-label="Call chain" placeholder="Call chain" oninput="renderTrace()"><button class="btn" onclick="document.getElementById('trace-chain').value='';renderTrace()">All chains</button></div><div id="trace-status" class="runtime-status"></div><div id="trace-list"></div></section>
-<div id="modal">
-  <h3 id="mtitle"></h3>
-  <div id="mruntime" style="white-space:pre-wrap;overflow-wrap:anywhere;margin-bottom:12px"></div>
-  <div id="mpromise"></div>
-  <div id="mviews"></div>
-  <div id="mproperties"></div>
-  <div id="mvars"></div>
-  <div class="mths" id="mmths"></div>
+<div id="modal" role="dialog" aria-modal="true" aria-labelledby="mtitle">
+  <div id="inspect-header"><div class="inspect-heading"><div><span class="eyebrow">Live object</span><h3 id="mtitle"></h3><div id="midentity"></div></div><button class="btn" onclick="closeM()">Close</button></div><nav id="inspect-tabs" role="tablist" aria-label="Object sections"><button class="btn" id="inspect-tab-view" role="tab" aria-controls="inspect-view" onclick="selectInspectorSection('view')">Interface</button><button class="btn" id="inspect-tab-methods" role="tab" aria-controls="inspect-methods" onclick="selectInspectorSection('methods')">Methods</button><button class="btn" id="inspect-tab-state" role="tab" aria-controls="inspect-state" onclick="selectInspectorSection('state')">State</button><button class="btn" id="inspect-tab-workspace" role="tab" aria-controls="inspect-workspace" onclick="selectInspectorSection('workspace')">Workspace</button></nav></div>
+  <section id="inspect-view" class="inspect-pane" role="tabpanel" aria-labelledby="inspect-tab-view"><div id="mviews"></div></section>
+  <section id="inspect-state" class="inspect-pane" role="tabpanel" aria-labelledby="inspect-tab-state" hidden><div id="mpromise"></div><div id="mproperties"></div><h4>Fields</h4><div id="mvars"></div><details><summary>Runtime details</summary><div id="mruntime" style="white-space:pre-wrap;overflow-wrap:anywhere;margin-bottom:12px"></div></details></section>
+  <section id="inspect-methods" class="inspect-pane" role="tabpanel" aria-labelledby="inspect-tab-methods" hidden><input id="method-filter" aria-label="Find a method" placeholder="Find a method…" oninput="filterInspectorMethods()"><div class="mths" id="mmths"></div>
   <form id="mcall" onsubmit="sendObjectMessage(event)">
     <label for="mselector">Method</label>
     <input id="mselector" required oninput="prepareArguments()" placeholder="Select or enter a method">
@@ -145,8 +144,10 @@ c value</textarea>
     <button class="btn btn-run" id="msend">Send</button>
     <button type="button" class="btn" id="mpromise-send" onclick="sendObjectPromise()">Send asynchronously</button>
   </form>
+  <details><summary>Object tools</summary><div id="mactions"></div></details></section>
+  <section id="inspect-workspace" class="inspect-pane" role="tabpanel" aria-labelledby="inspect-tab-workspace" hidden>
+  <section id="ow"><h4>Object workspace</h4><div id="ow-target"></div><div id="ow-suggestions"></div><label>Build an expression <select id="ow-method" onchange="workspaceArguments()"></select></label><div id="ow-signature"></div><div id="ow-args"></div><button class="btn" onclick="insertWorkspaceMethod()">Insert method</button><textarea id="ow-code" aria-label="Object expression" oninput="rememberWorkspaceDraft()"></textarea><button class="btn btn-run" id="ow-run" onclick="runObjectWorkspace()">Run expression</button><span> Ctrl+Enter</span><div id="ow-result" role="status"></div></section></section>
   <div id="mresult" role="status"></div>
-  <section id="ow"><h4>Object workspace</h4><div id="ow-target"></div><div id="ow-suggestions"></div><label>Build an expression <select id="ow-method" onchange="workspaceArguments()"></select></label><div id="ow-signature"></div><div id="ow-args"></div><button class="btn" onclick="insertWorkspaceMethod()">Insert method</button><textarea id="ow-code" aria-label="Object expression" oninput="rememberWorkspaceDraft()"></textarea><button class="btn btn-run" id="ow-run" onclick="runObjectWorkspace()">Run expression</button><span> Ctrl+Enter</span><div id="ow-result" role="status"></div></section>
 </div>
 
 <script>
@@ -191,19 +192,9 @@ async function refreshObjs() {
   try {
     const r = await fetch('/registry');
     const d = await r.json();
-    const entries = (d.registry || []).sort((a,b) => (a.id || '').localeCompare(b.id || ''));
-    document.getElementById('ocount').textContent =
-      entries.length + ' object' + (entries.length !== 1 ? 's' : '');
-    const tb = document.getElementById('otbody');
-    tb.innerHTML = '';
-    entries.forEach(e => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = '<td class="cn">' + esc(e.className) + '</td>'
-                   + '<td class="oid">' + esc(e.id) + '</td>';
-      tr.onclick = () => showInspect(e.id);
-      tb.appendChild(tr);
-    });
-  } catch(_) {}
+    objectEntries = (d.registry || []).sort((a,b) => (a.className || '').localeCompare(b.className || '') || (a.id || '').localeCompare(b.id || ''));
+    renderObjectList();document.getElementById('connection-status').textContent='Connected';document.getElementById('connection-status').dataset.offline='false';
+  } catch(error) { document.getElementById('connection-status').textContent='Disconnected';document.getElementById('connection-status').dataset.offline='true'; }
 }
 
 let inspectedId = null;
@@ -211,6 +202,7 @@ let methodSignatures = {};
 let inspectorMetadata = {};
 let inspectionVersion = 0;
 async function showInspect(id, preserveCall = false) {
+  if(!preserveCall&&document.getElementById('modal').style.display!=='block')inspectorReturnFocus=document.activeElement;else{}
   const version = ++inspectionVersion;
   inspectedId = id;
   if (!preserveCall) {
@@ -224,7 +216,8 @@ async function showInspect(id, preserveCall = false) {
     if (!r.ok) return;
     const d = await r.json();
     if (version !== inspectionVersion || inspectedId !== id) return;
-    document.getElementById('mtitle').textContent = d.className + '   ' + id;
+    document.getElementById('mtitle').textContent = d.className;
+    document.getElementById('midentity').textContent = id;
     const runtime = d.runtime || {};
     const debugBusy = runtime.debug && ['queued','running','paused'].includes(runtime.debug.state);
     const retention = d.retention || {};
@@ -283,15 +276,16 @@ async function showInspect(id, preserveCall = false) {
       }
     }
     if (version !== inspectionVersion || inspectedId !== id) return;
-    const md = document.getElementById('mmths');
-    md.innerHTML = '';
-    md.appendChild(navButton('Browse methods', () => { closeM(); openNavigation(d.className); }));
-    md.appendChild(navButton('Object graph', () => { closeM(); openNavigation('', 'objects'); }));
-    md.appendChild(navButton('Debug method', () => openDebugger(id, methods, d.methodSignatures || {})));
-    md.appendChild(navButton('Clone', () => cloneInspectedObject(id)));
-    if (d.className === 'Wiring') md.appendChild(navButton('Open graph', () => { closeM(); openWiring(id); })); else {}
-    if (vars.kind && vars.children && vars.owner) md.appendChild(navButton('Open control in designer', () => openControlDesigner(id))); else {}
-    if (runtime.definitionVersion) md.appendChild(navButton('Clone and edit', () => openClone(id))); else {}
+    const md = document.getElementById('mmths'),actions=document.getElementById('mactions');
+    md.innerHTML = '';actions.replaceChildren();
+    actions.appendChild(navButton('Browse methods', () => { closeM(); openNavigation(d.className); }));
+    actions.appendChild(navButton('Object graph', () => { closeM(); openNavigation('', 'objects'); }));
+    actions.appendChild(navButton('Debug method', () => openDebugger(id, methods, d.methodSignatures || {})));
+    actions.appendChild(navButton('Clone', () => cloneInspectedObject(id)));
+    if (d.className === 'Wiring') actions.appendChild(navButton('Open graph', () => { closeM(); openWiring(id); })); else {}
+    if (vars.kind && vars.children && vars.owner) actions.appendChild(navButton('Open control in designer', () => openControlDesigner(id))); else {}
+    if (runtime.definitionVersion) actions.appendChild(navButton('Clone and edit', () => openClone(id))); else {}
+    if(!preserveCall)document.getElementById('method-filter').value='';else{}
     methods.forEach(method => {
       const button = document.createElement('button');
       button.className = 'btn';
@@ -307,11 +301,14 @@ async function showInspect(id, preserveCall = false) {
       md.appendChild(button);
     });
 
+    filterInspectorMethods();
     updateObjectWorkspace(id, d, inspectorMetadata);
     if (!debugBusy) { await loadInspectorViews(id, d, version); } else { document.getElementById('mviews').textContent = 'Debugger: ' + runtime.debug.state + ' ' + runtime.debug.method; }
     if(version!==inspectionVersion || inspectedId!==id)return;else{}
+    prepareInspectorSections(!!document.querySelector('#mviews .view-body'),preserveCall);
     document.getElementById('mbg').style.display = 'block';
     document.getElementById('modal').style.display = 'block';
+    if(!preserveCall)document.getElementById('inspect-tab-'+inspectorSection).focus();else{}
   } catch(_) {}
 }
 
@@ -500,6 +497,7 @@ function closeM() {
   inspectionVersion++;
   document.getElementById('mbg').style.display = 'none';
   document.getElementById('modal').style.display = 'none';
+  if(inspectorReturnFocus&&inspectorReturnFocus.isConnected)inspectorReturnFocus.focus();else{}
 }
 
 function esc(s) {
@@ -509,9 +507,8 @@ function esc(s) {
 }
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeM(); });
-setInterval(refreshObjs, 2000);
-refreshObjs();
 </script>
+<script>` + workbenchLayoutJS + `</script>
 <script src="/navigation.js"></script>
 <script src="/interaction.js"></script>
 <script src="/views.js"></script>

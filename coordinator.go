@@ -1452,6 +1452,15 @@ func (c *Coordinator) ensureWorkspace() (string, error) {
 		c.workspaceID = ""
 	}
 
+	if id, err := c.recoveredWorkspace(); err != nil {
+		return "", err
+	} else if id != "" {
+		c.workspaceID = id
+		return id, nil
+	} else {
+		// No surviving workspace root was loaded from the registry.
+	}
+
 	// Workspace pulse-timeout = 0 (no self-shutdown).  It's a root: the
 	// coordinator's pulseLoop is what keeps it alive.  Without that the
 	// workspace would die at every interval, which is fine, but

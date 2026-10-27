@@ -1,6 +1,28 @@
 package main
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
+
+func (c *Coordinator) recoveredWorkspace() (string, error) {
+	roots := c.rootSnapshot()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	id := ""
+	for _, root := range roots {
+		if entry := c.registry[root]; entry != nil && entry.ClassName == BuiltinClassWorkspace {
+			if id != "" {
+				return "", fmt.Errorf("cannot select a recovered workspace: both %s and %s are pinned workspace roots", id, root)
+			} else {
+				id = root
+			}
+		} else {
+			// Other roots do not own the main REPL workspace.
+		}
+	}
+	return id, nil
+}
 
 const staleReconnectGrace = 5 * time.Second
 

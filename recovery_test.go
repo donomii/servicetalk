@@ -27,6 +27,23 @@ func TestPulseLeaseUsesLocalArrivalDespiteRemoteClockSkew(t *testing.T) {
 	}
 }
 
+func TestRecoveredWorkspaceRetainsMainIdentity(t *testing.T) {
+	c := &Coordinator{registry: map[string]*ObjectEntry{"main": {ID:"main",ClassName:BuiltinClassWorkspace},"example": {ID:"example",ClassName:BuiltinClassWorkspace},"counter": {ID:"counter",ClassName:"Counter"}}, roots: map[string]struct{}{"main":{},"counter":{}}}
+	if id,err := c.ensureWorkspace(); err != nil || id != "main" {
+		t.Fatalf("expected surviving main workspace without spawning a replacement, got %q: %v",id,err)
+	} else {}
+	c.workspaceID = ""
+	c.roots["example"] = struct{}{}
+	if _,err := c.ensureWorkspace(); err == nil || !strings.Contains(err.Error(),"pinned workspace roots") {
+		t.Fatalf("ambiguous restored workspaces should report their roots: %v",err)
+	} else {}
+	delete(c.registry,"main")
+	delete(c.registry,"example")
+	if id,err := c.recoveredWorkspace(); err != nil || id != "" {
+		t.Fatalf("dead registry roots should not be reused: %q %v",id,err)
+	} else {}
+}
+
 func TestDuplicatePulseCannotKeepPartitionedObjectAlive(t *testing.T) {
 	obj := newTestObject("Clock")
 	obj.observePulse(123)

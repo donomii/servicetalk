@@ -1,0 +1,5 @@
+renderObjectList: filter registry entries by class or ID and optional runtime classes; show visible/total count, stable class/ID order, empty state and keyboard-accessible Open actions; preserve object-button focus across refresh.
+selectInspectorSection: show the selected Interface/Methods/State/Workspace panel and relevant results; update tab selection and keyboard focus order.
+prepareInspectorSections: choose Interface when available, Methods otherwise, or preserve a valid prior section on refresh.
+filterInspectorMethods: filter selector buttons without changing their order or invocation.
+Support arrow/Home/End tab selection and wrap keyboard focus within the object dialog. Refresh registry periodically.

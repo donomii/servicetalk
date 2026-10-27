@@ -5,3 +5,6 @@ Edit layout opens the visual designer. Update the selected tab title from the st
 Read/write/invoke through live control objects; draft preview reads its chosen receiver. Poll the selected layout every second, update changed renderings and clean designers, preserve focused inputs, and stop obsolete loops.
 
 Automatic updates preserve focused text, selection and numeric inputs while allowing updates after button clicks.
+
+
+Mark the selected view tab with pressed state; display the live view title beside its inspector/layout tools. The enclosing inspector presents controls only in its Interface panel.

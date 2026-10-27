@@ -3,3 +3,5 @@ failed liveness probe(object, observation time) -> may evict
     Repeated failure after the reconnect grace permits eviction.
 successful liveness probe(object)
     Clear suspicion so a later interruption starts a new window.
+
+recoveredWorkspace: find the sole registered builtin workspace among pinned roots; exclude dead entries and unpinned workspaces; report ambiguity when multiple main roots survive.

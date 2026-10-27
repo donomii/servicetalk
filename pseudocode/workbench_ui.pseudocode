@@ -7,3 +7,6 @@ runExample: save changes, execute source and check, display status/transcript an
 resetExample: replace the selected example's scratch workspace.
 newExample: add an editable initial example returning 42.
 inspectExample: open the example or its workspace as an ordinary object.
+
+
+Render saved tool order in the sidebar, attach action metadata for styling, display the configured workbench name in the header and retain all existing action dispatch.
