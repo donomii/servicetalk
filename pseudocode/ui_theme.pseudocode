@@ -1,1 +1,4 @@
 Define the shared workbench visual system: system UI typography, monospaced code, neutral surfaces, consistent borders/spacing and terracotta emphasis. Style the fixed tool rail, expression/output panes, object list and tabbed inspector. Give live controls generous space, position designer preview between outline and properties, and adapt to narrow screens without document overflow.
+
+
+Style the discovery actions, contextual inspector help, examples search, observed-result card and persistent view result with responsive wrapping.

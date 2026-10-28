@@ -58,9 +58,9 @@ async function viewRead(node,id,preview=false){
   if(node.getter)return inspectorCall(id,node.getter,node.args||[]);
   else return {kind:'string',str:node.text||''};
 }
-async function viewAction(id,method,args,result){
-  const response=await performInteraction({kind:'call',objectId:id,method,args});
-  renderResult(result,response);
+async function viewAction(id,method,args,result,label=''){
+  const response=await performInteraction({kind:'call',objectId:id,method,args,label});
+  renderResult(document.getElementById('mview-result'),response);
   if(response.error)return false;else{return true;}
 }
 async function renderViewNode(node,id,parent,version,depth,decorate,path=[],inheritedReceiver=id){
@@ -88,7 +88,7 @@ async function renderViewNode(node,id,parent,version,depth,decorate,path=[],inhe
         const apply=navButton('Apply',async()=>{apply.disabled=true;try{
           let argument;
           if(node.kind==='textarea')argument={kind:'string',str:input.value};else argument=argumentValue(row);
-          const ok=await viewAction(node.controlId||receiver,node.controlId?'write:':node.setter,[argument],status);
+          const ok=await viewAction(node.controlId||receiver,node.controlId?'write:':node.setter,[argument],status,node.label?'Set '+node.label:'');
           if(ok && version===inspectionVersion)await showInspect(id,true);else{}
         }catch(error){status.textContent=error.message;}finally{apply.disabled=false;}});
         input.onkeydown=event=>{if(event.key==='Enter' && node.kind!=='textarea'){event.preventDefault();apply.click();}else{}};
@@ -98,7 +98,7 @@ async function renderViewNode(node,id,parent,version,depth,decorate,path=[],inhe
       case 'action':{
         const result=document.createElement('div');
         const button=navButton(node.text||node.method,async()=>{button.disabled=true;try{
-          const ok=await viewAction(node.controlId||node.wiring||receiver,node.controlId?'invoke':node.wiring?'run':node.method,node.controlId||node.wiring?[]:node.args||[],result);
+          const ok=await viewAction(node.controlId||node.wiring||receiver,node.controlId?'invoke':node.wiring?'run':node.method,node.controlId||node.wiring?[]:node.args||[],result,node.text||node.method||'Action');
           if(ok && node.refresh && version===inspectionVersion)await showInspect(id,true);else{}
         }catch(error){result.textContent=error.message;}finally{button.disabled=false;}});
         element.append(button,result);break;

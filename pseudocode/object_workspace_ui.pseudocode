@@ -1,3 +1,6 @@
 Inspector workspace offers method selection, named typed arguments or expressions, insertion of a complete self-send, getter shortcuts, Run and Ctrl+Enter. Maintain per-receiver drafts and results; refresh inspector after evaluation and make object results navigable.
 
 Use the shared retained-result interaction API, render reusable result controls, and support prior results as typed arguments.
+
+
+Preserve the full interaction result and its captured-input metadata when refreshing the object workspace so its result can be saved as an example.

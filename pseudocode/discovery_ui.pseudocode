@@ -1,0 +1,7 @@
+starterHelp: offer runnable examples, object search and method browsing from an empty output.
+renderContextHelp: show explicit property getter actions and class-related examples for the inspected object.
+renderSelectorHelp: link a selected selector to its callers/implementors or debugger; rank similar selectors and fill a chosen suggestion without executing it.
+captureInputBindings: sample named workspace values before an interactive expression; include referenced scratch values and preserve object identities.
+captureExpression: construct an editable expression for a Playground evaluation, object-workspace expression or typed receiver message, carrying captured receiver/argument references.
+saveInteractionExample: create a RunnableExample, retain its inputs and observed result, leave its check empty and open it in Examples.
+showObservedExample: show the recorded result and optionally populate an equality check for primitive values after explicit acceptance.

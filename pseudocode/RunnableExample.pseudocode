@@ -5,3 +5,6 @@ run: evaluate source with typed result and transcript; preserve that response; e
 workspace and result: expose scratch object and last typed value.
 reset: replace workspace and clear lastRun.
 inspectorMetadata: expose editable text properties.
+
+
+capture:value: retain a name/value pair, install it in the workspace, and preserve its object reference. run restores captured inputs before evaluating; reset restores captured bindings after replacing the workspace. Observed-result metadata is stored as captured bindings.

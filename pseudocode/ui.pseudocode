@@ -51,3 +51,6 @@ Offer Open control in designer when inspecting a live control.
 
 
 The page composes the shared visual theme and layout behavior. Render a header, ordered tool sidebar, labelled expression/output area and searchable object list. The inspector separates Interface, Methods, State and Workspace into tab panels. Keep object actions in an expandable group and runtime details collapsed. Preserve section on refresh and give newly opened dialogs keyboard focus.
+
+
+The Playground empty output offers discovery actions. Object inspectors expose property shortcuts, matching examples, selector suggestions, method navigation and debugger actions; results include Save as example.

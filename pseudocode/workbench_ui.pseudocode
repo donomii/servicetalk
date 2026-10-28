@@ -10,3 +10,6 @@ inspectExample: open the example or its workspace as an ordinary object.
 
 
 Render saved tool order in the sidebar, attach action metadata for styling, display the configured workbench name in the header and retain all existing action dispatch.
+
+
+Filter examples by title, description and source; show an empty state. Display a saved observed result and explicit Use observed result as check action. Empty checks report completion without a pass claim. Reset restores the captured example bindings.

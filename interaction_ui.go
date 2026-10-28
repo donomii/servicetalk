@@ -10,7 +10,11 @@ async function uiPost(path,request){
   if(!response.ok)throw Error(value.error||response.statusText);else{return value;}
 }
 async function performInteraction(request){
+  let captured=null,captureError='';
+  if(['eval','workspace'].includes(request.kind)){try{captured=await captureInputBindings(request);}catch(error){captureError=error.message;}}else{}
   const result=await uiPost('/interaction',{...request,recordingId:activeRecording});
+  result.captured=captured;result.captureError=captureError;
+  result.request={...request};
   if(result.handle){retainedResults.set(result.handle,result);updateResultChoices();}else{}
   if(result.recordingError)document.getElementById('recording-status').textContent='Recording: '+result.recordingError;else{}
   return result;
@@ -46,6 +50,7 @@ function renderResult(container,result){
   else container.appendChild(document.createTextNode(fmtVal(result.result)));
   if(!result.handle)return;else{}
   const bar=document.createElement('div');bar.className='result-actions';
+  if(result.request&&['eval','call','workspace'].includes(result.request.kind)){const save=navButton('Save as example',async()=>{save.disabled=true;try{await saveInteractionExample(result,status);}finally{save.disabled=false;}});bar.appendChild(save);}else{}
   bar.appendChild(navButton('Use in REPL',()=>{code.setRangeText(result.handle,code.selectionStart,code.selectionEnd,'select');closeM();document.getElementById('result-shelf').hidden=true;document.getElementById('recording-panel').hidden=true;code.focus();}));
   bar.appendChild(navButton('Pick as argument',()=>{pickedResult=result.handle;bar.querySelector('.picked-status').textContent='Selected';document.getElementById('result-shelf').hidden=true;}));
   const picked=document.createElement('span');picked.className='picked-status';bar.appendChild(picked);
@@ -60,7 +65,7 @@ async function clearResults(){
     const response=await uiPost('/result',{action:'release',handle});
     if(response.error)throw Error(response.error);else{}
   }
-  retainedResults.clear();updateResultChoices();out.replaceChildren();
+  retainedResults.clear();updateResultChoices();out.replaceChildren();starterHelp();
 }
 async function toggleRecording(){
   const button=document.getElementById('record-toggle');

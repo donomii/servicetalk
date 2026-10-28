@@ -1,3 +1,6 @@
 Present typed retained results with inspect, reuse, argument selection, naming and release controls. Keep a result shelf. Start/stop a live recording; display ordered steps and editable script/test exports; download or load into REPL.
 
 Result counts tolerate a toolbar without a Results tool and preserve a custom button label.
+
+
+Sample workspace inputs before evaluation and retain the request and input metadata with the result. Successful evaluations, calls and workspace results offer Save as example. Clearing output restores discovery actions.

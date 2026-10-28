@@ -8,3 +8,6 @@ Automatic updates preserve focused text, selection and numeric inputs while allo
 
 
 Mark the selected view tab with pressed state; display the live view title beside its inspector/layout tools. The enclosing inspector presents controls only in its Interface panel.
+
+
+Place each control action result in a persistent result area across view refresh; carry its visible label to example capture.

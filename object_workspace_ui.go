@@ -83,7 +83,7 @@ function insertWorkspaceMethod() {
 function renderWorkspaceResult(draft) {
   const result=document.getElementById('ow-result');result.replaceChildren();
   if(draft.error){result.textContent='Error: '+draft.error;return;}else{}
-  if(draft.result)renderResult(result,{result:draft.result,output:draft.output,handle:draft.handle});else{}
+  if(draft.result)renderResult(result,draft.response||{result:draft.result,output:draft.output,handle:draft.handle});else{}
 }
 async function runObjectWorkspace() {
   const id=objectWorkspaceReceiver,draft=objectWorkspaceDrafts.get(id);
@@ -95,7 +95,7 @@ async function runObjectWorkspace() {
   try{
     const result=await performInteraction({kind:'workspace',objectId:id,code:draft.source});
     if(result.error)throw Error(result.error);else{}
-    draft.handle=result.handle;
+    draft.response=result;draft.handle=result.handle;
     draft.result=result.result;draft.output=result.output;draft.error='';
     if(inspectedId===id){await showInspect(id,true);renderWorkspaceResult(draft);}else{}
   }catch(error){draft.error=error.message;if(inspectedId===id)renderWorkspaceResult(draft);else{}}

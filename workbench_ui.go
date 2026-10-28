@@ -46,18 +46,22 @@ function rememberExampleDraft(){
 async function openExamples(){
  rememberExampleDraft();document.getElementById('examples-panel').hidden=false;document.getElementById('examples-status').textContent='Loading examples…';
  try{const response=await fetch('/examples').then(r=>r.json());if(response.error)throw Error(response.error);else{}
-  workbenchObject=response.workbench;exampleCatalog=response.examples;renderExampleList();exampleSelected='';
+  workbenchObject=response.workbench;exampleCatalog=response.examples;document.getElementById('examples-search').value='';renderExampleList();exampleSelected='';
   if(exampleCatalog.length)selectExample(exampleCatalog[0].objectId);else{}document.getElementById('examples-status').textContent='';
  }catch(error){document.getElementById('examples-status').textContent=error.message;}
 }
+function matchingExamples(query){return exampleCatalog.filter(example=>(example.title+' '+example.description+' '+example.source).toLowerCase().includes(query.toLowerCase()));}
 function renderExampleList(){
  const list=document.getElementById('examples-list');list.replaceChildren();
- for(const example of exampleCatalog)list.append(toolButton(example.title,()=>selectExample(example.objectId)));
+ const query=document.getElementById('examples-search').value.trim(),matches=matchingExamples(query),editor=document.getElementById('example-editor');
+ if(matches.length&&editor.hidden){editor.hidden=false;selectExample(matches[0].objectId);}else if(!matches.length)editor.hidden=true;else{}
+ for(const example of matches)list.append(toolButton(example.title,()=>selectExample(example.objectId)));
+ if(!matches.length)list.append(toolElement('p','No matching examples'));else{}
 }
 function selectExample(id){
  rememberExampleDraft();exampleSelected=id;const example=exampleCatalog.find(e=>e.objectId===id);if(!example)return;else{}
  const content=exampleDrafts.get(id)||example;for(const field of ['title','description','source','check'])document.getElementById('example-'+field).value=content[field];
- document.getElementById('example-result').replaceChildren();document.getElementById('examples-status').textContent='';
+ document.getElementById('example-result').replaceChildren();document.getElementById('examples-status').textContent='';showObservedExample(example);
 }
 async function saveExample(){
  if(!exampleSelected)return false;else{}rememberExampleDraft();const draft=exampleDrafts.get(exampleSelected),example=exampleCatalog.find(e=>e.objectId===exampleSelected);
@@ -70,12 +74,12 @@ async function runExample(){
  const button=document.getElementById('example-run'),id=exampleSelected;button.disabled=true;
  try{if(!await saveExample())return;else{}document.getElementById('examples-status').textContent='Running…';
   const response=await performInteraction({kind:'example',objectId:id});if(exampleSelected!==id)return;else{}
-  renderResult(document.getElementById('example-result'),response);document.getElementById('examples-status').textContent=response.error?'Failed':'Passed';
+  renderResult(document.getElementById('example-result'),response);document.getElementById('examples-status').textContent=response.error?'Failed':document.getElementById('example-check').value.trim()?'Passed':'Completed (no check)';
  }catch(error){document.getElementById('examples-status').textContent=error.message;}finally{button.disabled=false;}
 }
 async function resetExample(){
  const id=exampleSelected;const response=await performInteraction({kind:'call',objectId:id,method:'reset',args:[]});
- if(response.error)document.getElementById('examples-status').textContent=response.error;else{const workspace=await inspectorCall(id,'workspace',[]);exampleCatalog.find(e=>e.objectId===id).workspace=workspace.objid;document.getElementById('example-result').replaceChildren();document.getElementById('examples-status').textContent='Workspace reset';}
+ if(response.error)document.getElementById('examples-status').textContent=response.error;else{const workspace=await inspectorCall(id,'workspace',[]);const example=exampleCatalog.find(e=>e.objectId===id);example.workspace=workspace.objid;showObservedExample(example);document.getElementById('example-result').replaceChildren();document.getElementById('examples-status').textContent='Workspace reset';}
 }
 async function newExample(){
  try{const response=await performInteraction({kind:'call',objectId:workbenchObject,method:'addExampleTitle:description:source:check:',args:[{kind:'string',str:'New example'},{kind:'string',str:''},{kind:'string',str:'42'},{kind:'string',str:"(it = 42) ifFalse: [ 'Expected 42' signal ]"}]});if(response.error)throw Error(response.error);else{}await openExamples();selectExample(response.result.objid);}catch(error){document.getElementById('examples-status').textContent=error.message;}

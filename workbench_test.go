@@ -64,6 +64,24 @@ func TestRunnableExampleChecksAndOutput(t *testing.T) {
  if before.ObjID==after.ObjID { t.Fatal("reset retained old workspace") } else {}
 }
 
+func TestCapturedExampleSurvivesWorkspaceReset(t *testing.T) {
+ base:=interactiveTestRuntime(t)
+ created:=testInteraction(t,base,InteractionRequest{Kind:"eval",Code:"target := Counter new. target add: 7. example := RunnableExample new. example source: 'exampleReceiver value'. example check: '(it = 7) ifFalse: [ ''wrong result'' signal ]'. example capture: 'exampleReceiver' value: target. example capture: 'exampleObserved' value: 7. example"})
+ if created.Error!="" { t.Fatal(created.Error) } else {}
+ first:=testInteraction(t,base,InteractionRequest{Kind:"example",ObjectID:created.Result.ObjID})
+ if first.Error!="" || first.Result.Num!=7 { t.Fatalf("captured run: %+v",first) } else {}
+ reset:=testInteraction(t,base,InteractionRequest{Kind:"call",ObjectID:created.Result.ObjID,Method:"reset"})
+ if reset.Error!="" { t.Fatal(reset.Error) } else {}
+ second:=testInteraction(t,base,InteractionRequest{Kind:"example",ObjectID:created.Result.ObjID})
+ if second.Error!="" || second.Result.Num!=7 { t.Fatalf("captured run after reset: %+v",second) } else {}
+ replay:=testInteraction(t,base,InteractionRequest{Kind:"eval",Code:"example := RunnableExample new. example source: 'it + 1'. example check: '(it = 8) ifFalse: [ ''wrong result'' signal ]'. example capture: 'it' value: 7. example"})
+ if replay.Error!="" { t.Fatal(replay.Error) } else {}
+ for run:=0;run<2;run++ {
+  result:=testInteraction(t,base,InteractionRequest{Kind:"example",ObjectID:replay.Result.ObjID})
+  if result.Error!="" || result.Result.Num!=8 { t.Fatalf("captured prior result on run %d: %+v",run,result) } else {}
+ }
+}
+
 func TestWorkbenchEditableToolsAndRetention(t *testing.T) {
  base:=interactiveTestRuntime(t)
  initial:=testWorkbench(t,base)

@@ -1,3 +1,6 @@
 Catalog test: run every shipped example, require independent workspaces and retained results, preserve main bindings and catalog identities.
 Execution test: preserve printed output and typed result, propagate source/check failures, replace workspace on reset.
 Workbench test: save custom typed-message tools, verify target retention, reject unknown actions without replacing the previous definition.
+
+
+Verify captured receiver and observed-value bindings survive an example workspace reset and that repeated runs and its check still pass with captured previous results.
