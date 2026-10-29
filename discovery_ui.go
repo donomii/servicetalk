@@ -1,6 +1,12 @@
 package main
 
 const discoveryJS = `
+let playgroundStarterDraft=null;
+function loadPlaygroundStarter(name){
+ const starters={counter:'"Create an object and send it messages"\nexampleCounter := Counter new.\nexampleCounter add: 12.\nexampleCounter value',files:'"Explore the current directory"\nshellDemo := Shell new.\nshellDemo ls',command:'"Run a command with explicit arguments"\nshellDemo := Shell new.\nshellDemoJob := shellDemo run: \'printf\' args: #(\'hello %s\\n\' \'ServiceTalk\').\nshellDemoJob stdout'};
+ if(name==='restore'){if(playgroundStarterDraft!==null){code.value=playgroundStarterDraft;playgroundStarterDraft=null;}else{}}else if(starters[name]){if(playgroundStarterDraft===null)playgroundStarterDraft=code.value;else{}code.value=starters[name];}else{}
+ document.getElementById('playground-starter').value='';document.getElementById('playground-restore').hidden=playgroundStarterDraft===null;code.focus();
+}
 function starterHelp(){
  const box=toolElement('div','','starter-help');box.id='starter-help';box.append(toolElement('strong','Explore ServiceTalk'),toolElement('p','Start with an example, find a live object, or browse methods.'));
  box.append(toolButton('Try an example',()=>openExamples()),toolButton('Find an object',()=>document.getElementById('object-filter').focus()),toolButton('Find a method',()=>openNavigation()));out.append(box);
@@ -12,7 +18,7 @@ function renderContextHelp(id,inspection,metadata){
  for(const property of properties.slice(0,4))help.append(toolButton('Read '+property.name,async()=>{
   try{const response=await performInteraction({kind:'call',objectId:id,method:property.getter,args:[]});if(inspectedId!==id)return;else{}selectInspectorSection('state');renderResult(document.getElementById('mresult'),response);}catch(error){document.getElementById('mresult').textContent=error.message;}
  }));
- help.append(toolButton('Find examples',()=>findExamples(inspection.className)));
+ help.append(toolButton('Find examples',()=>findExamples(resultClassName(inspection.className))));
 }
 function renderSelectorHelp(selector){
  const help=document.getElementById('selector-help');help.replaceChildren();if(!selector)return;else{}

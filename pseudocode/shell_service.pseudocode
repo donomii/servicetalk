@@ -1,0 +1,11 @@
+shellDispatch(operation, argument Array) -> typed result or signal
+    Validate operation arguments and execute the host filesystem operation.
+    Resolve paths relative to a supplied base, including home abbreviations using the effective session home environment.
+    Require directory existence before accepting navigation.
+    Return sorted directory names as Array elements without splitting filenames.
+    Read text or write/append text, checking open, write and close failures.
+    Create directories including missing parents.
+    Recursively match regular filenames and return relative paths in traversal order.
+    Find lines containing a literal substring.
+    Validate environment names and string-or-unset values without reading credentials.
+    File failures signal operation, path and the underlying error.

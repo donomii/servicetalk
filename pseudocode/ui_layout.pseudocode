@@ -3,3 +3,5 @@ selectInspectorSection: show the selected Interface/Methods/State/Workspace pane
 prepareInspectorSections: choose Interface when available, Methods otherwise, or preserve a valid prior section on refresh.
 filterInspectorMethods: filter selector buttons without changing their order or invocation.
 Support arrow/Home/End tab selection and wrap keyboard focus within the object dialog. Refresh registry periodically.
+
+Process objects are public shell jobs and remain visible when Runtime objects is disabled. Present public builtin names such as Process, Array and Dictionary without internal underscores, and sort/filter using those friendly names.

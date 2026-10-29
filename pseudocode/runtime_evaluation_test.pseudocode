@@ -1,0 +1,25 @@
+TestEvaluationPrograms:
+    Run the five example programs through the real executable test command.
+    Require every program to complete its assertions successfully.
+
+TestUnknownMessagesPropagateAndHandlersRemainUsable:
+    Send missing selectors to primitives, collections, blocks, native objects,
+    builtin services, workspace and coordinator through MCP.
+    Require immediate tool errors that name the selector and skip later code.
+    Check missing-variable arithmetic and missing super sends also signal.
+    Preserve explicit/inherited doesNotUnderstand handlers and onError recovery.
+
+TestNumericDivisionFailuresAndModuloSyntax:
+    Require zero divisors and wrong divisor kinds to signal before later effects.
+    Check ordinary and reflective modulo syntax and catchable numeric errors.
+    Verify empty string results stay empty through MCP, while nil still prints nil.
+
+TestComparatorReadsAndFailuresKeepArrayUsable:
+    Sort while a comparator reads the receiver; require no deadlock.
+    Signal from a comparator and require the original ordering to remain editable.
+    Mutate from a comparator and reject the sorted commit without losing mutations.
+    Check a bound Array workspace supports implicit size and isolated missing vars.
+
+TestScriptRejectsMissingMessagesAndClasses:
+    Run missing-selector, missing-class and succeeding scripts in one batch.
+    Require two failures, continued execution and a failing command exit code.

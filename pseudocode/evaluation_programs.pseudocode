@@ -1,0 +1,34 @@
+EvaluationChecks equal(actual, expected, name):
+    Return actual when equal; otherwise signal a named failure showing both values.
+
+EvaluationTask:
+    Public fields title and completion are exposed through title/title:, completed,
+    complete, reopen and summary. Start as Untitled and open. Mutators return self.
+
+EvaluationTimedTask:
+    Extend EvaluationTask with minutes/minutes:, initially zero.
+    Append the estimate to the inherited summary.
+
+arithmetic_test:
+    Check receipt arithmetic, FizzBuzz with remainder, independent closure captures
+    and an accumulating factorial loop. Show the FizzBuzz sequence.
+
+collections_test:
+    Decode orders, filter by total, reduce to a sum and project customer names.
+    Count words, sort keys and numbers, check Unicode access and JSON round-trip.
+
+objects_test:
+    Complete one of two tasks and query the remaining task.
+    Clone a task and check original state, inherited state and cloned behavior.
+
+signals_test:
+    Run a failing block with cleanup, catch its signal and check execution order.
+    Check the workspace can continue evaluating after recovery.
+
+examples_promises_test:
+    Complete a task asynchronously and reuse its returned object.
+    Capture an example input, run it, reset it and rerun its check.
+
+Run these programs with smt test examples/evaluation/*_test.smt from the repository
+directory. Each file starts in its own isolated runtime and fails by signaling.
+shell_tasks: start a Shell, send sample lines to sort, pass its output to uniq, check each exit, print the report and return the retained command jobs for inspection.

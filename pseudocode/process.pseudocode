@@ -1,0 +1,16 @@
+Process owns one subprocess, its command, directory, configuration, output buffers and completion state.
+start: and start:cwd: execute a command string through the platform shell.
+start:args: and start:args:cwd: execute the named program directly with an argument Array.
+    Require exact selector arity, nonempty string command, string directory and an Array containing only string arguments; malformed requests signal before execution.
+    Reject reuse; create subprocess with configured directory, input and environment.
+    Capture combined output and separate standard output/error, each bounded to one MiB with a truncation marker.
+    Startup failure completes the object with error status, exit -1 and contextual error text.
+    Normal completion retains exit status, including nonzero program exits.
+output returns combined text; outputLines returns its lines as an Array.
+stdout and stderr expose separate streams; error exposes launch/wait failures.
+status returns starting, running, exited or error. exitCode is nil until completion.
+command, directory and pid describe the process; wait returns its final exit code.
+isRunning reads the running state. signal: sends a supported operating-system signal.
+inspect prints status and capture size without nested locking.
+free kills a running child and deregisters the object.
+Unknown selectors signal a missing-method error.

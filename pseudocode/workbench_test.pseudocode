@@ -1,4 +1,4 @@
-Catalog test: run every shipped example, require independent workspaces and retained results, preserve main bindings and catalog identities.
+Catalog test: run all eleven shipped examples, including arithmetic, JSON filtering and Shell tasks; require independent workspaces and retained results, preserve main bindings and catalog identities.
 Execution test: preserve printed output and typed result, propagate source/check failures, replace workspace on reset.
 Workbench test: save custom typed-message tools, verify target retention, reject unknown actions without replacing the previous definition.
 

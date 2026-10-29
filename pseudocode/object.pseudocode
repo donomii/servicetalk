@@ -2,23 +2,35 @@ collect object references(object) -> referenced object identifiers
     Include references in fields, collection entries and captured arguments.
     For a block, also include a nonempty lexical parent identifier.
 
+Array sort: invokes the comparator on a snapshot outside object locks. Install
+the result only when original contents are unchanged; errors keep the array usable.
+Array inspection and printAll label elements from zero, matching at: and at:put:.
+
 workspace call(selector, arguments) -> output or signal
     Parse source and serialize workspace evaluation.
     Capture output and always end capture when evaluation exits.
     Script evaluation propagates parse errors and uncaught nested signals.
     Interactive execution retains transcript capture and reports uncaught signals.
     Return captured output and the normal formatted result.
+    Preserve an explicitly empty string result as empty output, distinct from nil.
 
 method execution -> result or signal
     Catch explicit method returns; propagate uncaught signals to the caller.
     Apply the same rule to foreign methods and block bodies.
     Collect parallel-send replies before raising any returned signal.
+    Missing native or super selectors invoke the receiver's explicit inherited
+    doesNotUnderstand handler when present. Otherwise signal with receiver and
+    selector. Missing block, Array, Dictionary and workspace selectors also signal.
+    A missing no-argument initialize defaults to self so classes without an
+    initializer remain constructible, including through super initialization.
 
 pulse lifetime
     Use locally observed arrival time for lease expiry.
     Use remote sweep identifiers only to order accepted pulses and break cycles.
 
 Include inherited native selectors and independent parameter-name snapshots in inspection.
+respondsTo: uses the same inherited/builtin selector catalogue plus common object
+messages, allowing object workspaces to test a bare selector before sending it.
 
 Native workspace evalResult: returns result/transcript JSON and stores successful it without printString. initialize returns self. Restore bound receiver in block contexts and include it in pulse references.
 
@@ -31,6 +43,8 @@ Restore native snapshot state before receiving/registering. clone/cloneWith: pre
 Promise runtime primitives start and await independent message operations; promiseDone signals settlement.
 
 workbenchReferences: validates toolbar data and retains referenced targets and arguments.
+
+Dispatch __shell:arguments: to checked host filesystem operations. Process inspection lists direct argument starts, input/environment configuration, separate output streams and human-facing views.
 
 Dispatch live Control/InspectorView serialization and ownership primitives.
 

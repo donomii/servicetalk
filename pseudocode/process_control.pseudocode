@@ -1,0 +1,3 @@
+Process observation and signal methods use the control mailbox while a caller waits for exit in the application mailbox.
+Classify only builtin Process reads, inspector metadata and signal sends this way; ordinary objects and Process launch/configuration retain serialized dispatch.
+Initialize each Process state exactly once; read its started/running state under its state lock.

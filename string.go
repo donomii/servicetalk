@@ -474,8 +474,5 @@ func callStringMethod(obj *ObjectServer, s string, method string, args []Value) 
 		return StrVal(string(runes))
 	}
 
-	if obj != nil {
-		obj.transcriptf("String doesNotUnderstand: %s", method)
-	}
-	return Nil
+	return unsupportedMessage(StrVal(s), "String", method, args)
 }

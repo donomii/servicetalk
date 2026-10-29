@@ -122,8 +122,7 @@ func (obj *ObjectServer) callHttpServerMethod(name string, args []Value) Value {
 		return Nil
 	}
 
-	obj.transcriptf("HttpServer doesNotUnderstand: %s", name)
-	return Nil
+	return unsupportedMessage(ObjVal(obj.id), "HttpServer", name, args)
 }
 
 // getHttpServerState lazily initialises and returns the listener state.

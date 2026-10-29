@@ -48,6 +48,7 @@ type ObjectServer struct {
 
 	// Process state (only set for __process__ instances).
 	procState *processState
+	procStateOnce sync.Once
 
 	// Instance variables (regular objects + workspace state)
 	mu           sync.RWMutex
@@ -545,6 +546,8 @@ func (obj *ObjectServer) callMethod(name string, args []Value) Value {
 		return obj.promiseDispatch(name, args)
 	case "workbenchReferences:":
 		return obj.workbenchReferences(args)
+	case "__shell:arguments:":
+		return obj.shellDispatch(args)
 	case "__replaceView:", "__describeView", "__viewRoot", "__viewRoot:", "__controlState", "__controlOwner", "__controlOwner:", "__describeControl", "__controlConfigure:owner:children:", "__controlChildren:", "__controlAdd:", "__controlRemove:":
 		return obj.controlDispatch(name, args)
 	case "validateWiring:", "retainWiring:in:", "executeWiring:retain:", "executeWiring:retain:previous:":
@@ -615,11 +618,15 @@ func (obj *ObjectServer) callMethod(name string, args []Value) Value {
 			return False
 		}
 		sel := args[0].String()
-		if obj.classDef != nil {
-			_, ok := obj.classDef.Methods[sel]
-			return BoolVal(ok)
+		switch sel {
+		case "class", "yourself", "isNil", "notNil", "printString", "respondsTo:", "getVar:", "setVar:to:":
+			return True
+		default:
+			for _, supported := range obj.inspectionMethodNames() {
+				if supported == sel { return True } else {}
+			}
+			return False
 		}
-		return False
 
 	// Used by blocks to reach parent vars — keep these accessible on all objects
 	case "getVar:":
@@ -717,8 +724,11 @@ func (obj *ObjectServer) callMethod(name string, args []Value) Value {
 			}
 			return obj.runBody(ctx, dnu.Body)
 		}
-		obj.transcriptf("doesNotUnderstand: %s", name)
-		return Nil
+		if name == "initialize" && len(args) == 0 {
+			return ObjVal(obj.id)
+		} else {
+			return unsupportedMessage(ObjVal(obj.id), obj.classDef.Name, name, args)
+		}
 	}
 
 	return obj.runMethod(method, definingClass, args)
@@ -761,8 +771,11 @@ func (obj *ObjectServer) callMethodFrom(start *ClassDef, name string, args []Val
 		}
 		return obj.runMethod(dnu, dnuClass, dnuArgs)
 	}
-	obj.transcriptf("super doesNotUnderstand: %s", name)
-	return Nil
+	if name == "initialize" && len(args) == 0 {
+		return ObjVal(obj.id)
+	} else {
+		return unsupportedMessage(ObjVal(obj.id), obj.classDef.Name+" super", name, args)
+	}
 }
 
 // dispatchForeign routes a call to the foreign bridge and recovers from
@@ -936,8 +949,7 @@ func (obj *ObjectServer) callBlockMethod(name string, args []Value) Value {
 		return obj.runBody(ctx, bd.Body)
 	}
 
-	obj.transcriptf("block doesNotUnderstand: %s", name)
-	return Nil
+	return unsupportedMessage(ObjVal(obj.id), "Block", name, args)
 }
 
 // blockKeywordsMatchParams returns the call args reordered to match
@@ -1188,7 +1200,7 @@ func (obj *ObjectServer) callArrayMethod(name string, args []Value) Value {
 		obj.mu.RLock()
 		defer obj.mu.RUnlock()
 		for i, v := range obj.arrayData {
-			obj.transcriptf("  [%d] %s", i+1, v.String())
+			obj.transcriptf("  [%d] %s", i, v.String())
 		}
 		return Nil
 
@@ -1283,13 +1295,7 @@ func (obj *ObjectServer) callArrayMethod(name string, args []Value) Value {
 		if len(args) == 0 {
 			return Nil
 		}
-		block := args[0]
-		obj.mu.Lock()
-		sort.SliceStable(obj.arrayData, func(i, j int) bool {
-			return obj.sendMessage(block, "value:value:", []Value{obj.arrayData[i], obj.arrayData[j]}).Truthy()
-		})
-		obj.mu.Unlock()
-		return ObjVal(obj.id)
+		return obj.sortArrayWith(args[0])
 
 	case "reverse", "reversed":
 		// Non-mutating: returns a new Array with elements in reverse order.
@@ -1536,8 +1542,7 @@ func (obj *ObjectServer) callArrayMethod(name string, args []Value) Value {
 		return True
 	}
 
-	obj.transcriptf("Array doesNotUnderstand: %s", name)
-	return Nil
+	return unsupportedMessage(ObjVal(obj.id), "Array", name, args)
 }
 
 // lessValue is the default ordering used by Array sort: numbers compare
@@ -1832,8 +1837,7 @@ func (obj *ObjectServer) callDictionaryMethod(name string, args []Value) Value {
 		return obj.sendMessage(block, "value:", []Value{v})
 	}
 
-	obj.transcriptf("Dictionary doesNotUnderstand: %s", name)
-	return Nil
+	return unsupportedMessage(ObjVal(obj.id), "Dictionary", name, args)
 }
 
 // newDictionaryFrom spawns a fresh built-in Dictionary seeded with entries.
@@ -2020,7 +2024,7 @@ func (obj *ObjectServer) inspectResponse() InspectResponse {
 	case BuiltinClassArray:
 		obj.mu.RLock()
 		for i, v := range obj.arrayData {
-			vars[fmt.Sprintf("[%d]", i+1)] = v
+			vars[fmt.Sprintf("[%d]", i)] = v
 		}
 		obj.mu.RUnlock()
 	case BuiltinClassDictionary:
@@ -2044,34 +2048,7 @@ func (obj *ObjectServer) inspectResponse() InspectResponse {
 		obj.mu.RUnlock()
 	}
 
-	var methods []string
-	switch obj.classDef.Name {
-	case BuiltinClassWorkspace:
-		methods = []string{"eval:", "evalScript:", "evalResult:"}
-	case BuiltinClassArray:
-		methods = []string{"add:", "at:", "at:put:", "size", "first", "last", "includes:", "do:", "collect:", "parallelSend:withEach:", "parallelSend:withEach:timeoutMs:", "printAll"}
-	case BuiltinClassDictionary:
-		methods = []string{"at:", "at:put:", "at:ifAbsent:", "includesKey:", "removeKey:", "do:", "keysAndValuesDo:", "keys", "values", "size", "printAll"}
-	case BuiltinClassHttpClient:
-		methods = []string{"get:", "get:timeoutMs:", "get:headers:", "post:body:", "post:body:contentType:"}
-	case BuiltinClassHttpServer:
-		methods = []string{"listenOn:handler:", "listenOn:handler:methodName:", "stop", "isRunning", "port"}
-	case BuiltinClassRobotsMatcher:
-		methods = []string{"parse:", "allows:agent:", "crawlDelayFor:", "agentCount"}
-	case BuiltinClassSitemapParser:
-		methods = []string{"parse:", "pageUrls", "indexUrls", "empty"}
-	case BuiltinClassProcess:
-		methods = []string{"start:", "start:args:", "output", "outputLines",
-			"status", "exitCode", "pid", "command", "signal:", "wait", "isRunning"}
-	case BuiltinClassBlock:
-		methods = []string{"value", "value:", "value:value:", "free"}
-	default:
-		if obj.classDef != nil {
-			for name := range inspectorSignatures(obj.classDef) {
-				methods = append(methods, name)
-			}
-		}
-	}
+	methods := obj.inspectionMethodNames()
 
 	return InspectResponse{
 		ObjectID:     obj.id,
@@ -2211,13 +2188,12 @@ func (obj *ObjectServer) callWorkspaceMethod(method string, args []Value) Value 
 			}
 		}
 		out := strings.TrimRight(sb.String(), "\n")
-		if out == "" {
+		if out == "" && result.Kind != "string" {
 			out = "nil"
 		}
 		return StrVal(out)
 
 	default:
-		obj.transcriptf("workspace doesNotUnderstand: %s", method)
-		return Nil
+		return unsupportedMessage(ObjVal(obj.id), "Workspace", method, args)
 	}
 }

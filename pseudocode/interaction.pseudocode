@@ -3,3 +3,5 @@ Run typed eval/call/workspace requests. Validate call arguments, retain successf
 kind promise validates a normal typed call, creates and starts a Promise in the workspace, and retains its returned identity.
 
 kind example executes the example object, decodes its WorkspaceResult and retains the typed outcome.
+
+Before executing a standard control action, capture its semantic replay request. Execute the original control, but record and expose the captured receiver/message for replay and examples. Retain original and normalized object references. A binding-capture failure is returned separately and prevents misleading recording output without suppressing execution.

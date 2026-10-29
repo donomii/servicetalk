@@ -1,0 +1,5 @@
+inspectionMethodNames(object) -> selectors:
+    Return the existing implemented methods of builtin objects or all inherited
+    native/foreign declarations. Array and Dictionary include their filtering,
+    sorting, copying and reduction methods. Use the same catalogue for inspection
+    and supported-selector preflight without reading mutable object state.

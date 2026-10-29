@@ -38,3 +38,7 @@ Serve selector refactoring previews and their browser script.
 Serve the combined visual editor browser script at /visual-editor.js.
 
 ensureWorkspace: reuse the current live workspace or the sole recovered pinned workspace before spawning a new workspace.
+Unknown coordinator messages signal with the coordinator receiver and selector.
+
+Shell completion includes file writing, search, session environment, direct argument execution and job access selectors.
+Serve the static browser document as literal text, preserving percent signs in expression examples.

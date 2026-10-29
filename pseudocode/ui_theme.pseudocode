@@ -2,3 +2,7 @@ Define the shared workbench visual system: system UI typography, monospaced code
 
 
 Style the discovery actions, contextual inspector help, examples search, observed-result card and persistent view result with responsive wrapping.
+
+Emphasize the returned value over its actions: large scalar text, plain multiline text, explicit object inspection and a secondary identity. Keep long outputs scrollable within their result. Put secondary actions in a compact expandable area. Sidebar object tools use ordinary navigation styling rather than implying a currently selected tool.
+
+Place a compact starter selector in the expression heading. Collection previews show indexed rows with wrapping contents and bounded scrolling.

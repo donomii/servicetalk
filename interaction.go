@@ -63,6 +63,8 @@ func (c *Coordinator) runInteraction(request InteractionRequest) (WorkspaceResul
 
 func (c *Coordinator) interact(request InteractionRequest) InteractionResult {
  result := InteractionResult{Result:Nil}
+ replay, captureErr := c.controlReplayRequest(request)
+ if captureErr!=nil { result.CaptureError=captureErr.Error() } else if replay.ObjectID!=request.ObjectID || replay.Method!=request.Method { result.Request=&replay } else {}
  value, err := c.runInteraction(request)
  if err != nil { result.Error=err.Error() } else {
   result.Result=value.Result; result.Output=value.Output
@@ -70,7 +72,8 @@ func (c *Coordinator) interact(request InteractionRequest) InteractionResult {
   if err != nil { result.Error="operation completed, but retaining its result failed: "+err.Error() } else {}
  }
  if request.RecordingID!="" {
-  record := InteractionRecord{Request:request,Response:result,At:time.Now()}
+  if captureErr!=nil { result.RecordingError="Could not record control action: "+captureErr.Error();return result } else {}
+  record := InteractionRecord{Request:replay,Response:result,At:time.Now()}
   record.Request.RecordingID=""
   if result.Result.Kind=="objid" {
    if class, err:=c.callObjectID(result.Result.ObjID,"class",nil,inspectionTimeout); err==nil { record.ResultClass=class.Str } else {}
@@ -78,6 +81,7 @@ func (c *Coordinator) interact(request InteractionRequest) InteractionResult {
   data, err:=json.Marshal(record)
   if err==nil { _,err=c.callObjectID(request.RecordingID,"append:",[]Value{StrVal(string(data))},inspectionTimeout) } else {}
   if err==nil { err=c.retainRecordingReferences(request,result.Result) } else {}
+  if err==nil { err=c.retainRecordingReferences(replay,result.Result) } else {}
   if err!=nil { result.RecordingError=err.Error() } else {}
  }
  return result

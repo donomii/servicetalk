@@ -18,6 +18,7 @@ NavigationMethod records class, selector, parameters, sends, source, file, line 
 WorkspaceResult carries typed result, output and optional error. ObjectWorkspaceRequest carries receiver ID and code. BlockDef optionally captures a selfOverride Value.
 
 InteractionRequest/Result describe typed UI calls. InteractionRecord adds timestamp/class. ResultRequest binds/releases handles. RecordingRequest/Response supplies structured records and exports. InspectorViewRequest/Response supplies target, key and JSON layout.
+InteractionResult optionally supplies the normalized replay request and a capture error independently of operation/recording errors.
 
 Define DebugRequest, DebugCommand, DebugSnapshot, DebugHTTPRequest/Response, TraceEvent, TraceSnapshot and TraceRequest as documented in SPEC. Add sender to MessageRequest and optional debug to RuntimeInspection.
 

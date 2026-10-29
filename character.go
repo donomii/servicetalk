@@ -85,8 +85,5 @@ func callCharacterMethod(obj *ObjectServer, r rune, method string, args []Value)
 		return BoolVal(unicode.IsPunct(r))
 	}
 
-	if obj != nil {
-		obj.transcriptf("Character doesNotUnderstand: %s", method)
-	}
-	return Nil
+	return unsupportedMessage(CharVal(r), "Character", method, args)
 }

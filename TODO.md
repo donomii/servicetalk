@@ -267,8 +267,21 @@ Work from the top. Preserve system integration and separate objects/processes ac
 13. **Constraints between properties / ThingLab — deferred.** Record the idea; do not implement yet.
 14. **Inspectable, editable GUI objects — implemented.** Workbench owns toolbar definitions and custom object-message tools; InspectorView, InteractionLog, Wiring and RunnableExample own their live GUI state. View controls are live Button, Label, Input, Row, Column and Control objects, with per-control receivers, retained child/argument references, Wiring actions and MCP-visible edits. Visual editors arrange controls and toolbar tools with live previews, method/object suggestions and typed arguments. Their definitions can also be edited through ordinary messages and inspectors; browser rendering remains the platform boundary.
 15. **Semantic refactoring — selector rename implemented.** Parsed previews locate native definitions and sends, preserve bindings/comments/literals, flag literal references for review, and save selected files through the digest-checked source editor with Git history. Broader transformations remain suitable for AI assistance.
-16. **Runnable documentation/examples — implemented.** Editable RunnableExample objects own isolated workspaces, executable checks and typed results. The Examples browser includes seven working demonstrations and supports adding examples.
+16. **Runnable documentation/examples — implemented.** Editable RunnableExample objects own isolated workspaces, executable checks and typed results. New workbenches include eleven demonstrations covering live objects, arithmetic, JSON and Shell tasks, and support adding examples.
 17. **Inspectable promises — implemented.** Ordinary Promise objects retain the receiver, argument snapshot and typed result/error, expose state and await operations, and remain inspectable while calls run. Inspector messages and wiring runs can execute asynchronously.
 18. **Changing behavior — native definition editor implemented.** Saved definitions apply to new object processes; old and new native instances coexist, verified with subprocess tests. Foreign source continues through its existing language/build tools; no live cross-language code replacement is assumed.
 19. **Prototypes / class versions — native experiment implemented.** Derive an object's fields and method overrides without editing a class file; derived objects can be cloned again. Loaded definition digests distinguish coexisting behavior versions. No live foreign-runtime rewriting is assumed.
 20. **Object mobility — research recorded in SPEC.** Native snapshot copies can spawn on workers. Preserving identity would need mailbox quiescence, subject/registry handoff, in-flight-call accounting and resource-specific transfer adapters. Arbitrary cross-language/OS migration remains outside this research-only item.
+
+## Evaluation pass — 2026-10-29
+
+Five executable programs in examples/evaluation exercise arithmetic/FizzBuzz/closures, JSON reports and word frequencies, task objects/inheritance/clones, signals and cleanup, and promises/captured examples. Runtime fixes cover missing messages/classes, division errors, modulo syntax, empty text, reentrant Array comparators and zero-based inspection labels.
+
+Shell now supplies persistent cwd/environment/jobs, checked file operations and command execution with stdin and separate output streams. Actual evaluation tasks created and searched text files, used sort then uniq for a word-count report, copied/renamed paths containing spaces and punctuation, passed session environment variables, started/stopped a background sleep and made a local HTTP request. The UI pass tested result reuse, file/command starters, collection previews, Process inspection, a recorded counter action and debugger stepping, including a 390-pixel layout. Recording standard controls now captures their bound messages so recreated receivers are reused correctly.
+
+Useful next shell experiments:
+
+- A PTY-backed terminal object for interactive applications, terminal resize and keyboard input.
+- Byte-valued file I/O and streaming process connections for binary data and large pipelines; current command composition transfers captured text.
+- Command/filename completion and argument assistance in the Playground, building on the terminal shell's existing completion.
+- Recording dependency views for objects nested in returned collections, so the user can choose which external objects to recreate or reuse.

@@ -133,8 +133,7 @@ func (obj *ObjectServer) callHttpClientMethod(name string, args []Value) Value {
 		return obj.httpClientDo("DELETE", args[0].String(), nil, "", httpClientDefaultTimeoutMs, nil)
 	}
 
-	obj.transcriptf("HttpClient doesNotUnderstand: %s", name)
-	return Nil
+	return unsupportedMessage(ObjVal(obj.id), "HttpClient", name, args)
 }
 
 // httpClientDo runs the actual HTTP roundtrip and returns a Dictionary

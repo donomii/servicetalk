@@ -10,3 +10,5 @@ coordinator command(arguments)
     strict one-shot script mode.
 
 Internal object --snapshot supplies a native clone bootstrap file; ordinary starts are unchanged.
+
+Shell startup searches user paths, current directory and normal bundled classes before legacy shell example fallbacks. Pass the same ordered paths to child object processes.

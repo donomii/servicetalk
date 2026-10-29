@@ -1,0 +1,3 @@
+HttpClient is an object whose messages configure and issue HTTP requests and
+return structured response data. Unsupported messages signal with object identity
+and selector instead of returning nil.

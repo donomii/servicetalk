@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
 	"sync"
@@ -66,16 +67,22 @@ func callNumberMethod(obj *ObjectServer, n float64, method string, args []Value)
 			return NumVal(n * args[0].Num)
 		}
 	case "/":
-		if len(args) > 0 && args[0].Kind == "number" && args[0].Num != 0 {
+		if len(args) == 1 && args[0].Kind == "number" && args[0].Num != 0 {
 			return NumVal(n / args[0].Num)
+		} else {
+			panic(signalError{msg: fmt.Sprintf("Number %v / requires one nonzero numeric divisor; received %v", n, args)})
 		}
 	case "//": // integer division
-		if len(args) > 0 && args[0].Kind == "number" && args[0].Num != 0 {
+		if len(args) == 1 && args[0].Kind == "number" && args[0].Num != 0 {
 			return NumVal(math.Floor(n / args[0].Num))
+		} else {
+			panic(signalError{msg: fmt.Sprintf("Number %v // requires one nonzero numeric divisor; received %v", n, args)})
 		}
 	case "\\\\":  // modulo
-		if len(args) > 0 && args[0].Kind == "number" && args[0].Num != 0 {
+		if len(args) == 1 && args[0].Kind == "number" && args[0].Num != 0 {
 			return NumVal(math.Mod(n, args[0].Num))
+		} else {
+			panic(signalError{msg: fmt.Sprintf("Number %v \\\\ requires one nonzero numeric divisor; received %v", n, args)})
 		}
 	case "**", "raisedTo:":
 		if len(args) > 0 && args[0].Kind == "number" {
@@ -94,6 +101,8 @@ func callNumberMethod(obj *ObjectServer, n float64, method string, args []Value)
 	case "reciprocal":
 		if n != 0 {
 			return NumVal(1.0 / n)
+		} else {
+			panic(signalError{msg: "Number 0 reciprocal requires a nonzero receiver"})
 		}
 	case "ceiling":
 		return NumVal(math.Ceil(n))
@@ -330,6 +339,5 @@ func callNumberMethod(obj *ObjectServer, n float64, method string, args []Value)
 		}
 	}
 
-	obj.transcriptf("Number doesNotUnderstand: %s", method)
-	return Nil
+	return unsupportedMessage(NumVal(n), "Number", method, args)
 }

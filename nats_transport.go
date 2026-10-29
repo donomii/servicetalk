@@ -157,7 +157,7 @@ func (obj *ObjectServer) dispatchNATSCall(req MessageRequest, msg natsResponder)
 		return
 	}
 	call := objectNATSCall{req: req, msg: msg}
-	if isControlMethod(req.Method) {
+	if isControlMethod(req.Method) || obj.processControlMethod(req.Method) {
 		select {
 		case obj.controlMailbox <- call:
 		default:

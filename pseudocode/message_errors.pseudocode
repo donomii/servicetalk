@@ -1,0 +1,4 @@
+Unsupported message:
+    Signal an error naming the receiver class/value, missing selector and argument
+    count, explaining that a defined method is required. Normal signal handling
+    makes this catchable and prevents execution of subsequent statements.

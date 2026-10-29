@@ -3,5 +3,5 @@ initialize/resetTools: validate and install default title and toolbar tools.
 definition: expose current JSON definition. definition: validates new tools and retains referenced objects before replacement.
 examples: lazily create the catalog and its ordinary example objects.
 addExampleTitle:description:source:check: create, configure, retain and return a RunnableExample.
-populateExamples: install demonstrations of counters, clones, prototypes, wiring, promises, signal recovery and process integration.
+populateExamples: install demonstrations of counters, clones, prototypes, wiring, promises, signal recovery, process integration, receipt calculation, JSON record filtering, Shell file exploration and direct command execution.
 inspectorViews: expose editable tools definition and default restoration.

@@ -1,0 +1,2 @@
+equal(actual, expected, name):
+    Return actual when equal; otherwise signal the name and both values.

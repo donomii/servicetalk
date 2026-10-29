@@ -104,7 +104,7 @@ func (l *stLexer) skipTrivia() {
 }
 
 func isStBinopChar(ch rune) bool {
-	return strings.ContainsRune("+-*/<>=~@%&?!,", ch)
+	return strings.ContainsRune("+-*/<>=~@%&?!,\\", ch)
 }
 
 func isStIdentStart(ch rune) bool {

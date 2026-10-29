@@ -1,0 +1,2 @@
+Start a real sleeping child, queue wait, then require independent status and TERM messages to complete promptly and release wait.
+Verify ordinary application methods and Process launch/configuration are not moved to the control mailbox.

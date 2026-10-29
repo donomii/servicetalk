@@ -1,0 +1,2 @@
+EvaluationTimedTask extends EvaluationTask with minutes/minutes:, initially zero.
+Initialize inherited state and append estimated minutes to the inherited summary.

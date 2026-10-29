@@ -1,5 +1,6 @@
 ParseSmalltalk(source) -> shared evaluator nodes or error
     Lex identifiers, keywords, operators, literals, punctuation and source positions.
+    Include backslash among binary operator characters, including literal selectors.
     Skip whitespace and double-quoted comments.
     Parse classes, fields, superclass names and unary/binary/keyword method bodies.
     Parse assignment, return, closures, arrays and messages with unary, binary, keyword and cascade precedence.

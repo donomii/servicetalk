@@ -1,0 +1,5 @@
+String messages provide Unicode size/indexing/slices, case conversion, predicates,
+replacement, concatenation, splitting, lines, characters, numeric conversion,
+padding/repetition, URL fields, path/file reads and shell tokenization.
+Collection-producing messages return ordinary Array objects. Explicit signal
+raises the receiver text. Unsupported messages signal with receiver and selector.

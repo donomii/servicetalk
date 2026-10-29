@@ -1,0 +1,3 @@
+Nil messages provide nil predicates, identity/display metadata, equality,
+nil-conditional block execution and supported-selector queries. Unsupported
+messages signal with the receiver and selector.

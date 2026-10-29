@@ -72,5 +72,5 @@ func callBoolMethod(obj *ObjectServer, b bool, method string, args []Value) Valu
 	case "yourself":
 		return BoolVal(b)
 	}
-	return Nil
+	return unsupportedMessage(BoolVal(b), "Boolean", method, args)
 }

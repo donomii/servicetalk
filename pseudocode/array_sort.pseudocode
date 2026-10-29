@@ -1,0 +1,7 @@
+sortArrayWith(comparator) -> receiver or signal:
+    Snapshot the receiver's elements under a read lock.
+    Stable-sort a separate copy by calling the comparator without holding a lock.
+    Comparator errors propagate without installing a partial ordering.
+    Under a write lock, require the receiver still matches its original snapshot
+    before replacing its contents with the sorted copy. Otherwise signal that the
+    array changed, preserving those changes. Return the receiver on success.

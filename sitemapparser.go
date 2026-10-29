@@ -107,8 +107,7 @@ func (obj *ObjectServer) callSitemapParserMethod(name string, args []Value) Valu
 		return BoolVal(len(st.pageURLs) == 0 && len(st.indexURLs) == 0)
 	}
 
-	obj.transcriptf("SitemapParser doesNotUnderstand: %s", name)
-	return Nil
+	return unsupportedMessage(ObjVal(obj.id), "SitemapParser", name, args)
 }
 
 func (obj *ObjectServer) sitemapParserState() *sitemapParserState {

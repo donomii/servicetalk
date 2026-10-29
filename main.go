@@ -226,9 +226,14 @@ func runShellCmd(args []string) {
 	setVerbose(verbose)
 	// Auto-add binary-relative examples/shell so the user doesn't have
 	// to remember --path when running from a built tree or a bundle.
-	paths = append(paths, shellExamplePaths()...)
-	SetClassPath(paths)
+	setShellClassPath(paths)
 	runCoordinator(*port, "", ModeShell, "")
+}
+
+func setShellClassPath(paths []string) {
+	SetClassPath(paths)
+	classPath = append(classPath, shellExamplePaths()...)
+	userClassPath = append([]string{}, classPath...)
 }
 
 // shellExamplePaths returns binary-relative candidates for the

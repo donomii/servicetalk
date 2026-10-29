@@ -44,6 +44,19 @@ caught' check: 'caught ifFalse: [ ''The handler did not run'' signal ]'.
 tool start: ''go'' args: #(''version'') cwd: ''.''.
 tool wait.
 tool' check: '(tool exitCode = 0) ifFalse: [ tool output signal ]'.
+        self addExampleTitle: 'Calculate a receipt' description: 'Transform prices, total them, and add tax. Change a price or tax rate and run again.' source: 'prices := #(4 6 10).
+subtotal := prices inject: 0 into: [ :sum :price | sum + price ].
+tax := subtotal * 0.1.
+subtotal + tax' check: '(it = 22) ifFalse: [ ''Expected a total of 22'' signal ]'.
+        self addExampleTitle: 'Filter records' description: 'Parse JSON, select larger orders, and calculate their total. The result remains a number that another object can use.' source: 'orders := JSON decode: ''[{"name":"Tea","total":4},{"name":"Books","total":12},{"name":"Parts","total":20}]''.
+large := orders select: [ :order | (order at: ''total'') >= 10 ].
+large inject: 0 into: [ :sum :order | sum + (order at: ''total'') ]' check: '(it = 32) ifFalse: [ ''Expected the selected orders to total 32'' signal ]'.
+        self addExampleTitle: 'Explore files with Shell' description: 'A Shell keeps its own directory. List Smalltalk source files as an Array, then inspect the Shell to navigate or read files.' source: 'shell := Shell new.
+files := shell ls select: [ :name | (name endsWith: ''.st'') or: [ name endsWith: ''.smt'' ] ].
+files' check: '(files size > 0) ifFalse: [ ''Expected Smalltalk source files in the starting directory'' signal ]'.
+        self addExampleTitle: 'Run a command with Shell' description: 'Run the Go tool with explicit arguments. Inspect the returned Process to read output, errors, directory and exit status; shell jobs retains it.' source: 'shell := Shell new.
+job := shell run: ''go'' args: #(''version'').
+job' check: '(job exitCode = 0) ifFalse: [ job output signal ]. (job stdout includes: ''go version'') ifFalse: [ ''Expected the Go version'' signal ]'.
         ^ self
     ]
     inspectorViews [ ^ '{"views":[{"id":"workbench","title":"Workbench","body":{"kind":"column","children":[{"kind":"textarea","label":"Tools definition","getter":"definition","setter":"definition:","type":"string"},{"kind":"action","text":"Restore default tools","method":"resetTools","refresh":true}]}}]}' ]

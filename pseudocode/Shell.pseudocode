@@ -1,0 +1,21 @@
+Shell stores cwd, environment overrides, jobs and lastProcess.
+initialize creates independent environment and job collections, with the host directory as cwd.
+pwd and cwd return the current directory; home returns effective session HOME, falling back to USERPROFILE on Windows. If neither is set, home expansion signals a clear error.
+resolvePath resolves relative names against cwd and expands a leading home abbreviation.
+cd changes cwd only after confirming the target is a directory, returning the new path.
+ls and ls: return sorted directory entry names as an Array.
+cat: returns file text. write:text: replaces file text; append:text: appends it; both return the resolved path.
+mkdir: creates a directory and any missing parents, returning the resolved path.
+find: recursively returns regular file paths matching a filename pattern, relative to cwd.
+grep:in: returns lines containing the supplied text.
+env: and getenv: use the session override when present, otherwise the inherited host value.
+env:put: validates and stores a string override; unsetEnv: records an explicit unset.
+environment returns the override Dictionary; jobs returns the session's retained Process Array.
+lastProcess returns the latest Process, including a failed launch.
+exec:args: and exec:args:input: start a Process directly with argument values, cwd, environment and optional input.
+run:args: and run:args:input: wait and return the Process with separate stdout, stderr and exitCode.
+checked:args: returns stdout on zero exit, otherwise signals command, directory, exit and diagnostic context.
+exec: and run: retain explicit command-string shell execution; exec returns Process and run waits then returns combined output.
+help explains session methods and normal Smalltalk composition.
+inspectorMetadata describes typed method arguments and editable directory.
+inspectorViews supplies a directory editor, file/job/result actions and workspace examples.

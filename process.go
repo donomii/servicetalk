@@ -51,6 +51,11 @@ type processState struct {
 	cmd      *exec.Cmd
 	command  string
 	stdout   *bytes.Buffer
+	standardOutput *bytes.Buffer
+	errorOutput *bytes.Buffer
+	input string
+	environment []string
+	directory string
 	started  bool
 	finished int32 // atomic
 	exitCode int   // valid only when finished == 1
@@ -60,7 +65,10 @@ type processState struct {
 
 // callProcessMethod handles every send to a Process instance.
 func (obj *ObjectServer) callProcessMethod(name string, args []Value) Value {
+	processValidateStart(name,args)
 	switch name {
+	case "input:", "environment:", "stdout", "stderr", "error", "directory", "inspectorMetadata", "inspectorViews":
+		return obj.processSessionMethod(name,args)
 	case "initialize":
 		return Nil
 	case "class":
@@ -79,7 +87,7 @@ func (obj *ObjectServer) callProcessMethod(name string, args []Value) Value {
 		case "start:", "start:cwd:", "start:args:", "start:args:cwd:",
 			"output", "outputLines", "status", "exitCode", "pid",
 			"command", "signal:", "wait", "isRunning",
-			"printString", "displayString":
+			"printString", "displayString", "input:", "environment:", "stdout", "stderr", "error", "directory", "inspectorMetadata", "inspectorViews":
 			return True
 		}
 		return False
@@ -87,8 +95,9 @@ func (obj *ObjectServer) callProcessMethod(name string, args []Value) Value {
 		return StrVal(processPrintString(obj.processState()))
 	case "inspect":
 		st := obj.processState()
+		status := processStatus(st)
 		st.mu.Lock()
-		obj.transcriptf("Process %s — %s — %d bytes captured", st.command, processStatus(st), st.stdout.Len())
+		obj.transcriptf("Process %s — %s — %d bytes captured", st.command, status, st.stdout.Len())
 		st.mu.Unlock()
 		return Nil
 	case "free":
@@ -178,9 +187,9 @@ func (obj *ObjectServer) callProcessMethod(name string, args []Value) Value {
 
 	case "wait":
 		st := obj.processState()
-		if !st.started {
+		if !processHasStarted(st) {
 			return Nil
-		}
+		} else {}
 		<-st.done
 		st.mu.Lock()
 		defer st.mu.Unlock()
@@ -188,20 +197,25 @@ func (obj *ObjectServer) callProcessMethod(name string, args []Value) Value {
 
 	case "isRunning":
 		st := obj.processState()
+		st.mu.Lock()
+		defer st.mu.Unlock()
 		return BoolVal(st.started && atomic.LoadInt32(&st.finished) == 0)
 	}
 
-	obj.transcriptf("Process doesNotUnderstand: %s", name)
-	return Nil
+	return unsupportedMessage(ObjVal(obj.id), "Process", name, args)
 }
 
 func (obj *ObjectServer) processState() *processState {
+	obj.procStateOnce.Do(func() {
 	if obj.procState == nil {
 		obj.procState = &processState{
 			stdout: &bytes.Buffer{},
+			standardOutput: &bytes.Buffer{},
+			errorOutput: &bytes.Buffer{},
 			done:   make(chan struct{}),
 		}
-	}
+	} else {}
+	})
 	return obj.procState
 }
 
@@ -263,21 +277,23 @@ func (obj *ObjectServer) processStartArgv(prog string, argv []string, cwd string
 	st.mu.Lock()
 	if st.started {
 		st.mu.Unlock()
-		obj.transcriptf("Process already started — spawn a new Process for a new command")
-		return
-	}
+		panic(signalError{msg:"Process already started; create a new Process for another command"})
+	} else {}
+	st.started = true
 	st.command = prog
 	if len(argv) > 0 {
 		st.command = prog + " " + strings.Join(argv, " ")
 	}
-	cmd := exec.Command(prog, argv...)
+	st.directory = cwd
+	cmd := processCommand(prog,argv,cwd,st.environment)
+	cmd.Stdin = strings.NewReader(st.input)
 	if cwd != "" {
 		cmd.Dir = cwd
 	}
-	cmd.Stdout = newProcessWriter(st)
-	cmd.Stderr = newProcessWriter(st)
+	cmd.Stdout = &processWriter{st:st,stream:st.standardOutput}
+	cmd.Stderr = &processWriter{st:st,stream:st.errorOutput}
 	if err := cmd.Start(); err != nil {
-		st.exitErr = err.Error()
+		st.exitErr = fmt.Sprintf("cannot start %q in %q: %v",prog,cwd,err)
 		atomic.StoreInt32(&st.finished, 1)
 		st.exitCode = -1
 		close(st.done)
@@ -286,7 +302,6 @@ func (obj *ObjectServer) processStartArgv(prog string, argv []string, cwd string
 		return
 	}
 	st.cmd = cmd
-	st.started = true
 	st.mu.Unlock()
 
 	go func() {
@@ -311,6 +326,7 @@ func (obj *ObjectServer) processStartArgv(prog string, argv []string, cwd string
 // keep a chatty job from blowing the heap.
 type processWriter struct {
 	st *processState
+	stream *bytes.Buffer
 }
 
 func newProcessWriter(st *processState) *processWriter {
@@ -320,8 +336,10 @@ func newProcessWriter(st *processState) *processWriter {
 func (w *processWriter) Write(p []byte) (int, error) {
 	w.st.mu.Lock()
 	defer w.st.mu.Unlock()
+	if w.stream != nil { processAppendOutput(w.stream,p) } else {}
 	remaining := processOutputCap - w.st.stdout.Len()
 	if remaining <= 0 {
+		if remaining == 0 && len(p) > 0 { w.st.stdout.WriteString("\n…<truncated>\n") } else {}
 		return len(p), nil // silently drop after cap
 	}
 	if len(p) > remaining {
@@ -355,8 +373,10 @@ func (obj *ObjectServer) processSignal(name string) bool {
 // start:args: to materialise an argv from a user-supplied Array.
 func (obj *ObjectServer) arrayToStrings(v Value) []string {
 	if v.Kind != "objid" {
-		return nil
-	}
+		panic(signalError{msg:"Process arguments must be an Array"})
+	} else {}
+	class := obj.sendMessage(v,"class",nil)
+	if !isArrayClass(class.Str) { panic(signalError{msg:"Process arguments must be an Array"}) } else {}
 	sz := obj.sendMessage(v, "size", nil)
 	n := 0
 	if sz.Kind == "number" {
@@ -365,7 +385,7 @@ func (obj *ObjectServer) arrayToStrings(v Value) []string {
 	out := make([]string, 0, n)
 	for i := 0; i < n; i++ {
 		el := obj.sendMessage(v, "at:", []Value{NumVal(float64(i))})
-		out = append(out, el.String())
+		if el.Kind != "string" { panic(signalError{msg:fmt.Sprintf("Process argument %d must be a string; received %s",i,el.Kind)}) } else { out = append(out, el.Str) }
 	}
 	return out
 }

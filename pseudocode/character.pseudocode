@@ -1,0 +1,3 @@
+Character messages provide Unicode code-point/string conversion, case conversion,
+classification and comparisons. Values are Unicode scalar characters and execute
+locally. Unsupported messages signal with the receiver and selector.

@@ -63,8 +63,5 @@ func callNilMethod(obj *ObjectServer, method string, args []Value) Value {
 		return False
 	}
 
-	if obj != nil {
-		obj.transcriptf("Nil doesNotUnderstand: %s", method)
-	}
-	return Nil
+	return unsupportedMessage(Nil, "Nil", method, args)
 }

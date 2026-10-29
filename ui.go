@@ -88,7 +88,7 @@ tr:hover td{background:#f5f5f5;cursor:pointer}
 
 <div id="main">
   <div id="left">
-    <div class="pane-heading"><strong>Expression</strong><kbd>Ctrl + Enter</kbd></div>
+    <div class="pane-heading"><strong>Expression</strong><select id="playground-starter" aria-label="Load a starter expression" onchange="loadPlaygroundStarter(this.value)"><option value="">Load starter…</option><option value="counter">An object and messages</option><option value="files">Explore files</option><option value="command">Run a command</option><option id="playground-restore" value="restore" hidden>Restore my expression</option></select><kbd>Ctrl + Enter</kbd></div>
     <textarea id="code">"Spawn a counter and poke it"
 c := Counter new.
 c increment.
@@ -219,7 +219,7 @@ async function showInspect(id, preserveCall = false) {
     if (!r.ok) return;
     const d = await r.json();
     if (version !== inspectionVersion || inspectedId !== id) return;
-    document.getElementById('mtitle').textContent = d.className;
+    document.getElementById('mtitle').textContent = resultClassName(d.className);
     document.getElementById('midentity').textContent = id;
     const runtime = d.runtime || {};
     const debugBusy = runtime.debug && ['queued','running','paused'].includes(runtime.debug.state);

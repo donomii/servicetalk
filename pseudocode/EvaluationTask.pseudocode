@@ -1,0 +1,3 @@
+EvaluationTask has title and completion state, initially Untitled and false.
+title/title: read/write its label. completed reads completion; complete and reopen
+set it. Mutators return self. summary appends the human-readable completion state.

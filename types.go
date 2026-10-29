@@ -406,6 +406,8 @@ type InteractionRequest struct {
  RecordingID string `json:"recordingId"`
 }
 type InteractionResult struct {
+ Request *InteractionRequest `json:"request,omitempty"`
+ CaptureError string `json:"captureError,omitempty"`
  Result Value `json:"result"`
  Output string `json:"output"`
  Handle string `json:"handle,omitempty"`

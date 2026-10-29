@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"bytes"
 	"encoding/json"
 	"strings"
@@ -94,7 +95,11 @@ func (ctx *EvalCtx) evalSymbol(name string) Value {
 	// returning Nil — preserves the current "undefined identifier
 	// reads as nil" semantics inside class methods.
 	if ctx.selfOverride != nil && ctx.selfOverride.Kind == "objid" {
-		return ctx.obj.sendMessage(*ctx.selfOverride, name, nil)
+		if ctx.obj.sendMessage(*ctx.selfOverride, "respondsTo:", []Value{StrVal(name)}).Truthy() || ctx.obj.sendMessage(*ctx.selfOverride, "respondsTo:", []Value{StrVal("doesNotUnderstand:")}).Truthy() {
+			return ctx.obj.sendMessage(*ctx.selfOverride, name, nil)
+		} else {
+			return Nil
+		}
 	}
 	return Nil
 }
@@ -404,15 +409,11 @@ func (ctx *EvalCtx) evalSend(node *Node) Value {
 // method lookup starts from the superclass of the class whose body is
 // running — so an override can delegate to the version it shadows.
 func (ctx *EvalCtx) evalSuperSend(method string, args []Value) Value {
-	if ctx.definingClass == nil || ctx.definingClass.Superclass == nil {
-		name := "<unknown>"
-		if ctx.obj != nil && ctx.obj.classDef != nil {
-			name = ctx.obj.classDef.Name
-		}
-		ctx.obj.transcriptf("super: %s has no superclass (selector %s)", name, method)
-		return Nil
+	if ctx.definingClass == nil {
+		panic(signalError{msg: fmt.Sprintf("super send %q requires a method with a defining class", method)})
+	} else {
+		return ctx.obj.callMethodFrom(ctx.definingClass.Superclass, method, args)
 	}
-	return ctx.obj.callMethodFrom(ctx.definingClass.Superclass, method, args)
 }
 
 // dispatchValue routes a message to a target value: primitives (number,
@@ -542,19 +543,16 @@ func (ctx *EvalCtx) spawnInstance(className string) (Value, bool) {
 	reqBody, _ := json.Marshal(SpawnRequest{ClassName: className})
 	resp, err := rpcClient.Post(ctx.obj.coordinatorURL+"/spawn", "application/json", bytes.NewReader(reqBody))
 	if err != nil {
-		ctx.obj.transcriptf("new: spawn request failed: %v", err)
-		return Nil, false
+		panic(signalError{msg: fmt.Sprintf("new %s: spawn request to %s failed: %v", className, ctx.obj.coordinatorURL, err)})
 	}
 	defer resp.Body.Close()
 
 	var spawnResp SpawnResponse
 	if err := json.NewDecoder(resp.Body).Decode(&spawnResp); err != nil {
-		ctx.obj.transcriptf("new: spawn response decode error: %v", err)
-		return Nil, false
+		panic(signalError{msg: fmt.Sprintf("new %s: invalid spawn response from %s: %v", className, ctx.obj.coordinatorURL, err)})
 	}
 	if spawnResp.Error != "" {
-		ctx.obj.transcriptf("new: spawn error: %s", spawnResp.Error)
-		return Nil, false
+		panic(signalError{msg: fmt.Sprintf("new %s: spawn failed: %s", className, spawnResp.Error)})
 	}
 
 	newID := spawnResp.ObjectID

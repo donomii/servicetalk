@@ -4,12 +4,12 @@ const workbenchLayoutJS = `
 let objectEntries=[],inspectorSection='view',inspectorReturnFocus=null;
 function renderObjectList(){
  const query=document.getElementById('object-filter').value.toLowerCase(),internal=document.getElementById('object-internals').checked;
- const entries=objectEntries.filter(item=>(internal||!item.className.startsWith('__'))&&(!query||(item.className+' '+item.id).toLowerCase().includes(query)));
+ const entries=objectEntries.filter(item=>(internal||item.className==='__process__'||!item.className.startsWith('__'))&&(!query||(resultClassName(item.className)+' '+item.id).toLowerCase().includes(query))).sort((a,b)=>resultClassName(a.className).localeCompare(resultClassName(b.className))||a.id.localeCompare(b.id));
  document.getElementById('ocount').textContent=entries.length+' / '+objectEntries.length;
  const body=document.getElementById('otbody'),focused=body.contains(document.activeElement)?document.activeElement.dataset.objectId:null;body.replaceChildren();
  for(const item of entries){const row=document.createElement('tr');
-  row.innerHTML='<td class="cn">'+esc(item.className)+'</td><td class="oid">'+esc(item.id)+'</td>';
-  const cell=document.createElement('td'),button=document.createElement('button');button.className='object-open';button.dataset.objectId=item.id;button.textContent='Open';button.setAttribute('aria-label','Open '+item.className+' '+item.id);button.onclick=event=>{event.stopPropagation();showInspect(item.id);};cell.append(button);row.append(cell);row.onclick=()=>showInspect(item.id);body.append(row);if(focused===item.id)button.focus({preventScroll:true});else{}
+  row.innerHTML='<td class="cn">'+esc(resultClassName(item.className))+'</td><td class="oid">'+esc(item.id)+'</td>';
+  const cell=document.createElement('td'),button=document.createElement('button');button.className='object-open';button.dataset.objectId=item.id;button.textContent='Open';button.setAttribute('aria-label','Open '+resultClassName(item.className)+' '+item.id);button.onclick=event=>{event.stopPropagation();showInspect(item.id);};cell.append(button);row.append(cell);row.onclick=()=>showInspect(item.id);body.append(row);if(focused===item.id)button.focus({preventScroll:true});else{}
  }
  if(!entries.length){const row=document.createElement('tr'),cell=document.createElement('td');cell.colSpan=3;cell.textContent=query?'No matching objects':'No objects to show';row.append(cell);body.append(row);}else{}
 }

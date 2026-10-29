@@ -1,0 +1,9 @@
+controlReplayRequest(request) -> replay request or capture error
+    For ordinary standard Control invoke/write: calls, snapshot loaded methods and bindings before execution.
+    Compare action and receiver-lookup method bodies with canonical forwarding behavior, ignoring source line positions.
+    Keep overridden actions or receiver lookup behavior as their original object calls.
+    For a standard action, capture its bound selector and argument values; for a setter, capture its bound setter and supplied value.
+    Resolve default inherited receivers through retained owner fields and InspectorView target, rejecting cycles and excessive depth.
+    A standard Wiring action records a run message to its graph.
+    Return metadata errors instead of generating an action pointing at the wrong object.
+    Actual execution still invokes the original live control.

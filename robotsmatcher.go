@@ -112,8 +112,7 @@ func (obj *ObjectServer) callRobotsMatcherMethod(name string, args []Value) Valu
 		return NumVal(float64(len(st.groups)))
 	}
 
-	obj.transcriptf("RobotsMatcher doesNotUnderstand: %s", name)
-	return Nil
+	return unsupportedMessage(ObjVal(obj.id), "RobotsMatcher", name, args)
 }
 
 func (obj *ObjectServer) robotsMatcherState() *robotsState {

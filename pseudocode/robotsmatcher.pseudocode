@@ -1,0 +1,2 @@
+RobotsMatcher is an object whose messages parse and query robots exclusion rules.
+Unsupported messages signal with object identity and selector instead of nil.

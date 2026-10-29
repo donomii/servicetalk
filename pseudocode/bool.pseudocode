@@ -1,0 +1,3 @@
+Boolean messages provide not, short-circuit and/or, xor, conditional block
+execution, equality and identity/display metadata. Unsupported messages signal
+with the receiver and selector.

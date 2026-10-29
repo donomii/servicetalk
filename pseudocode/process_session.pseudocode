@@ -1,0 +1,10 @@
+input: sets text to send to subprocess standard input; reject changes after start.
+environment: accepts a Dictionary of string overrides and nil unsets.
+    Snapshot the inherited environment plus overrides before launching.
+    Reject invalid names/values and changes after start.
+    Resolve program names using the resulting PATH and working directory.
+    Environment keys compare without case on Windows and remain case-sensitive elsewhere.
+stdout, stderr, error and directory return captured stream/configuration details.
+inspectorMetadata describes status, exit code, command, directory and method arguments.
+inspectorViews displays command/status/directory, separate output streams and start error, with Wait and Stop actions.
+Output caps show one truncation marker even when additional output follows a write ending exactly at the cap.

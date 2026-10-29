@@ -1,0 +1,8 @@
+TestShellFilesAndSessionState exercises real object messages for paths with spaces/metacharacters, read/write/append, directory creation, recursive search, literal text search and separate environment overrides. Assert failures signal and failed navigation preserves cwd.
+TestShellChildProcess is a controlled subprocess reporting cwd, environment, stdin and a literal argument, with separate diagnostics and exit seven.
+TestShellProcessStreamsInputAndEnvironment launches that subprocess through Shell, checks outputs and retained jobs, verifies inspect returns, rejects process reuse and checks launch failure status/exit/context.
+TestProcessSessionPathOverride verifies program lookup honors the supplied environment PATH.
+TestShellClassPathPrefersCurrentAndExplicitClasses checks modern default Shell and user override precedence, with fallback paths propagated to children.
+TestProcessRejectsMalformedStarts verifies malformed argument vectors, nonstring command/directory and missing arguments signal before execution.
+TestProcessOutputExactLimitReportsTruncation checks combined and separate stream markers at the exact cap boundary.
+TestShellHomeUsesSessionEnvironment checks distinct session home overrides, home expansion and explicit error when home is unset.

@@ -1,0 +1,7 @@
+Number messages evaluate arithmetic, comparisons, numeric conversions, bitwise
+operations, predicates and range/block iteration locally. Unary math includes
+square root, powers, logarithms, trigonometry, factorial and rounding.
+Division, integer division and remainder require one nonzero numeric divisor;
+reciprocal requires a nonzero receiver. Invalid divisors signal a numeric error.
+Missing methods fall back to loaded Number class methods; remaining unsupported
+messages signal with the receiver and selector instead of returning nil.

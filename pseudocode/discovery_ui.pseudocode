@@ -5,3 +5,4 @@ captureInputBindings: sample named workspace values before an interactive expres
 captureExpression: construct an editable expression for a Playground evaluation, object-workspace expression or typed receiver message, carrying captured receiver/argument references.
 saveInteractionExample: create a RunnableExample, retain its inputs and observed result, leave its check empty and open it in Examples.
 showObservedExample: show the recorded result and optionally populate an equality check for primitive values after explicit acceptance.
+loadPlaygroundStarter fills the editor with an object/messages, directory-listing or explicit-command example without running it. Preserve the original editor text while switching starters and offer Restore my expression until it is restored.

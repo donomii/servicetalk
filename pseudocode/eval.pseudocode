@@ -1,2 +1,10 @@
 
 Block creation includes the current self override for later evaluation and nested closures.
+Super sends require a defining class. Start lookup above that class, including
+the ordinary missing-method handler and default no-argument initializer when
+there is no parent. Unsupported super sends signal instead of returning nil.
+Class construction failures signal with the class name and coordinator/error
+details, so missing classes cannot make script tests or MCP evaluations succeed.
+An unresolved bare identifier in a bound workspace sends a unary message only
+when the target supports it or supplies doesNotUnderstand:. Otherwise return nil,
+preserving scratch-variable isolation. Explicit sends still signal if unsupported.

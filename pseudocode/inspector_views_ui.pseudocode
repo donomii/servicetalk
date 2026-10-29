@@ -11,3 +11,5 @@ Mark the selected view tab with pressed state; display the live view title besid
 
 
 Place each control action result in a persistent result area across view refresh; carry its visible label to example capture.
+View text values show their content without source-language quotes. Value controls mark their runtime kind so numbers can be emphasized while paths/status/text remain readable at ordinary size; code outputs wrap and scroll within the view.
+Refresh view explicitly rereads the saved layout and its getters while preserving the separate action-result area, allowing users to update process status/output or other external state.

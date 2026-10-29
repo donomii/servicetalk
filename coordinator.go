@@ -659,6 +659,9 @@ func shellNames() []string {
 		// Shell methods
 		"ls", "pwd", "cd:", "home", "cwd", "help",
 		"getenv:", "exec:", "run:", "cat:", "jobs",
+		"write:text:", "append:text:", "mkdir:", "find:", "grep:in:",
+		"env:", "env:put:", "unsetEnv:", "environment", "lastProcess",
+		"exec:args:", "run:args:", "exec:args:input:", "run:args:input:", "checked:args:",
 		// Common classes
 		"Counter", "Process", "Dictionary", "Array",
 		"HttpClient", "HttpServer", "RobotsMatcher", "SitemapParser",
@@ -1662,7 +1665,7 @@ func (c *Coordinator) sendObjectID(id string, method string, args []Value, timeo
 // handleUI serves the web REPL interface.
 func (c *Coordinator) handleUI(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	fmt.Fprint(w, uiHTML)
+	io.WriteString(w, uiHTML)
 }
 
 // ---- Coordinator as a Smalltalk object ----
@@ -1878,8 +1881,7 @@ func (c *Coordinator) dispatchCoordinatorMethod(method string, args []Value) Val
 		return StrVal("coordinator: shutting down")
 
 	default:
-		fmt.Printf("[coordinator] doesNotUnderstand: %s\n", method)
-		return Nil
+		return unsupportedMessage(ObjVal(coordinatorID), "Coordinator", method, args)
 	}
 }
 

@@ -1,0 +1,3 @@
+HttpServer is an object whose messages start/stop HTTP listening and route
+requests to a target handler. Unsupported messages signal with object identity
+and selector instead of returning nil.

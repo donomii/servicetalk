@@ -1,0 +1,4 @@
+TestControlRecordingReplaysAgainstCreatedReceiver records object creation, a button and an input setter, then replays the generated test against the recreated receiver while leaving the original unchanged.
+TestControlRecordingPreservesOverridesAndReportsMetadataErrors verifies metadata failure surfaces without suppressing the real action or exporting a misleading record; custom invoke overrides retain their original message.
+TestControlRecordingNormalizesWiring verifies standard Wiring buttons export a run message to the graph.
+TestControlRecordingCapturesBindingBeforeActionChangesIt checks an action that changes its own selector records the original message and arguments.

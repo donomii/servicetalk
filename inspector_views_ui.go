@@ -25,6 +25,7 @@ async function loadInspectorViews(id,inspection,version){
         async function render(){body.replaceChildren();
         const controls=document.createElement('div');controls.className='view-tools';
         const title=document.createElement('strong');title.textContent=view.definition.title||definition.title||definition.id;controls.appendChild(title);
+        controls.appendChild(navButton('Refresh view',()=>select(definition)));
         controls.appendChild(navButton('Inspect view object',()=>showInspect(view.objectId)));
         controls.appendChild(navButton('Edit layout',()=>editInspectorView(view,id,body,version)));
         body.appendChild(controls);
@@ -51,7 +52,7 @@ function editInspectorView(view,id,container,version){
 }
 function viewValue(container,value){
   if(value && value.kind==='objid'){container.appendChild(objectLink(value.objid));}
-  else{container.appendChild(document.createTextNode(value && value.kind?fmtVal(value):typeof value==='object'?JSON.stringify(value):String(value??'')));}
+  else{container.appendChild(document.createTextNode(value?.kind==='string'?value.str||'':value && value.kind?fmtVal(value):typeof value==='object'?JSON.stringify(value):String(value??'')));}
 }
 async function viewRead(node,id,preview=false){
   if(node.controlId&&!preview)return inspectorCall(node.controlId,'read',[]);else{}
@@ -75,7 +76,7 @@ async function renderViewNode(node,id,parent,version,depth,decorate,path=[],inhe
         for(const [index,child]of (node.children||[]).entries())await renderViewNode(child,id,element,version,depth+1,decorate,[...path,index],receiver);
         break;
       case 'text':case 'value':case 'code':{
-        const value=await viewRead(node,receiver,!!decorate);const output=document.createElement(node.kind==='code'?'pre':'span');viewValue(output,value);element.appendChild(output);break;
+        const value=await viewRead(node,receiver,!!decorate);const output=document.createElement(node.kind==='code'?'pre':'span');output.dataset.kind=value.kind;viewValue(output,value);element.appendChild(output);break;
       }
       case 'input':case 'slider':case 'textarea':{
         const value=await viewRead(node,receiver,!!decorate);const kind=node.type||value.kind;const row=document.createElement('div');row.className='marg';

@@ -4,3 +4,9 @@ Result counts tolerate a toolbar without a Results tool and preserve a custom bu
 
 
 Sample workspace inputs before evaluation and retain the request and input metadata with the result. Successful evaluations, calls and workspace results offer Save as example. Clearing output restores discovery actions.
+Prefer a normalized server replay request for control actions while preserving the visible label. Propagate server binding-capture errors so example creation cannot silently capture the wrong action.
+
+renderResult presents the value with a type label, readable text preserving line breaks, or a class-labelled Inspect button and subdued object identity. Printed output is separate. Keep Use in Playground and Save as example visible; put naming, argument selection and release inside More actions. Report action success or failure beside the result. Reusing a result closes overlay panels and inserts its retained handle at the Playground selection. Releasing removes its reuse controls and retained reference.
+showResultShelf lists newest results first with their originating expression or method, and gives a useful empty state before any interaction.
+
+presentResultObject reads a returned object's inspection snapshot without sending getters. Show its class and explicit Inspect action. For arrays and dictionaries, preview at most 80 indexed items or sorted entries, preserving typed values and clickable object references; report total size and truncation. Keep the ordinary object inspector available. A removed result ignores late preview responses.

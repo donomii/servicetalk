@@ -31,7 +31,7 @@ func TestRunnableExamplesCatalogAndIsolation(t *testing.T) {
  base:=interactiveTestRuntime(t)
  sourceTestEval(t,base,"counter := Counter new. counter add: 99")
  catalog:=testExamples(t,base)
- if len(catalog.Examples)!=7 || catalog.Workbench=="" { t.Fatalf("catalog: %+v",catalog) } else {}
+ if len(catalog.Examples)!=11 || catalog.Workbench=="" { t.Fatalf("catalog: %+v",catalog) } else {}
  workspaces:=map[string]bool{}
  for _,example:=range catalog.Examples {
   if workspaces[example.Workspace] || example.Workspace=="" { t.Fatalf("examples share workspace: %+v",example) } else { workspaces[example.Workspace]=true }
