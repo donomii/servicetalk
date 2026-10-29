@@ -152,6 +152,7 @@ func (natsCoreTransport) Subscribe(subject string, handler func(MessageRequest, 
 func (obj *ObjectServer) dispatchNATSCall(req MessageRequest, msg natsResponder) {
 	runtimeCounters.callsIn.Add(1)
 	obj.callsReceived.Add(1)
+	if obj.serviceConcurrentMethod(req.Method) { go obj.replyToNATSControlCall(req, msg); return } else {}
 	if obj.isActiveChain(req.ChainID) {
 		obj.replyToNATSCall(req, msg)
 		return
@@ -237,7 +238,7 @@ func (obj *ObjectServer) rejectNATSCall(req MessageRequest, msg natsResponder, r
 
 func isControlMethod(method string) bool {
 	switch method {
-	case "pulse:", "class", "__inspectJson", "__metricsJson", "__debugStart:", "__debugCommand:", "__debugJson", "__trace:", "__traceJson", "__nativeSnapshotJson", "__controlState", "__controlOwner", "__controlOwner:", "__controlConfigure:owner:children:":
+	case "pulse:", "class", "__inspectJson", "__metricsJson", "__debugStart:", "__debugCommand:", "__debugJson", "__trace:", "__traceJson", "__nativeSnapshotJson", "__controlState", "__controlOwner", "__controlOwner:", "__controlConfigure:owner:children:", "__forceShutdown":
 		return true
 	default:
 		return false
@@ -368,9 +369,13 @@ func messageCallTimeout(method string, args []Value) time.Duration {
 	const responseOverhead = 5 * time.Second
 	argumentIndex := -1
 	switch method {
+	case "prepareClass:", "prepareSource:":
+		return spawnTimeout() + defaultTimeout + responseOverhead
+	case "call:arguments:", "check:selector:arguments:expect:":
+		return defaultTimeout + responseOverhead
 	case "await:", "awaitPromise:":
 		argumentIndex = 0
-	case "parallelSend:withEach:timeoutMs:":
+	case "parallelSend:withEach:timeoutMs:", "call:arguments:timeoutMs:":
 		argumentIndex = 2
 	case "getWithTimeout:timeoutMs:", "get:timeoutMs:":
 		argumentIndex = 1

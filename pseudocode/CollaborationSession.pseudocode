@@ -1,0 +1,11 @@
+CollaborationSession retains participants, board, activity, sequence and pending binding transfers in the ordinary shared object pool.
+joinName:kind: creates a SessionParticipant, registers it and returns its identity.
+activeParticipant: rejects identities outside this session and participants who have left.
+leave: validates membership and releases the participant workspace through its leave method.
+publish:value:expected:by: validates active membership and exact nonnegative integer revision, compares the current revision atomically, creates a publication if absent, and retains the new typed value. A new name requires revision zero.
+unpublish:expected:by: requires an existing present publication and matching revision, then clears its value while preserving a revision tombstone.
+publication: returns a present publication or signals that the name is absent or removed.
+prepareBinding:for: validates membership and retains a transfer containing the publication value and participant workspace. Return the transfer identity without waiting for the workspace.
+releaseBinding: releases a finished transfer.
+record: appends attributed serialized activity with an increasing sequence; keep the latest 200 entries.
+snapshot returns JSON describing participant, publication and activity state through the narrow runtime snapshot primitive.

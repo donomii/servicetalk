@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
@@ -13,6 +14,7 @@ import (
 func classBundleFromClassPath() (*SourceBundle, error) {
 	seenDirs := map[string]bool{}
 	seenFiles := map[string]bool{}
+	seenClasses := map[string]bool{}
 	var files []SourceBundleFile
 	for _, dir := range classPath {
 		if dir == "" {
@@ -34,6 +36,7 @@ func classBundleFromClassPath() (*SourceBundle, error) {
 		if err != nil {
 			return nil, err
 		}
+		collected = bundleSelectedClasses(collected, seenClasses)
 		for _, file := range collected {
 			if seenFiles[file.Path] {
 				continue
@@ -109,7 +112,7 @@ func skipForeignGeneratedFile(className string, path string) bool {
 	if base == className || base == className+".exe" {
 		return true
 	}
-	return strings.HasPrefix(base, "_st_") || base == ".gitignore"
+	return strings.HasPrefix(base, "_st_") || base == "_st.h" || base == ".gitignore"
 }
 
 func readBundleFile(root string, path string) (SourceBundleFile, error) {
@@ -165,24 +168,37 @@ func stageSourceBundle(bundle *SourceBundle) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	if err := os.MkdirAll(root, 0755); err != nil { return "", err } else {}
 	dst := filepath.Join(root, bundle.Digest)
-	if err := os.MkdirAll(dst, 0755); err != nil {
-		return "", err
-	}
+	if exists, err := existingSourceBundle(dst, bundle.Files); exists || err != nil { if err == nil { err = ensureSourceBundleManifest(dst, bundle) } else {}; return dst, err } else {}
+	temporary, err := os.MkdirTemp(root, ".stage-")
+	if err != nil { return "", err } else {}
+	defer os.RemoveAll(temporary)
 	for _, file := range bundle.Files {
 		rel, err := safeBundlePath(file.Path)
-		if err != nil {
-			return "", err
-		}
-		out := filepath.Join(dst, rel)
-		if err := os.MkdirAll(filepath.Dir(out), 0755); err != nil {
-			return "", err
-		}
-		if err := os.WriteFile(out, file.Data, 0644); err != nil {
-			return "", err
-		}
+		if err != nil { return "", err } else {}
+		out := filepath.Join(temporary, rel)
+		if err := os.MkdirAll(filepath.Dir(out), 0755); err != nil { return "", err } else {}
+		if err := os.WriteFile(out, file.Data, 0644); err != nil { return "", err } else {}
 	}
-	return dst, nil
+	if err := ensureSourceBundleManifest(temporary, bundle); err != nil { return "", err } else {}
+	if err := os.Rename(temporary, dst); err != nil {
+		if exists, existingErr := existingSourceBundle(dst, bundle.Files); exists && existingErr == nil { return dst, ensureSourceBundleManifest(dst, bundle) } else { return "", fmt.Errorf("publish source bundle %s: %w", bundle.Digest, err) }
+	} else { return dst, nil }
+}
+
+func existingSourceBundle(directory string,files []SourceBundleFile) (bool,error) {
+ seen:=map[string]bool{}
+ for _,file:=range files {
+  path,err:=safeBundlePath(file.Path)
+  if err!=nil { return false,err } else if seen[path] { return false,fmt.Errorf("duplicate source bundle path %q",file.Path) } else { seen[path]=true }
+ }
+ if _,err:=os.Stat(directory);os.IsNotExist(err) { return false,nil } else if err!=nil { return false,err } else {}
+ for _,file:=range files {
+  content,err:=os.ReadFile(filepath.Join(directory,filepath.FromSlash(file.Path)))
+  if err!=nil { return true,fmt.Errorf("cached source bundle is incomplete at %s: %w",file.Path,err) } else if !bytes.Equal(content,file.Data) { return true,fmt.Errorf("cached source bundle differs at %s; immutable sources were modified",file.Path) } else {}
+ }
+ return true,nil
 }
 
 func sourceBundleCacheRoot() (string, error) {
@@ -209,4 +225,19 @@ func safeBundlePath(path string) (string, error) {
 		return "", fmt.Errorf("invalid bundle path %q", path)
 	}
 	return rel, nil
+}
+
+// Bundle flattening preserves the loader's directory and source-format precedence.
+func bundleSelectedClasses(files []SourceBundleFile,seen map[string]bool) []SourceBundleFile {
+ ranks:=map[string]int{}
+ for _,file:=range files { name,rank:=bundleClassSource(file.Path);if previous,exists:=ranks[name];!exists || rank<previous { ranks[name]=rank } else {} }
+ selected:=[]SourceBundleFile{}
+ for _,file:=range files { name,rank:=bundleClassSource(file.Path);if !seen[name] && rank==ranks[name] { selected=append(selected,file) } else {} }
+ for name:=range ranks { seen[name]=true }
+ return selected
+}
+
+func bundleClassSource(path string) (string,int) {
+ if name,_,nested:=strings.Cut(path,"/");nested { return name,2 } else {}
+ if strings.HasSuffix(path,".smt") { return strings.TrimSuffix(path,".smt"),0 } else { return strings.TrimSuffix(path,".st"),1 }
 }

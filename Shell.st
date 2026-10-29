@@ -28,6 +28,25 @@ class Shell [
     environment [ ^ environment ]
     jobs [ ^ jobs ]
     lastProcess [ ^ lastProcess ]
+    terminal: program args: arguments [
+        lastProcess := Terminal new.
+        lastProcess environment: environment.
+        jobs add: lastProcess.
+        lastProcess start: program args: arguments cwd: cwd.
+        ^ lastProcess
+    ]
+    pipeline: stages [ ^ self pipeline: stages outputFile: '' ]
+    pipeline: stages outputFile: path [ ^ self pipeline: stages input: '' outputFile: path ]
+    pipeline: stages input: text outputFile: path [
+        lastProcess := Pipeline new.
+        lastProcess environment: environment.
+        lastProcess input: text.
+        jobs add: lastProcess.
+        lastProcess start: stages cwd: cwd outputFile: (path = '' ifTrue: [ '' ] ifFalse: [ self resolvePath: path ]).
+        ^ lastProcess
+    ]
+    completeCommand: prefix [ ^ self __shellComplete: prefix directory: cwd environment: environment mode: 'command' ]
+    completePath: prefix [ ^ self __shellComplete: prefix directory: cwd environment: environment mode: 'path' ]
     prepareProcess: input [
         lastProcess := Process new.
         lastProcess environment: environment.
@@ -63,7 +82,7 @@ class Shell [
             ('Command failed in ' , cwd , ' (exit ' , lastProcess exitCode asString , '): ' , lastProcess command , ' / ' , lastProcess error , lastProcess stderr) signal
         ]
     ]
-    help [ ^ 'Shell new creates a session. cd: changes its directory; ls lists names; cat: reads; write:text: and append:text: save text; mkdir: creates directories; find: matches names recursively; grep:in: finds text. run:args: returns a Process with stdout, stderr and exitCode. exec:args: starts a background job; jobs lists this session''s jobs. env:put: sets an environment override. run:args:input: passes text to stdin. Methods and Workspace accept normal Smalltalk expressions.' ]
-    inspectorMetadata [ ^ '{"properties":[{"name":"Directory","getter":"pwd","setter":"cd:","type":"string"}],"methods":{"cd:":{"arguments":[{"name":"path","type":"string"}],"returns":"string"},"cat:":{"arguments":[{"name":"path","type":"string"}],"returns":"string"},"find:":{"arguments":[{"name":"pattern","type":"string"}],"returns":"objid"},"write:text:":{"arguments":[{"name":"path","type":"string"},{"name":"text","type":"string"}],"returns":"string"},"grep:in:":{"arguments":[{"name":"text","type":"string"},{"name":"path","type":"string"}],"returns":"objid"},"run:args:":{"arguments":[{"name":"program","type":"string"},{"name":"arguments","type":"objid"}],"returns":"objid"},"exec:args:":{"arguments":[{"name":"program","type":"string"},{"name":"arguments","type":"objid"}],"returns":"objid"},"env:put:":{"arguments":[{"name":"name","type":"string"},{"name":"value","type":"string"}],"returns":"objid"}}}' ]
+    help [ ^ 'Shell new creates a session. cd: changes its directory; ls lists names; cat: reads; write:text: and append:text: save text; mkdir: creates directories; find: matches names recursively; grep:in: finds text. run:args: returns a Process with stdout, stderr and exitCode. exec:args: starts a background job; jobs lists this session''s jobs. env:put: sets an environment override. run:args:input: passes text to stdin. terminal:args: opens an interactive Terminal. pipeline: connects argument Arrays with streaming pipes; pipeline:outputFile: writes the final bytes to a file. completeCommand: and completePath: offer matching names. Methods and Workspace accept normal Smalltalk expressions.' ]
+    inspectorMetadata [ ^ '{"properties":[{"name":"Directory","getter":"pwd","setter":"cd:","type":"string"}],"methods":{"cd:":{"arguments":[{"name":"path","type":"string"}],"returns":"string"},"cat:":{"arguments":[{"name":"path","type":"string"}],"returns":"string"},"find:":{"arguments":[{"name":"pattern","type":"string"}],"returns":"objid"},"write:text:":{"arguments":[{"name":"path","type":"string"},{"name":"text","type":"string"}],"returns":"string"},"grep:in:":{"arguments":[{"name":"text","type":"string"},{"name":"path","type":"string"}],"returns":"objid"},"run:args:":{"arguments":[{"name":"program","type":"string"},{"name":"arguments","type":"objid"}],"returns":"objid"},"exec:args:":{"arguments":[{"name":"program","type":"string"},{"name":"arguments","type":"objid"}],"returns":"objid"},"terminal:args:":{"arguments":[{"name":"program","type":"string"},{"name":"arguments","type":"objid"}],"returns":"objid"},"pipeline:":{"arguments":[{"name":"stages","type":"objid"}],"returns":"objid"},"pipeline:outputFile:":{"arguments":[{"name":"stages","type":"objid"},{"name":"path","type":"string"}],"returns":"objid"},"completeCommand:":{"arguments":[{"name":"prefix","type":"string"}],"returns":"objid"},"completePath:":{"arguments":[{"name":"prefix","type":"string"}],"returns":"objid"},"env:put:":{"arguments":[{"name":"name","type":"string"},{"name":"value","type":"string"}],"returns":"objid"}}}' ]
     inspectorViews [ ^ '{"views":[{"id":"shell","title":"Shell session","body":{"kind":"column","children":[{"kind":"input","label":"Directory","getter":"pwd","setter":"cd:","type":"string"},{"kind":"row","children":[{"kind":"action","text":"List files","method":"ls"},{"kind":"action","text":"Show jobs","method":"jobs"},{"kind":"action","text":"Last process","method":"lastProcess"}]},{"kind":"code","label":"Try in Workspace","text":"self ls.\nself find: ''*.st''.\n(self run: ''go'' args: #(''version'')) stdout"}]}}]}' ]
 ]

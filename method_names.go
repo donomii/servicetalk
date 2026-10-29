@@ -19,6 +19,7 @@ func (obj *ObjectServer) inspectionMethodNames() []string {
 		methods = []string{"parse:", "pageUrls", "indexUrls", "empty"}
 	case BuiltinClassProcess:
 		methods = []string{"start:", "start:cwd:", "start:args:", "start:args:cwd:", "input:", "environment:", "output", "outputLines", "stdout", "stderr", "error", "directory",
+			"terminalStart:args:cwd:columns:rows:", "terminalWrite:", "terminalRead", "terminalReadFrom:", "terminalOutput", "terminalDropped", "terminalResizeColumns:rows:", "pipeline:cwd:outputFile:", "pipelineExitCodes",
 			"status", "exitCode", "pid", "command", "signal:", "wait", "isRunning", "inspectorMetadata", "inspectorViews"}
 	case BuiltinClassBlock:
 		methods = []string{"value", "value:", "value:value:", "free"}

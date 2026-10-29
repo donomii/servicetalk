@@ -1,0 +1,5 @@
+forceShutdownAndExit stops a target from the control lane while ordinary execution is blocked.
+Kill its foreign child or owned Process job if present, deregister the target and exit after acknowledging.
+This operation intentionally invalidates direct references to the target; it does not migrate state.
+
+Forced foreign interruption marks the bridge before killing its child; an interrupted protocol call signals rather than silently returning nil.

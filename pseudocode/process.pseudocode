@@ -14,3 +14,7 @@ isRunning reads the running state. signal: sends a supported operating-system si
 inspect prints status and capture size without nested locking.
 free kills a running child and deregisters the object.
 Unknown selectors signal a missing-method error.
+
+Dispatch PTY launch/input/output/cursor/resize methods to the terminal module, and pipeline launch/status methods to the pipeline module.
+Process state additionally owns a master terminal, bounded pending/recent terminal bytes and offsets, or pipeline commands and per-stage exits.
+signal: addresses the complete terminal or pipeline process groups on Unix; ordinary Process signal behavior is preserved.

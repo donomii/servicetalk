@@ -269,7 +269,7 @@ Work from the top. Preserve system integration and separate objects/processes ac
 15. **Semantic refactoring — selector rename implemented.** Parsed previews locate native definitions and sends, preserve bindings/comments/literals, flag literal references for review, and save selected files through the digest-checked source editor with Git history. Broader transformations remain suitable for AI assistance.
 16. **Runnable documentation/examples — implemented.** Editable RunnableExample objects own isolated workspaces, executable checks and typed results. New workbenches include eleven demonstrations covering live objects, arithmetic, JSON and Shell tasks, and support adding examples.
 17. **Inspectable promises — implemented.** Ordinary Promise objects retain the receiver, argument snapshot and typed result/error, expose state and await operations, and remain inspectable while calls run. Inspector messages and wiring runs can execute asynchronously.
-18. **Changing behavior — native definition editor implemented.** Saved definitions apply to new object processes; old and new native instances coexist, verified with subprocess tests. Foreign source continues through its existing language/build tools; no live cross-language code replacement is assumed.
+18. **Changing behavior — definition editor and service generations implemented.** Saved definitions apply to new processes. Ordinary Service objects prepare native/foreign source snapshots, check candidates, promote a new route and drain old tracked calls. Direct old references retain their loaded behavior; force retirement is explicit. Existing and replacement C/native instances coexist; objects are not rewritten in place.
 19. **Prototypes / class versions — native experiment implemented.** Derive an object's fields and method overrides without editing a class file; derived objects can be cloned again. Loaded definition digests distinguish coexisting behavior versions. No live foreign-runtime rewriting is assumed.
 20. **Object mobility — research recorded in SPEC.** Native snapshot copies can spawn on workers. Preserving identity would need mailbox quiescence, subject/registry handoff, in-flight-call accounting and resource-specific transfer adapters. Arbitrary cross-language/OS migration remains outside this research-only item.
 
@@ -279,9 +279,20 @@ Five executable programs in examples/evaluation exercise arithmetic/FizzBuzz/clo
 
 Shell now supplies persistent cwd/environment/jobs, checked file operations and command execution with stdin and separate output streams. Actual evaluation tasks created and searched text files, used sort then uniq for a word-count report, copied/renamed paths containing spaces and punctuation, passed session environment variables, started/stopped a background sleep and made a local HTTP request. The UI pass tested result reuse, file/command starters, collection previews, Process inspection, a recorded counter action and debugger stepping, including a 390-pixel layout. Recording standard controls now captures their bound messages so recreated receivers are reused correctly.
 
-Useful next shell experiments:
+Shell follow-up implemented:
 
-- A PTY-backed terminal object for interactive applications, terminal resize and keyboard input.
-- Byte-valued file I/O and streaming process connections for binary data and large pipelines; current command composition transfers captured text.
-- Command/filename completion and argument assistance in the Playground, building on the terminal shell's existing completion.
+- Ordinary Terminal objects provide PTY input, resize, interrupt, job control and an interactive browser terminal. Independent byte cursors let people and agents read the same terminal without consuming one another's output.
+- Ordinary Pipeline objects connect argument Arrays through streaming operating-system pipes, report every stage's exit code and optionally write uncapped raw final output to a file.
+- Shell command/path completion uses the session directory and environment. The Shell panel offers executable suggestions, one-argument-per-line input and file-argument selection; terminal REPL quoted completion uses the same object methods.
+
+Remaining shell/discovery options:
+
+- Byte-valued general file I/O. Pipeline connections and redirected files now preserve bytes; regular Shell cat:/write:text: and Process captured values remain text.
+- Inline Playground argument/completion assistance beyond the dedicated Shell panel and terminal REPL.
 - Recording dependency views for objects nested in returned collections, so the user can choose which external objects to recreate or reuse.
+
+## Shared sessions and service replacement — 2026-10-29
+
+- **Collaboration foundation — implemented.** People and agents join one live object pool with names and independent scratch workspaces. Shared publications retain actual references, revision comparisons reject conflicting updates, tombstones prevent stale restoration, and notes/activity identify the participant. Browser and MCP clients use the same objects. Leaving clears participant workspace retention while published values remain. A busy workspace binding does not block other session operations.
+- **Service replacement — implemented.** Prepare a new native or foreign generation, run an explicit readiness check, promote it for new routed calls and drain the previous generation's tracked work. Old direct references continue working until explicitly forced or no longer reachable. Failed preparation/checks preserve the active route, and uncertain completion remains visible rather than being called finished. The Services panel exposes prepare/check/promote/retire controls and ordinary inspectors.
+- **Collaboration follow-ups — optional.** Work claims/leases, automatic presence expiry and richer shared task views can be considered after the explicit participant/board/activity foundation. They are not implemented by join/leave or publication revision checks.

@@ -540,7 +540,7 @@ func (ctx *EvalCtx) evalNew(node *Node) Value {
 // send the message themselves; callers building built-ins (array
 // literals) skip it.  Returns ok=false after logging on spawn failure.
 func (ctx *EvalCtx) spawnInstance(className string) (Value, bool) {
-	reqBody, _ := json.Marshal(SpawnRequest{ClassName: className})
+	reqBody, _ := json.Marshal(generationSpawnRequest(SpawnRequest{ClassName: className}))
 	resp, err := rpcClient.Post(ctx.obj.coordinatorURL+"/spawn", "application/json", bytes.NewReader(reqBody))
 	if err != nil {
 		panic(signalError{msg: fmt.Sprintf("new %s: spawn request to %s failed: %v", className, ctx.obj.coordinatorURL, err)})
@@ -614,7 +614,7 @@ func (ctx *EvalCtx) evalBlock(node *Node) Value {
 		SelfOverride: ctx.selfOverride,
 	}
 
-	reqBody, _ := json.Marshal(SpawnRequest{ClassName: BuiltinClassBlock, BlockDef: bd})
+	reqBody, _ := json.Marshal(generationSpawnRequest(SpawnRequest{ClassName: BuiltinClassBlock, BlockDef: bd}))
 	resp, err := rpcClient.Post(ctx.obj.coordinatorURL+"/spawn", "application/json", bytes.NewReader(reqBody))
 	if err != nil {
 		ctx.obj.transcriptf("block: spawn failed: %v", err)

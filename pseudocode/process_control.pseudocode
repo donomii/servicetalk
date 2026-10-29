@@ -1,3 +1,7 @@
 Process observation and signal methods use the control mailbox while a caller waits for exit in the application mailbox.
 Classify only builtin Process reads, inspector metadata and signal sends this way; ordinary objects and Process launch/configuration retain serialized dispatch.
 Initialize each Process state exactly once; read its started/running state under its state lock.
+
+Terminal and Pipeline wrappers route observation, terminal input/resize and stop signals through the control mailbox as well.
+Their wrapper methods delegate straight to Process so nested self control sends cannot deadlock the lane.
+Process terminal cursor reads and pipeline stage exits remain observable during wait.

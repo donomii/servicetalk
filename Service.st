@@ -1,0 +1,21 @@
+"A stable address for independently built service generations."
+class Service [
+    | serviceState |
+    initialize [ ^ self ]
+    name [ ^ self __service: 'name' arguments: {} ]
+    name: text [ ^ self __service: 'name' arguments: {text} ]
+    status [ ^ self __service: 'status' arguments: {} ]
+    prepareClass: className [ ^ self __service: 'prepareClass' arguments: {className} ]
+    prepareSource: source [ ^ self __service: 'prepareSource' arguments: {source} ]
+    check: generation selector: selector arguments: arguments expect: expected [ ^ self __service: 'check' arguments: {generation. selector. arguments. expected} ]
+    promote: generation [ ^ self __service: 'promote' arguments: {generation} ]
+    current [ ^ self __service: 'current' arguments: {} ]
+    targetFor: generation [ ^ self __service: 'target' arguments: {generation} ]
+    call: selector arguments: arguments [ ^ self __service: 'call' arguments: {selector. arguments. 30000} ]
+    call: selector arguments: arguments timeoutMs: milliseconds [ ^ self __service: 'call' arguments: {selector. arguments. milliseconds} ]
+    retire: generation [ ^ self __service: 'retire' arguments: {generation} ]
+    discard: generation [ ^ self __service: 'discard' arguments: {generation} ]
+    forceRetire: generation [ ^ self __service: 'force' arguments: {generation} ]
+    clone [ ^ 'Service cannot be cloned; create Service new for an independent route' signal ]
+    cloneWith: patch [ ^ self clone ]
+]

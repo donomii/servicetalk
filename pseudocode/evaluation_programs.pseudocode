@@ -32,3 +32,7 @@ examples_promises_test:
 Run these programs with smt test examples/evaluation/*_test.smt from the repository
 directory. Each file starts in its own isolated runtime and fails by signaling.
 shell_tasks: start a Shell, send sample lines to sort, pass its output to uniq, check each exit, print the report and return the retained command jobs for inspection.
+
+shell_pipeline: stream literal sample lines through sort and uniq with a stable locale; verify both stage exits and exact counts, print the report, and return the inspectable Pipeline.
+
+shared_session: create a CollaborationSession with human and agent participants. Publish a Counter from the human workspace and bind the same reference into the agent workspace. Verify each participant sees the other's updates, reaching 12, while their scratch values remain independent. Print the shared result and return the Counter.

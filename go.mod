@@ -3,6 +3,7 @@ module smt
 go 1.25.0
 
 require (
+	github.com/creack/pty v1.1.24
 	github.com/nats-io/nats-server/v2 v2.14.2
 	github.com/nats-io/nats.go v1.52.0
 	golang.org/x/term v0.43.0

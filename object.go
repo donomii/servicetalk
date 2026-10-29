@@ -548,6 +548,12 @@ func (obj *ObjectServer) callMethod(name string, args []Value) Value {
 		return obj.workbenchReferences(args)
 	case "__shell:arguments:":
 		return obj.shellDispatch(args)
+	case "__service:arguments:":
+		return obj.serviceDispatch(args)
+	case "__shellComplete:directory:environment:mode:":
+		return obj.shellCompleteDispatch(args)
+	case "__collaborationSnapshot":
+		return obj.collaborationSnapshot()
 	case "__replaceView:", "__describeView", "__viewRoot", "__viewRoot:", "__controlState", "__controlOwner", "__controlOwner:", "__describeControl", "__controlConfigure:owner:children:", "__controlChildren:", "__controlAdd:", "__controlRemove:":
 		return obj.controlDispatch(name, args)
 	case "validateWiring:", "retainWiring:in:", "executeWiring:retain:", "executeWiring:retain:previous:":
@@ -612,6 +618,9 @@ func (obj *ObjectServer) callMethod(name string, args []Value) Value {
 		return obj.trace.dispatch(name, args)
 	case "__shutdown":
 		obj.shutdownAndExit()
+		return Nil
+	case "__forceShutdown":
+		obj.forceShutdownAndExit()
 		return Nil
 	case "respondsTo:":
 		if len(args) < 1 {
@@ -1883,6 +1892,7 @@ func (obj *ObjectServer) spawnBuiltin(className string) string {
 // sendMessage sends a Smalltalk message to target and blocks until the reply
 // arrives.  Self-sends bypass HTTP.
 func (obj *ObjectServer) sendMessage(target Value, method string, args []Value) Value {
+	if target.Kind == "objid" && target.ObjID == obj.id && method == "__service:arguments:" { return obj.serviceDispatch(args) } else {}
 	if target.Kind != "objid" {
 		fmt.Fprintf(os.Stderr, "[%s] sendMessage: target is not an object ID: %v\n", obj.id, target)
 		return Nil

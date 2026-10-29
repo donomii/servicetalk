@@ -1,0 +1,9 @@
+Exercise actual Service objects with isolated coordinators and brokers.
+Block a v1 call, promote v2 and verify new traffic uses v2 while old call completes with v1.
+After drain, verify Service drops its reference while retained old target, clone and block retain old source dependencies.
+Verify parse, initialize and readiness failures preserve current routing and record failed candidates.
+Verify missing replies retain uncertain generations until explicit forced retirement.
+Compile two C generations and preserve both behaviors; failed recompilation leaves current C generation active.
+Verify staged source overrides embedded code only inside explicit generation context.
+
+A real C method writes a marker then blocks; force retirement interrupts it promptly with a signal while a replacement serves calls.

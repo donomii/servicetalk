@@ -1,0 +1,2 @@
+spawnSourceArguments(bundle): validate and stage an explicit source bundle and place its directory before inherited user class paths; without a bundle preserve normal paths.
+spawnSourceEnvironment(bundle, paths): preserve host environment; for a prepared bundle remove inherited class-path and generation overrides and set the selected immutable source directory.

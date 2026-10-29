@@ -1,0 +1,3 @@
+Embed the complete vendored terminal asset directory, including licenses and source provenance, in runtime binaries.
+Serve requests from the embedded filesystem with ordinary HTTP content types and missing-file responses.
+No runtime filesystem asset lookup or package manager is required.

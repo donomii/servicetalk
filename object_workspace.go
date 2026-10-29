@@ -14,14 +14,17 @@ func objectWorkspaceExpression(id, source string) string {
 }
 
 func (c *Coordinator) evaluateObjectWorkspace(id, source string) (WorkspaceResult, error) {
+ ws,err:=c.ensureWorkspace()
+ if err!=nil { return WorkspaceResult{},err } else { return c.evaluateObjectWorkspaceIn(ws,id,source) }
+}
+
+func (c *Coordinator) evaluateObjectWorkspaceIn(ws,id, source string) (WorkspaceResult, error) {
  for _, ch := range id {
   if !isObjIdChar(ch) { return WorkspaceResult{}, fmt.Errorf("invalid receiver object ID %q", id) } else {}
  }
  if _, err := c.inspectObject(id, false); err != nil {
   return WorkspaceResult{}, fmt.Errorf("open workspace for %s: %w", id, err)
  } else { /* Confirm the receiver exists before creating a rooted workspace. */ }
- ws, err := c.ensureWorkspace()
- if err != nil { return WorkspaceResult{}, err } else {}
  reply, err := c.callObjectID(ws, "evalInternal:", []Value{StrVal(objectWorkspaceExpression(id, source))}, evalTimeout())
  if err != nil { return WorkspaceResult{}, err } else {}
  var result WorkspaceResult

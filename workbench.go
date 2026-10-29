@@ -18,7 +18,7 @@ func parseWorkbench(source string) (WorkbenchDefinition,error) {
   switch tool.Action {
   case "results","record":
    if singleton[tool.Action] { return definition,fmt.Errorf("duplicate %s tool",tool.Action) } else { singleton[tool.Action]=true }
-  case "recording","methods","objects","trace","debugger","wiring","examples":
+  case "recording","methods","objects","trace","debugger","wiring","examples","services","session","shell":
   case "inspect","call":
    if err:=validateDebugValues([]Value{ObjVal(tool.ObjectID)});err!=nil { return definition,err } else if strings.TrimSpace(tool.ObjectID)=="" { return definition,fmt.Errorf("tool %s needs a target object",tool.ID) } else {}
    if tool.Action=="call" && tool.Method=="" { return definition,fmt.Errorf("tool %s needs a method",tool.ID) } else if err:=validateDebugValues(tool.Args);err!=nil { return definition,err } else {}

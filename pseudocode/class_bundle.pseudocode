@@ -1,0 +1,5 @@
+SourceBundle stores a content digest and named source files. Capture class paths in precedence order, preserving the first available class and its selected source format; retain foreign source dependencies while excluding generated glue, binaries and build output.
+Compute a deterministic digest from sorted source paths and contents. Enforce file-count and total-byte bounds.
+Stage a bundle only after verifying its digest and safe relative paths; reject traversal, absolute paths and drive paths. Return its content-addressed source directory.
+
+Publish an original SourceBundle manifest with staged source; validate immutable cache metadata and exclude generated _st.h from initial collection.

@@ -1,0 +1,3 @@
+Stage source, add foreign build outputs, then verify inherited and restaged source version is unchanged.
+Upgrade a legacy cache missing metadata; reject altered metadata and mismatched inherited source digest.
+Verify generated C runtime header is excluded when collecting initial authored source.

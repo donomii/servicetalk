@@ -1,0 +1,10 @@
+SMT_SOURCE_BUNDLE_DIR identifies an explicit staged service generation source directory.
+generationClassSource resolves that directory before embedded definitions, only when the flag is present.
+Normal class loading retains existing embedded precedence.
+generationSpawnRequest carries the staged source bundle through constructors, blocks and clones.
+serviceSourceBundle parses native source, captures current dependencies and replaces its same-name class entry.
+Validate bundle limits, sort source paths and hash paths plus bytes for the immutable version identity.
+Foreign directories include manifests, source and dependencies; generated glue and binaries are excluded.
+Fresh foreign generation startup builds its own staged source version through the existing foreign builder.
+
+Inherited spawn requests read the original source manifest instead of rescanning foreign build outputs.

@@ -19,3 +19,10 @@ exec: and run: retain explicit command-string shell execution; exec returns Proc
 help explains session methods and normal Smalltalk composition.
 inspectorMetadata describes typed method arguments and editable directory.
 inspectorViews supplies a directory editor, file/job/result actions and workspace examples.
+
+terminal:args: starts a retained Terminal with session cwd/environment.
+pipeline: starts a retained Pipeline with literal argument Arrays and session cwd/environment.
+pipeline:outputFile: streams final bytes to a resolved output file.
+pipeline:input:outputFile: additionally provides literal text as the first stage's stdin; an empty output path uses capture.
+jobs and lastProcess also retain Terminal and Pipeline objects.
+completeCommand: and completePath: return sorted candidates using current session PATH, HOME and cwd.

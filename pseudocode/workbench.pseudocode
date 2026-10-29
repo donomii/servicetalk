@@ -5,3 +5,5 @@ handleWorkbench: expose the live workbench identity and definition through GET.
 readExample: read editable text and scratch workspace identity from a live example.
 listExamples: traverse the workbench's owned example Array in order and describe each entry.
 handleExamples: expose catalog data through GET.
+
+Accept services and session as declarative tool actions.

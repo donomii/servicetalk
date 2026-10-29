@@ -1,0 +1,13 @@
+Service is an ordinary object providing a stable address for versioned service objects.
+name / name: read or set its display name.
+prepareClass: captures current classpath sources and starts a fresh target, rebuilding foreign code when needed.
+prepareSource: captures a native definition plus current dependencies without editing the source file.
+Both return a generation ID after successful initialization; failure records a failed candidate and signals.
+check:selector:arguments:expect: invokes a candidate once and compares the typed result with the expected value.
+promote: requires a successful check and atomically directs future calls to the chosen generation.
+call:arguments: / call:arguments:timeoutMs: choose the current generation once, track the call and return its result or signal.
+current returns the active target; targetFor: returns a retained candidate/current/draining target or nil.
+status returns JSON name, current generation ID, next sequence, and generation records.
+retire: / discard: release an old generation or candidate after tracked calls have finished.
+forceRetire: explicitly terminates a noncurrent target, including references retained by other objects.
+clone / cloneWith: signal that a new Service is needed for an independent route.

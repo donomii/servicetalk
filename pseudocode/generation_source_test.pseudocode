@@ -1,0 +1,4 @@
+
+Verify concurrent first publication exposes complete sources to every reader; verify unfinished Service snapshot rejection and inherited versus overridden wrapper mailbox ordering.
+
+A controlled transport verifies a two-minute Service call reaches the target with the full deadline and its outer reply allows overhead.

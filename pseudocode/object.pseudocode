@@ -46,6 +46,14 @@ workbenchReferences: validates toolbar data and retains referenced targets and a
 
 Dispatch __shell:arguments: to checked host filesystem operations. Process inspection lists direct argument starts, input/environment configuration, separate output streams and human-facing views.
 
+Dispatch __shellComplete:directory:environment:mode: to the session-aware command and path completion boundary.
+
 Dispatch live Control/InspectorView serialization and ownership primitives.
 
 Control ownership reads/writes and validated configuration use the inspection channel with locked field snapshots/replacement. This lets layout saves complete while a control awaits its inherited receiver.
+
+__service:arguments: dispatches the Service host boundary. __forceShutdown terminates a target through the control lane.
+
+__collaborationSnapshot dispatches the narrow collaboration snapshot primitive used by the ordinary CollaborationSession class.
+
+The Service __service:arguments: self boundary dispatches locally so its native timeout is not shortened by a nested default RPC deadline.

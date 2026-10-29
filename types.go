@@ -129,6 +129,29 @@ type SourceBundleFile struct {
 	Data []byte `json:"data"`
 }
 
+// ServiceStatus describes a stable route and its independently prepared generations.
+type ServiceStatus struct {
+ Name string `json:"name"`
+ Current string `json:"current"`
+ Next int `json:"next"`
+ Generations []ServiceGeneration `json:"generations"`
+}
+
+// Target is historical identity, not a GC reference. Service retains live targets separately.
+type ServiceGeneration struct {
+ ID string `json:"id"`
+ ClassName string `json:"className"`
+ Version string `json:"version"`
+ Target string `json:"target"`
+ State string `json:"state"`
+ InFlight int `json:"inFlight"`
+ Uncertain int `json:"uncertain"`
+ Error string `json:"error"`
+ PreparedAt string `json:"preparedAt"`
+ PromotedAt string `json:"promotedAt"`
+ RetiredAt string `json:"retiredAt"`
+}
+
 // PulseRequest is the payload behind pulse: — the sole input to the pulse
 // reachability tracer.  SweepID is time.Now().UnixMilli() at the root.
 // An object updates its lastSweepID and re-pulses its references only
@@ -342,6 +365,14 @@ type MCPToolCall struct {
 }
 
 type MCPToolArguments struct {
+	ParticipantID string `json:"participantId,omitempty"`
+	Action string `json:"action,omitempty"`
+	Name string `json:"name,omitempty"`
+	Kind string `json:"kind,omitempty"`
+	Binding string `json:"binding,omitempty"`
+	Text string `json:"text,omitempty"`
+	Value *Value `json:"value,omitempty"`
+	ExpectedRevision *int64 `json:"expectedRevision,omitempty"`
 	Code string `json:"code,omitempty"`
 	ObjectID string `json:"objectId,omitempty"`
 	Method string `json:"method,omitempty"`
@@ -397,6 +428,7 @@ type ObjectWorkspaceRequest struct {
 
 // Interactive UI requests share the runtime's typed Value protocol.
 type InteractionRequest struct {
+ ParticipantID string `json:"participantId,omitempty"`
  TimeoutMs float64 `json:"timeoutMs,omitempty"`
  Kind string `json:"kind"`
  ObjectID string `json:"objectId"`
@@ -406,6 +438,8 @@ type InteractionRequest struct {
  RecordingID string `json:"recordingId"`
 }
 type InteractionResult struct {
+ ParticipantID string `json:"participantId,omitempty"`
+ WorkspaceID string `json:"workspaceId,omitempty"`
  Request *InteractionRequest `json:"request,omitempty"`
  CaptureError string `json:"captureError,omitempty"`
  Result Value `json:"result"`
@@ -414,6 +448,14 @@ type InteractionResult struct {
  Error string `json:"error,omitempty"`
  RecordingError string `json:"recordingError,omitempty"`
 }
+type TerminalReadResponse struct {
+ Data string `json:"data"`
+ NextOffset int64 `json:"nextOffset"`
+ OldestOffset int64 `json:"oldestOffset"`
+ Dropped int64 `json:"dropped"`
+ Status string `json:"status"`
+ ExitCode *int `json:"exitCode"`
+}
 type InteractionRecord struct {
  Request InteractionRequest `json:"request"`
  Response InteractionResult `json:"response"`
@@ -421,9 +463,54 @@ type InteractionRecord struct {
  At time.Time `json:"at"`
 }
 type ResultRequest struct {
+ ParticipantID string `json:"participantId,omitempty"`
  Action string `json:"action"`
  Handle string `json:"handle"`
  Name string `json:"name"`
+}
+
+type SessionRequest struct {
+ Action string `json:"action"`
+ ParticipantID string `json:"participantId,omitempty"`
+ Name string `json:"name,omitempty"`
+ Kind string `json:"kind,omitempty"`
+ Binding string `json:"binding,omitempty"`
+ Text string `json:"text,omitempty"`
+ Value *Value `json:"value,omitempty"`
+ ExpectedRevision *int64 `json:"expectedRevision,omitempty"`
+}
+type SessionParticipantDescription struct {
+ ID string `json:"id"`
+ Name string `json:"name"`
+ Kind string `json:"kind"`
+ Active bool `json:"active"`
+ WorkspaceID string `json:"workspaceId,omitempty"`
+}
+type SessionPublication struct {
+ Name string `json:"name"`
+ Value Value `json:"value"`
+ Revision int64 `json:"revision"`
+ ParticipantID string `json:"participantId"`
+ ParticipantName string `json:"participantName"`
+ Present bool `json:"present"`
+}
+type SessionActivity struct {
+ Sequence int64 `json:"sequence"`
+ ParticipantID string `json:"participantId"`
+ Name string `json:"name"`
+ Action string `json:"action"`
+ Detail string `json:"detail"`
+ At time.Time `json:"at"`
+}
+type SessionResponse struct {
+ SessionID string `json:"sessionId"`
+ ParticipantID string `json:"participantId,omitempty"`
+ WorkspaceID string `json:"workspaceId,omitempty"`
+ Participants []SessionParticipantDescription `json:"participants"`
+ Publications []SessionPublication `json:"publications"`
+ Activity []SessionActivity `json:"activity"`
+ Sequence int64 `json:"sequence"`
+ Error string `json:"error,omitempty"`
 }
 type RecordingRequest struct {
  Action string `json:"action"`

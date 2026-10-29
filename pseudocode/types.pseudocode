@@ -2,6 +2,8 @@ Inspection response
     Existing object identifier, class, methods and instance variables.
     Runtime record: host, process, worker, active calls, references, pulse timing, metrics.
     Retention record: root flag, sampled path, unavailable objects and interpretation note.
+
+TerminalReadResponse carries base64 raw output data, next delivered byte offset, oldest retained byte offset, bytes dropped before the requested offset, status and nullable exit code.
 Call activity
     Identifier, chain, selector, target, executing-or-waiting state and start time.
 MCP request and response
@@ -33,3 +35,7 @@ WorkbenchDefinition/Tool describe live toolbar actions; WorkbenchResponse and Ex
 SelectorSpan/Site describe parsed Unicode source locations. RefactorRequest supplies selectors and optional class; RefactorFile/Edit/Response carry digests, proposed sources, per-line edits, literal references and errors.
 
 Add ControlProperties (wire properties), ControlState (serialized properties/children) and ControlPlan (validated reconciliation tree).
+
+ServiceStatus and ServiceGeneration describe a stable route, generation history, source digest, state, activity/uncertainty counters and lifecycle timestamps. Historical target IDs are text; owned live targets are separately retained typed references.
+
+SessionRequest carries action, participantId, name, kind, binding, typed value, expectedRevision and note text. SessionResponse carries sessionId, selected participantId/workspaceId, participants, publications, activity, sequence and error. Participant records expose ID, name, kind, active and workspaceId. Publication records expose name, typed value, revision, author ID/name and presence, including deletion tombstones. Activity records expose sequence, participant ID/name, action, detail and UTC time. InteractionRequest/Result and ResultRequest optionally identify a participant; InteractionResult also returns workspaceId. MCPToolArguments include session fields.

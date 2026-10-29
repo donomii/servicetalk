@@ -1,0 +1,14 @@
+Service native boundary validates operation, arguments, selector and timeout.
+Parallel ingress permits independent routed calls and management while an older target is busy.
+Ordinary Service wrappers use atomic state changes; custom subclass overrides retain normal mailbox ordering.
+Prepare captures sources, reserves a generation, starts an uninitialized target and retains it before initialize.
+Source, build, spawn and initialize errors leave the current generation unchanged and record a failed candidate.
+Readiness sends one message and requires exact typed expected result before promotion.
+Route sends once to the selected target and records completion independently of later promotions.
+Signals propagate. Missing replies are uncertain; calls are never automatically retried.
+Timeout uncertainty keeps a retired generation's ownership until explicit force retirement.
+Force requests target shutdown through the control lane, then records forced status and releases ownership.
+
+Invocation cleanup always runs, including unexpected panics; an unexpected interruption retains uncertainty rather than losing tracked ownership.
+
+Preparation uses the configured spawn deadline, not the shorter ordinary peer HTTP timeout.

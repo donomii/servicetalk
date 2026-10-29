@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"os/exec"
 	"strings"
 	"sync"
@@ -49,6 +50,13 @@ const processOutputCap = 1 << 20
 type processState struct {
 	mu       sync.Mutex
 	cmd      *exec.Cmd
+	terminal *os.File
+	terminalPending []byte
+	terminalRecent []byte
+	terminalDropped int64
+	terminalTotal int64
+	pipeline []*exec.Cmd
+	pipelineCodes []int
 	command  string
 	stdout   *bytes.Buffer
 	standardOutput *bytes.Buffer
@@ -67,6 +75,10 @@ type processState struct {
 func (obj *ObjectServer) callProcessMethod(name string, args []Value) Value {
 	processValidateStart(name,args)
 	switch name {
+	case "terminalStart:args:cwd:columns:rows:", "terminalWrite:", "terminalRead", "terminalReadFrom:", "terminalOutput", "terminalDropped", "terminalResizeColumns:rows:":
+		return obj.processTerminalMethod(name,args)
+	case "pipeline:cwd:outputFile:", "pipelineExitCodes":
+		return obj.processPipelineMethod(name,args)
 	case "input:", "environment:", "stdout", "stderr", "error", "directory", "inspectorMetadata", "inspectorViews":
 		return obj.processSessionMethod(name,args)
 	case "initialize":
@@ -85,6 +97,7 @@ func (obj *ObjectServer) callProcessMethod(name string, args []Value) Value {
 		}
 		switch args[0].String() {
 		case "start:", "start:cwd:", "start:args:", "start:args:cwd:",
+			"terminalStart:args:cwd:columns:rows:", "terminalWrite:", "terminalRead", "terminalReadFrom:", "terminalOutput", "terminalDropped", "terminalResizeColumns:rows:", "pipeline:cwd:outputFile:", "pipelineExitCodes",
 			"output", "outputLines", "status", "exitCode", "pid",
 			"command", "signal:", "wait", "isRunning",
 			"printString", "displayString", "input:", "environment:", "stdout", "stderr", "error", "directory", "inspectorMetadata", "inspectorViews":
@@ -365,6 +378,12 @@ func (obj *ObjectServer) processSignal(name string) bool {
 	if sig == nil {
 		return false
 	}
+	if st.terminal != nil { return signalJobGroup(st.cmd,sig)==nil } else {}
+	if len(st.pipeline)>0 {
+		ok:=false
+		for _,command:=range st.pipeline { if command.Process!=nil && signalJobGroup(command,sig)==nil { ok=true } else {} }
+		return ok
+	} else {}
 	return st.cmd.Process.Signal(sig) == nil
 }
 

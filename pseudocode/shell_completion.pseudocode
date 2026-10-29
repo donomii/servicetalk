@@ -1,0 +1,11 @@
+shellCompleteDispatch(prefix, directory, environment, mode) -> sorted names
+    Snapshot effective session environment. Command mode without a slash searches executable names in session PATH.
+    Path mode and slash-containing command prefixes resolve against session cwd and HOME; directories retain a trailing separator.
+    Return matching literal names, deduplicating commands and filtering command files for executability.
+shellQuotedFragment(prefix) -> opening position, unescaped text, found
+    Find the current open Smalltalk string, respecting doubled apostrophes and spaces.
+shellRemoteCompletions(shell, selector, prefix) -> candidates
+    Ask the live Shell for command or path candidates and retrieve its Array values.
+shellQuotedCompletion(line, cursor, opening, fragment, candidates) -> edited line, cursor, changed
+    Extend the string with the common match prefix and escaped apostrophes.
+    A unique file or command closes the quote and adds a space; a directory remains open for continued navigation.

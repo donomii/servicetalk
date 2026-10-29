@@ -17,3 +17,5 @@ Tool arguments
     Source text, object identifier, method selector and ordinary Value arguments.
 Tool result
     Text entries and an execution-error flag.
+
+The session tool exposes status, join, leave, publish, unpublish, bind and note using the shared SessionRequest contract. Optional participantId on eval/call selects independent scratch state, records attribution and returns the typed InteractionResult including handles. Legacy eval/call output remains unchanged. Revision conflicts retain the session snapshot in the error result. Initialization instructions describe joining and collaboration.

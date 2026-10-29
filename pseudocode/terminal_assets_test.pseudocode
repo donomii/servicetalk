@@ -1,0 +1,3 @@
+Request each terminal script, stylesheet, license and provenance file; compare bytes with embedded content and verify content types.
+Missing embedded files return HTTP 404.
+Stage a single-binary build and verify every terminal asset and accompanying notice is copied unchanged.

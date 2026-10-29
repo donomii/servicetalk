@@ -1,0 +1,8 @@
+configureJobGroup(command)
+    Place a pipeline stage into a distinct process group so signals reach its descendants.
+signalJobGroup(command, signal) -> error
+    Signal the entire job process group, reporting a missing or already-exited child.
+configureTerminalIO(terminal) -> error
+    Enable nonblocking terminal I/O so deadlines and close interrupt pending reads and writes.
+resizeTerminal(terminal, columns, rows) -> error
+    Set terminal dimensions through its live raw descriptor without resetting nonblocking I/O.

@@ -10,3 +10,7 @@ renderResult presents the value with a type label, readable text preserving line
 showResultShelf lists newest results first with their originating expression or method, and gives a useful empty state before any interaction.
 
 presentResultObject reads a returned object's inspection snapshot without sending getters. Show its class and explicit Inspect action. For arrays and dictionaries, preview at most 80 indexed items or sorted entries, preserving typed values and clickable object references; report total size and truncation. Keep the ordinary object inspector available. A removed result ignores late preview responses.
+
+Attribute explicit interactions to the selected participant; retain ownership on result operations. Share in session opens publication controls. Reusing a result from a different workspace inserts its typed literal.
+
+Result navigation closes covering Shell, Services and Shared session panels before focusing the Playground or inspector.

@@ -1,0 +1,9 @@
+GET /session or action status returns the shared collaboration snapshot. POST /session decodes a bounded strict SessionRequest. An omitted action means status; a new participant's omitted kind means human.
+Create the ordinary CollaborationSession once through the rooted workspace. Reuse it by reading workspace state through the inspection control lane, so ordinary participant actions do not queue behind legacy evaluation.
+Join validates a nonempty name up to 80 bytes and human/agent kind, creates a separate scratch workspace, records attribution and returns participantId/workspaceId.
+Publish/unpublish validate a nonempty publication label up to 120 bytes, active participant, typed value and exact nonnegative expectedRevision; invoke the serialized Session operation and return a fresh snapshot even on revision conflict.
+Bind validates a variable name, prepares a retained transfer in the Session, writes the variable outside the Session mailbox, then releases the transfer. A busy participant workspace cannot block other session operations.
+Note validates nonempty text up to 2000 bytes and active membership, then appends attributed activity. Leave marks inactive and releases the scratch workspace reference.
+Return participant/workspace IDs and readable error text with every appropriate response. Participant identity provides attribution, not access control.
+participantWorkspace resolves the independent workspace or, if participantId is absent, preserves the existing legacy workspace.
+sessionRecord adds participant ID/name, action, detail and UTC timestamp to the shared log.

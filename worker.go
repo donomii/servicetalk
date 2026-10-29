@@ -141,14 +141,8 @@ func (w *Worker) spawnLocal(req SpawnRequest) (SpawnResponse, error) {
 		"--coordinator", w.coordinatorURL,
 		"--pulse-timeout", strconv.Itoa(pulseTimeoutSecs),
 	}
-	if req.SourceBundle != nil {
-		dir, err := stageSourceBundle(req.SourceBundle)
-		if err != nil {
-			return SpawnResponse{}, fmt.Errorf("stage source bundle %s: %w", req.SourceBundle.Digest, err)
-		}
-		args = append(args, "--path", dir)
-	}
-	args = append(args, ClassPathArgs()...)
+	paths, err := spawnSourceArguments(req.SourceBundle)
+	if err != nil { return SpawnResponse{}, err } else { args = append(args, paths...) }
 	if req.AutoInit {
 		args = append(args, "--init")
 	}
@@ -181,7 +175,7 @@ func (w *Worker) spawnLocal(req SpawnRequest) (SpawnResponse, error) {
 		defer os.Remove(file)
 		cmd.Args = append(cmd.Args, "--snapshot", file)
 	} else {}
-	cmd.Env = append(os.Environ(), "SMT_WORKER_ID="+w.id)
+	cmd.Env = append(spawnSourceEnvironment(req.SourceBundle, paths), "SMT_WORKER_ID="+w.id)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Start(); err != nil {

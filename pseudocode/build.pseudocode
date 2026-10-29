@@ -1,0 +1,8 @@
+runRunCmd(app directory, runtime flags) starts the coordinator with the application classpath and main class.
+runBuildCmd(app directory, output path, source path, main class) builds a standalone native runtime binary.
+Collect class definitions, validate names and syntax, and report foreign directories excluded from embedding.
+Stage non-test runtime sources, dependency metadata, vendored dependencies and web assets in a temporary build tree.
+Stage application definitions, generate their embedded filesystem binding, and compile the requested binary.
+Preserve terminal scripts, stylesheets, licenses and source provenance in standalone builds.
+Locate runtime sources from explicit directory, compile-time source location or current directory.
+Copy operations create required directories and report file errors.

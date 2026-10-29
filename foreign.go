@@ -13,6 +13,7 @@ import (
 	"runtime"
 	"strings"
 	"sync"
+	"sync/atomic"
 )
 
 // A foreign class is a directory containing:
@@ -709,6 +710,8 @@ func generateGlueC(info *ForeignClassInfo) string {
 
 type ForeignBridge struct {
 	mu     sync.Mutex
+	forceProcess *os.Process
+	forceStopped atomic.Bool
 	cmd    *exec.Cmd
 	stdin  io.WriteCloser
 	stdout *bufio.Reader
@@ -739,6 +742,7 @@ func NewForeignBridge(obj *ObjectServer, info *ForeignClassInfo) (*ForeignBridge
 	}
 	go func() { _ = cmd.Wait() }()
 	return &ForeignBridge{
+		forceProcess: cmd.Process,
 		cmd:    cmd,
 		stdin:  stdin,
 		stdout: bufio.NewReader(stdout),
@@ -778,6 +782,7 @@ func (b *ForeignBridge) Close() {
 // conversation until the child returns or signals.  Serialised via mu so
 // concurrent incoming messages queue cleanly.
 func (b *ForeignBridge) dispatch(method string, args []Value) Value {
+	defer func(){ if b.forceStopped.Load() { panic(signalError{msg:"foreign method "+method+" on "+b.obj.id+" interrupted by forced retirement"}) } else {} }()
 	b.mu.Lock()
 	defer b.mu.Unlock()
 

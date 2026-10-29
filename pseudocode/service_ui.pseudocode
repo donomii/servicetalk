@@ -1,0 +1,9 @@
+Services panel lists ordinary Service objects and lets the user create and name a stable route.
+Prepare a class from current files or a native source draft without replacing the active generation. Source editor can copy its draft to the service workflow.
+Check a chosen candidate using a selector, typed arguments and expected typed value. Passing checks expose Promote. Show every generation state, version, target, active calls and error.
+Promote sends new routed calls to the ready generation. Retire when idle requests natural release. Force stop requires a distinct explicit action explaining which generation and running calls will stop.
+Refresh status while open without replacing draft definitions or check inputs. Provide inspectable typed results and preserve action errors. Keep all panels usable at narrow widths.
+
+Disable checking until a candidate exists. Inspecting a service or version closes the service panel so the inspector is visible.
+
+Opening this panel closes the other Session, Shell and Services panels. Result navigation closes covering session tools before showing its destination.

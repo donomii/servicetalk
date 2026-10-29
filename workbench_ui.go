@@ -22,6 +22,9 @@ async function runWorkbenchTool(tool){
   case 'debugger':openDebugger();break;
   case 'wiring':openWiring();break;
   case 'examples':openExamples();break;
+  case 'shell':openShellPanel();break;
+  case 'services':openServices();break;
+  case 'session':openSession();break;
   case 'inspect':showInspect(tool.objectId);break;
   case 'call':
    try{const response=await performInteraction({kind:'call',objectId:tool.objectId,method:tool.method,args:tool.args||[]});if(response.error)throw Error(response.error);else{}if(response.result.kind==='objid')await showInspect(response.result.objid);else showResultShelf();}catch(error){document.getElementById('workbench-status').textContent=error.message;}break;

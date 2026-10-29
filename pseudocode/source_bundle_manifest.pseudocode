@@ -1,0 +1,6 @@
+Each staged source version contains .servicetalk-source-bundle.json with its original SourceBundle.
+Publish the manifest atomically beside source files before exposing a new cache directory.
+For existing caches, require the same original source bytes and manifest; install missing legacy metadata atomically.
+Inherited constructors, blocks and clones decode the bounded manifest and verify its digest and directory identity.
+Build-generated headers, lockfiles, binaries and other outputs cannot change inherited source snapshots.
+Legacy caches without a manifest may be inherited only when their collected files still match the directory digest.

@@ -1,0 +1,7 @@
+Launch an actual terminal child; verify it sees a terminal, initial dimensions, resizing, literal input, unread draining, final output and nonzero exit.
+Run an interactive system shell and verify arithmetic output and clean exit.
+Connect subprocesses carrying 2.5 MiB of binary data; verify byte count and checksum, and exact file redirection beyond capture limits.
+Verify pipeline input, ordered stage exits, upstream failure status, stderr, failed first stage and cleanup when a later stage cannot launch.
+Verify session PATH, HOME and paths containing spaces in command/path completion; retain embedded apostrophes in CLI quoted completion.
+Verify terminal byte readers remain independent across split Unicode characters, ring truncation and bounded cursor batches.
+Wait on live terminal and pipeline objects while querying status and inspector views, then stop them through their control mailbox.

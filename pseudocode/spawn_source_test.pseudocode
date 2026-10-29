@@ -1,0 +1,2 @@
+Verify the same prepared source overrides host definitions and environment class paths when spawned locally and on a worker.
+Verify flattening source bundles preserves class-directory precedence across native source formats.

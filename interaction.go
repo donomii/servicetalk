@@ -20,25 +20,21 @@ func (c *Coordinator) ensureUIObject(key, class string) (Value, error) {
  return c.callObjectID(ws,"evalInternal:",[]Value{StrVal(source)},evalTimeout())
 }
 
-func (c *Coordinator) retainUIResult(value Value) (string, error) {
- ws, err := c.ensureWorkspace()
- if err != nil { return "", err } else {}
+func (c *Coordinator) retainUIResult(ws string,value Value) (string, error) {
  handle := "result_" + newUUID()
- _, err = c.callObjectID(ws,"setVar:to:",[]Value{StrVal(handle),value},inspectionTimeout)
+ _, err := c.callObjectID(ws,"setVar:to:",[]Value{StrVal(handle),value},inspectionTimeout)
  return handle, err
 }
 
-func (c *Coordinator) runInteraction(request InteractionRequest) (WorkspaceResult, error) {
+func (c *Coordinator) runInteraction(ws string,request InteractionRequest) (WorkspaceResult, error) {
  switch request.Kind {
  case "eval":
-  ws, err := c.ensureWorkspace()
-  if err != nil { return WorkspaceResult{}, err } else {}
   value, err := c.callObjectID(ws,"evalResult:",[]Value{StrVal(request.Code)},evalTimeout())
   if err != nil { return WorkspaceResult{}, err } else {}
   var result WorkspaceResult
   err = json.Unmarshal([]byte(value.Str),&result)
   return result, err
- case "workspace": return c.evaluateObjectWorkspace(request.ObjectID,request.Code)
+ case "workspace": return c.evaluateObjectWorkspaceIn(ws,request.ObjectID,request.Code)
  case "example":
   value,err:=c.callObjectID(request.ObjectID,"run",nil,evalTimeout())
   if err!=nil { return WorkspaceResult{},err } else {}
@@ -50,8 +46,6 @@ func (c *Coordinator) runInteraction(request InteractionRequest) (WorkspaceResul
   if err != nil { return WorkspaceResult{}, err } else if err = validateMCPArguments("call",raw); err != nil { return WorkspaceResult{}, err } else {}
   if request.Kind=="promise" {
    if request.TimeoutMs!=0 { if _,ok:=messageTimeoutFromMilliseconds(NumVal(request.TimeoutMs));!ok { return WorkspaceResult{},fmt.Errorf("invalid promise timeout") } else {} } else {}
-   ws,err:=c.ensureWorkspace()
-   if err!=nil { return WorkspaceResult{},err } else {}
    value,err:=c.callObjectID(ws,"evalInternal:",[]Value{StrVal(promiseExpression(request,nil))},evalTimeout())
    return WorkspaceResult{Result:value},err
   } else {}
@@ -62,15 +56,26 @@ func (c *Coordinator) runInteraction(request InteractionRequest) (WorkspaceResul
 }
 
 func (c *Coordinator) interact(request InteractionRequest) InteractionResult {
- result := InteractionResult{Result:Nil}
+ result := InteractionResult{Result:Nil,ParticipantID:request.ParticipantID}
+ ws,err:=c.participantWorkspace(request.ParticipantID)
+ if err!=nil { result.Error=err.Error();return result } else { result.WorkspaceID=ws }
  replay, captureErr := c.controlReplayRequest(request)
  if captureErr!=nil { result.CaptureError=captureErr.Error() } else if replay.ObjectID!=request.ObjectID || replay.Method!=request.Method { result.Request=&replay } else {}
- value, err := c.runInteraction(request)
+ value, err := c.runInteraction(ws,request)
  if err != nil { result.Error=err.Error() } else {
   result.Result=value.Result; result.Output=value.Output
-  result.Handle, err=c.retainUIResult(value.Result)
+  result.Handle, err=c.retainUIResult(ws,value.Result)
   if err != nil { result.Error="operation completed, but retaining its result failed: "+err.Error() } else {}
  }
+ if request.ParticipantID!="" {
+  detail:=request.Code
+  if detail=="" { detail=request.ObjectID+" "+request.Method } else {}
+  if result.Error!="" { detail+=" — "+result.Error } else {}
+  if len(detail)>400 { detail=detail[:400] } else {}
+  if session,logErr:=c.collaborationSession();logErr==nil {
+   if logErr=c.sessionRecord(session,request.ParticipantID,request.Kind,detail);logErr!=nil { result.RecordingError="Session activity: "+logErr.Error() } else {}
+  } else { result.RecordingError="Session activity: "+logErr.Error() }
+ } else {}
  if request.RecordingID!="" {
   if captureErr!=nil { result.RecordingError="Could not record control action: "+captureErr.Error();return result } else {}
   record := InteractionRecord{Request:replay,Response:result,At:time.Now()}
@@ -102,7 +107,7 @@ func (c *Coordinator) handleResult(w http.ResponseWriter,r *http.Request) {
  var request ResultRequest
  if err:=json.NewDecoder(r.Body).Decode(&request); err!=nil { json.NewEncoder(w).Encode(InteractionResult{Error:err.Error()}); return } else {}
  result:=InteractionResult{Result:Nil}
- ws,err:=c.ensureWorkspace()
+ ws,err:=c.participantWorkspace(request.ParticipantID)
  if err==nil { err=c.changeResult(ws,request) } else {}
  if err!=nil { result.Error=err.Error() } else {}
  json.NewEncoder(w).Encode(result)

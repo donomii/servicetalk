@@ -1,0 +1,4 @@
+SharedPublication fields are name, value, revision, participant and present. Start absent at revision zero.
+name: assigns the board label; getters expose all fields.
+value:by: retains a typed value and author, increments revision, and marks present.
+removeBy: clears value, records author, increments revision and marks absent. The board retains this tombstone to reject stale re-publications.

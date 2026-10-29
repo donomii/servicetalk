@@ -1,0 +1,13 @@
+ServiceStatus contains name, current generation ID, next sequence, and ordered generations.
+ServiceGeneration contains ID, className, source version digest, historical target ID, state,
+inFlight, uncertain, error, preparedAt, promotedAt and retiredAt.
+State transitions and target ownership are atomic and contain no external calls.
+Reserve generation -> preparing. Attach source digest and target while initializing.
+Initialization -> candidate or failed; readiness check -> checking -> ready or failed.
+Promote only ready -> active; prior active -> draining.
+Reserve a routed call against current active generation before releasing state lock.
+Completed calls decrement inFlight; missing replies also increment uncertain.
+Drain only when inFlight and uncertain are zero: remove typed target reference and mark retired.
+Historical target text does not retain the object; outside direct references still do.
+Force retirement is explicit and forbidden for the active generation.
+Record forced state only after target acknowledges shutdown; preserve errors on failed force.

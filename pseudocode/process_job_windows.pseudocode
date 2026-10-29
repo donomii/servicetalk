@@ -1,0 +1,3 @@
+configureJobGroup(command) leaves Windows process creation unchanged.
+signalJobGroup(command, signal) signals the immediate Windows child process.
+configureTerminalIO and resizeTerminal report unsupported terminal operations; the PTY adapter cannot launch a Windows terminal.

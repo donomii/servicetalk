@@ -1,0 +1,13 @@
+processPipelineMethod(selector, arguments) -> Process or stage exit Array
+    Require nonempty Array of argument Arrays; every executable and argument is a string.
+    Expose stage exit statuses independently of aggregate wait.
+processStartPipeline(stages, directory, outputPath)
+    Snapshot environment and input. Create commands with a common working directory and separate job groups.
+    Connect adjacent stages with operating-system pipes, keeping intermediate bytes outside capture limits.
+    Feed configured text to the first stage. Capture the last stage or stream it to outputPath.
+    Capture all standard errors in the normal bounded error stream.
+    Start every command, then close parent pipe handles and publish the running job.
+    On launch failure, close handles, kill and reap every started stage, and report the failed stage and command.
+waitPipeline(state, commands)
+    Reap every stage and publish its status. Aggregate using the rightmost nonzero exit; all zero yields zero.
+    Mark the job finished only when all children have completed.

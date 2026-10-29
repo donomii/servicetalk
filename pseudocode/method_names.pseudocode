@@ -3,3 +3,5 @@ inspectionMethodNames(object) -> selectors:
     native/foreign declarations. Array and Dictionary include their filtering,
     sorting, copying and reduction methods. Use the same catalogue for inspection
     and supported-selector preflight without reading mutable object state.
+
+Include the native Process terminal, cursor-read and streaming-pipeline selectors.

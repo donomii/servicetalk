@@ -2,7 +2,7 @@
 class Workbench [
     | definition retained examples |
     initialize [ examples := nil. self resetTools ]
-    defaultDefinition [ ^ '{"title":"servicetalk","tools":[{"id":"results","label":"Results","action":"results"},{"id":"record","label":"Record","action":"record"},{"id":"recording","label":"Recording","action":"recording"},{"id":"methods","label":"Browse methods","action":"methods"},{"id":"objects","label":"Object graph","action":"objects"},{"id":"trace","label":"Message trace","action":"trace"},{"id":"debugger","label":"Debugger","action":"debugger"},{"id":"wiring","label":"Wiring","action":"wiring"},{"id":"examples","label":"Examples","action":"examples"}]}' ]
+    defaultDefinition [ ^ '{"title":"servicetalk","tools":[{"id":"results","label":"Results","action":"results"},{"id":"record","label":"Record","action":"record"},{"id":"recording","label":"Recording","action":"recording"},{"id":"methods","label":"Browse methods","action":"methods"},{"id":"objects","label":"Object graph","action":"objects"},{"id":"trace","label":"Message trace","action":"trace"},{"id":"debugger","label":"Debugger","action":"debugger"},{"id":"wiring","label":"Wiring","action":"wiring"},{"id":"shell","label":"Shell","action":"shell"},{"id":"services","label":"Services","action":"services"},{"id":"examples","label":"Examples","action":"examples"}]}' ]
     resetTools [ ^ self definition: self defaultDefinition ]
     definition [ ^ definition ]
     definition: source [ retained := self workbenchReferences: source. definition := source. ^ self ]

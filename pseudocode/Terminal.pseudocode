@@ -1,0 +1,12 @@
+Terminal owns a Process and a text input field for the generic inspector.
+initialize creates the Process and empty input.
+process returns the underlying Process; environment: configures its inherited environment overrides before launch.
+start:args:cwd: launches the executable and literal argument Array in a new 80-column, 24-row terminal, returning self.
+write: sends exact text bytes and returns bytes written; sendLine: adds a newline.
+read drains this terminal's bounded unread text. output returns recent terminal output. droppedBytes reports unread bytes discarded by the bound.
+readFrom: accepts a nonnegative byte offset and returns a JSON TerminalReadResponse without consuming another reader's output.
+resizeColumns:rows: changes the live terminal dimensions, each an integer from 1 through 65535.
+status, exitCode, error, command and pid describe the child. wait returns its final exit code.
+signal: addresses the terminal process group. interrupt writes the terminal interrupt character. stop kills the terminal process group.
+input and input: support the generic editable input field; sendInput sends that field as a line.
+inspectorMetadata describes editable arguments and status properties. inspectorViews offers output, input, send, interrupt and stop controls.

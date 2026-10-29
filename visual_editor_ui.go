@@ -4,7 +4,7 @@ const visualEditorJS = visualEditorCommonJS + workbenchEditorJS + viewEditorJS +
 
 const visualEditorCommonJS = `
 const visualKinds=['column','row','text','value','code','input','slider','textarea','action','table','list'];
-const visualActions={results:'Results',record:'Record',recording:'Recording',methods:'Browse methods',objects:'Object graph',trace:'Message trace',debugger:'Debugger',wiring:'Wiring',examples:'Examples',inspect:'Inspect an object',call:'Send a message'};
+const visualActions={results:'Results',record:'Record',recording:'Recording',methods:'Browse methods',objects:'Object graph',trace:'Message trace',debugger:'Debugger',wiring:'Wiring',examples:'Examples',shell:'Shell',services:'Services',session:'Shared session',inspect:'Inspect an object',call:'Send a message'};
 function visualCopy(value){return JSON.parse(JSON.stringify(value));}
 function visualField(parent,label,value,change,options){
  const wrapper=toolElement('label',label),input=document.createElement(options?'select':'input');wrapper.className='visual-field';input.setAttribute('aria-label',label);

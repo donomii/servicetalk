@@ -14,3 +14,7 @@ Restore before registration; remove the file after use or completion.
 Inspect origin and deterministic loaded-definition digest.
 
 Reject cloning an unresolved Promise; settled Promise fields and result references can be copied.
+
+Clone spawn requests inherit the generation source bundle; retained old clones keep their original constructor dependencies.
+
+Reject Service snapshots while any generation is preparing, checking, in flight or missing replies; idle generation ownership can be snapshotted.

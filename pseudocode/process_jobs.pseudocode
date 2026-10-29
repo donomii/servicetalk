@@ -1,0 +1,8 @@
+processBeginJob(state, command, directory) -> environment, input
+    Reject an already-started Process. Atomically retain launch description and mark it started, returning a configuration snapshot.
+processFinishJob(state, exitCode, error)
+    Publish final exit code and contextual failure, mark the Process complete, and release waiters exactly once.
+processWaitCode(command) -> exitCode, error
+    Reap the child. Keep ordinary nonzero exits as exit statuses; report infrastructure wait failures separately.
+processSetCommands(state, commands)
+    Publish the successfully started pipeline commands together, with stage exit values initially unknown.

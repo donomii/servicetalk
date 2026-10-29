@@ -1,0 +1,16 @@
+processTerminalMethod(selector, arguments) -> result or signal
+    Validate terminal launch, exact text input, integral byte offset and terminal size arguments.
+    Dispatch launching, input, draining text, recent output, cursor-based output and resizing.
+processStartTerminal(program, arguments, directory, columns, rows)
+    Start a child with controlling terminal and inherited session configuration.
+    Retain a nonblocking master terminal. Capture output concurrently and reap child independently.
+    Report launch or setup errors in completed Process state; preserve final child output before completion.
+    If descendants keep the terminal open after the child exits, allow one second to drain before closing it.
+appendTerminalOutput(state, bytes)
+    Retain at most one MiB of recent output and one MiB of unread output, counting total and dropped unread bytes.
+    Also feed ordinary Process capture buffers with their existing bounded-first-output semantics.
+terminalReadFrom(state, byteOffset) -> JSON TerminalReadResponse
+    Reject future offsets. Clamp stale offsets to the oldest retained byte and report skipped byte count.
+    Return at most 64 KiB as base64, preserving arbitrary bytes and split Unicode characters.
+    Return the offset immediately after the supplied bytes, oldest retained offset, current status and nullable exit code.
+    Never consume output belonging to another reader. Each viewer maintains its own next offset.

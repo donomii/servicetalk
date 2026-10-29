@@ -42,3 +42,8 @@ Unknown coordinator messages signal with the coordinator receiver and selector.
 
 Shell completion includes file writing, search, session environment, direct argument execution and job access selectors.
 Serve the static browser document as literal text, preserving percent signs in expression examples.
+
+Spawn requests retain explicitly supplied source bundles. Local and worker launches use the selected bundle before host class paths, while ordinary spawns retain existing behavior.
+
+Route GET/POST /session to collaboration session coordination.
+Shell completion recognizes the current open Smalltalk string. Program positions ask the live Shell for executable candidates; other string positions ask for session-aware paths. Keep spaces and escaped apostrophes intact, and expose terminal/pipeline/completion selectors in first-word completion.

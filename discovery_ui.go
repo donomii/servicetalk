@@ -33,8 +33,11 @@ function selectorDistance(a,b){let previous=Array.from({length:b.length+1},(_,i)
 async function findExamples(query){await openExamples();document.getElementById('examples-search').value=query;renderExampleList();const found=matchingExamples(query)[0];if(found)selectExample(found.objectId);else document.getElementById('examples-status').textContent='No examples found for '+query;}
 async function captureInputBindings(request){
  const names=new Set((request.code||'').match(/[\p{L}_][\p{L}\p{N}_]*/gu)||[]);if(!names.size)return {};else{}
- const coordinator=await fetch('/relationships?id=coordinator').then(response=>response.json());let main=null;
- for(const id of coordinator.runtime?.references||[]){const item=await fetch('/relationships?id='+encodeURIComponent(id)).then(response=>response.json());if(item.className==='__workspace__'){main=item;break;}else{}}
+ let main=null;
+ if(request.participantId&&sessionParticipant?.workspaceId){main=await fetch('/relationships?id='+encodeURIComponent(sessionParticipant.workspaceId)).then(response=>response.json());}else{
+  const coordinator=await fetch('/relationships?id=coordinator').then(response=>response.json());
+  for(const id of coordinator.runtime?.references||[]){const item=await fetch('/relationships?id='+encodeURIComponent(id)).then(response=>response.json());if(item.className==='__workspace__'){main=item;break;}else{}}
+ }
  if(!main)return {};else{}
  let fields=main.instanceVars||{};
  if(request.kind==='workspace'){

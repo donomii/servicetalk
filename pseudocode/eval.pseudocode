@@ -8,3 +8,5 @@ details, so missing classes cannot make script tests or MCP evaluations succeed.
 An unresolved bare identifier in a bound workspace sends a unary message only
 when the target supports it or supplies doesNotUnderstand:. Otherwise return nil,
 preserving scratch-variable isolation. Explicit sends still signal if unsupported.
+
+Constructor and block spawn requests inherit the explicit generation source bundle so later constructors remain in the originating source version.

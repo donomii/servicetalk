@@ -5,3 +5,5 @@ kind promise validates a normal typed call, creates and starts a Promise in the 
 kind example executes the example object, decodes its WorkspaceResult and retains the typed outcome.
 
 Before executing a standard control action, capture its semantic replay request. Execute the original control, but record and expose the captured receiver/message for replay and examples. Retain original and normalized object references. A binding-capture failure is returned separately and prevents misleading recording output without suppressing execution.
+
+Optional participantId selects and validates the participant scratch workspace. Retain results and handles in that workspace, return participantId/workspaceId and append attributed interaction activity. Object-specific scratch workspaces are keyed beneath the participant workspace. Result bind/release targets its supplied participant. Omitted identity keeps legacy behavior.

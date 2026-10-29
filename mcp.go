@@ -110,7 +110,7 @@ func initializeMCP(req MCPRequest) MCPResponse {
 	} else if capabilities := bytes.TrimSpace(params.Capabilities); len(capabilities) == 0 || capabilities[0] != '{' {
 		response.Error = &MCPError{-32602, "initialize capabilities must be an object"}
 	} else {
-		response.Result = json.RawMessage(`{"protocolVersion":"2025-06-18","capabilities":{"tools":{}},"serverInfo":{"name":"servicetalk","version":"1.0.0"},"instructions":"Use eval for persistent Smalltalk expressions, objects to find IDs, call to send typed messages, and inspect for state, active calls, placement and retention paths. Uncaught signals are tool errors."}`)
+		response.Result = json.RawMessage(`{"protocolVersion":"2025-06-18","capabilities":{"tools":{}},"serverInfo":{"name":"servicetalk","version":"1.0.0"},"instructions":"Use eval for persistent Smalltalk expressions, objects to find IDs, call to send typed messages, and inspect for state, active calls, placement and retention paths. Uncaught signals are tool errors. Join session as a named agent or human and pass the returned participantId to eval/call for independent scratch bindings in the shared object pool. Session publications share actual object references, with expectedRevision guarding updates. Use session note for attributed coordination messages."}`)
 	}
 	return response
 }
@@ -141,9 +141,10 @@ func validateMCPArguments(name string, raw json.RawMessage) error {
 	var fields map[string]json.RawMessage
 	var required, optional []string
 	switch name {
-	case "eval": required = []string{"code"}
+	case "eval": required,optional = []string{"code"},[]string{"participantId"}
 	case "inspect": required = []string{"objectId"}
-	case "call": required, optional = []string{"objectId", "method"}, []string{"args"}
+	case "call": required, optional = []string{"objectId", "method"}, []string{"args","participantId"}
+	case "session": required,optional = []string{"action"},[]string{"participantId","name","kind","value","expectedRevision","binding","text"}
 	case "objects", "metrics":
 	default: return fmt.Errorf("unknown ServiceTalk tool %q", name)
 	}
@@ -202,7 +203,16 @@ func decodeMCPArguments(raw json.RawMessage, args *MCPToolArguments) error {
 }
 
 func (c *Coordinator) runMCPTool(name string, args MCPToolArguments) (string, error) {
+	if args.ParticipantID!="" && (name=="eval" || name=="call") {
+		result:=c.interact(InteractionRequest{Kind:name,ParticipantID:args.ParticipantID,Code:args.Code,ObjectID:args.ObjectID,Method:args.Method,Args:args.Args})
+		if result.Error!="" { return "",fmt.Errorf("%s",result.Error) } else {}
+		body,err:=json.Marshal(result);return string(body),err
+	} else {}
 	switch name {
+	case "session":
+		result:=c.runSession(SessionRequest{Action:args.Action,ParticipantID:args.ParticipantID,Name:args.Name,Kind:args.Kind,Value:args.Value,ExpectedRevision:args.ExpectedRevision,Binding:args.Binding,Text:args.Text})
+		body,err:=json.Marshal(result)
+		if result.Error!="" { return string(body),fmt.Errorf("%s",string(body)) } else { return string(body),err }
 	case "eval":
 		if id, err := c.ensureWorkspace(); err != nil {
 			return "", err
@@ -256,10 +266,11 @@ func (c *Coordinator) objectSnapshot() []ObjectEntry {
 }
 
 const mcpTools = `{"tools":[
-{"name":"eval","description":"Evaluate Smalltalk or S-expressions in the persistent workspace. Can create objects and perform side effects. Uncaught signals fail the tool call.","inputSchema":{"type":"object","properties":{"code":{"type":"string"}},"required":["code"],"additionalProperties":false}},
+{"name":"eval","description":"Evaluate Smalltalk or S-expressions in the persistent workspace. Can create objects and perform side effects. Uncaught signals fail the tool call.","inputSchema":{"type":"object","properties":{"code":{"type":"string"},"participantId":{"type":"string"}},"required":["code"],"additionalProperties":false}},
 {"name":"objects","description":"List registered objects with IDs, class names and NATS subjects.","annotations":{"readOnlyHint":true},"inputSchema":{"type":"object","properties":{},"additionalProperties":false}},
 {"name":"inspect","description":"Inspect fields, methods, active calls, waits, host/PID/worker placement, and a sampled reference path from a GC root.","annotations":{"readOnlyHint":true},"inputSchema":{"type":"object","properties":{"objectId":{"type":"string"}},"required":["objectId"],"additionalProperties":false}},
-{"name":"call","description":"Send a method to an object. Arguments use ServiceTalk Value objects (kind and num/str/objid/bool/char). Can perform side effects.","inputSchema":{"type":"object","properties":{"objectId":{"type":"string"},"method":{"type":"string"},"args":{"type":"array","items":{"type":"object","properties":{"kind":{"type":"string","enum":["number","string","objid","bool","character","nil"]},"num":{"type":"number"},"str":{"type":"string"},"objid":{"type":"string"},"bool":{"type":"boolean"},"char":{"type":"integer","minimum":0,"maximum":1114111}},"required":["kind"],"additionalProperties":false}}},"required":["objectId","method"],"additionalProperties":false}},
+{"name":"call","description":"Send a method to an object. Arguments use ServiceTalk Value objects (kind and num/str/objid/bool/char). Can perform side effects.","inputSchema":{"type":"object","properties":{"objectId":{"type":"string"},"method":{"type":"string"},"participantId":{"type":"string"},"args":{"type":"array","items":{"type":"object","properties":{"kind":{"type":"string","enum":["number","string","objid","bool","character","nil"]},"num":{"type":"number"},"str":{"type":"string"},"objid":{"type":"string"},"bool":{"type":"boolean"},"char":{"type":"integer","minimum":0,"maximum":1114111}},"required":["kind"],"additionalProperties":false}}},"required":["objectId","method"],"additionalProperties":false}},
+{"name":"session","description":"Join the shared object pool as a human or agent; inspect participants, publications and activity; publish with expectedRevision, bind into your workspace, leave an attributed note, or leave. Participant IDs are attribution, not authentication. Use participantId on eval/call for isolated scratch bindings and attributed activity.","inputSchema":{"type":"object","properties":{"action":{"type":"string","enum":["status","join","leave","publish","unpublish","bind","note"]},"participantId":{"type":"string"},"name":{"type":"string"},"kind":{"type":"string","enum":["human","agent"]},"binding":{"type":"string"},"text":{"type":"string","maxLength":2000},"expectedRevision":{"type":"integer","minimum":0},"value":{"type":"object","properties":{"kind":{"type":"string","enum":["number","string","objid","bool","character","nil"]},"num":{"type":"number"},"str":{"type":"string"},"objid":{"type":"string"},"bool":{"type":"boolean"},"char":{"type":"integer"}},"required":["kind"],"additionalProperties":false}},"required":["action"],"additionalProperties":false}},
 {"name":"metrics","description":"Read coordinator spawn and pulse counts, errors and latency totals.","annotations":{"readOnlyHint":true},"inputSchema":{"type":"object","properties":{},"additionalProperties":false}}
 ]}`
 

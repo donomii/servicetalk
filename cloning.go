@@ -47,6 +47,11 @@ func (obj *ObjectServer) nativeSnapshot() (NativeSnapshot,error) {
  obj.mu.RLock()
  defer obj.mu.RUnlock()
  if promise && obj.instanceVars["state"].Str=="pending" { return NativeSnapshot{},fmt.Errorf("a pending Promise cannot be cloned; await its outcome first") } else {}
+ if obj.isService() {
+  state:=ServiceStatus{}
+  if raw:=obj.instanceVars["serviceState"];raw.Kind=="string" && raw.Str!="" { if err:=json.Unmarshal([]byte(raw.Str),&state);err!=nil { return NativeSnapshot{},fmt.Errorf("cannot snapshot invalid Service state: %w",err) } else {} } else {}
+  for _,generation:=range state.Generations { if generation.InFlight>0 || generation.Uncertain>0 || generation.State=="preparing" || generation.State=="checking" { return NativeSnapshot{},fmt.Errorf("cannot snapshot Service with unfinished generation %s (%s, %d active, %d without replies)",generation.ID,generation.State,generation.InFlight,generation.Uncertain) } else {} }
+ } else {}
  snapshot.Fields=copyDebugValues(obj.instanceVars)
  snapshot.Array=append([]Value{},obj.arrayData...)
  snapshot.Dictionary=copyDebugValues(obj.dictionaryData)
@@ -87,7 +92,7 @@ func (obj *ObjectServer) cloneObject(patch PrototypePatch) Value {
  snapshot,err:=obj.nativeSnapshot()
  if err==nil { err=applyPrototypePatch(&snapshot,patch) } else {}
  if err!=nil { panic(signalError{msg:err.Error()}) } else {}
- request:=SpawnRequest{ClassName:obj.classDef.Name,Snapshot:&snapshot}
+ request:=generationSpawnRequest(SpawnRequest{ClassName:obj.classDef.Name,Snapshot:&snapshot})
  body,err:=json.Marshal(request)
  if err!=nil { panic(signalError{msg:err.Error()}) } else {}
  response,err:=rpcClient.Post(obj.coordinatorURL+"/spawn","application/json",bytes.NewReader(body))

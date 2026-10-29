@@ -1,0 +1,3 @@
+SessionParticipant fields are name, kind, active and workspace. Initialize an active participant with a new scratch workspace in the coordinator's existing object pool.
+name:kind: sets display name and human/agent kind. name, kind, active and workspace expose current state.
+leave marks inactive and clears the workspace reference; shared publications survive.

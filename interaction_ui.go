@@ -10,6 +10,7 @@ async function uiPost(path,request){
   if(!response.ok)throw Error(value.error||response.statusText);else{return value;}
 }
 async function performInteraction(request){
+  request={...request,participantId:request.participantId||(typeof currentParticipantID==='function'?currentParticipantID():'')};
   let captured=null,captureError='';
   if(['eval','workspace'].includes(request.kind)){try{captured=await captureInputBindings(request);}catch(error){captureError=error.message;}}else{}
   const result=await uiPost('/interaction',{...request,recordingId:activeRecording});
@@ -21,6 +22,7 @@ async function performInteraction(request){
 }
 function updateResultChoices(){
   const button=document.getElementById('results-toggle');if(button)button.textContent=(button.dataset.label||'Results')+' ('+retainedResults.size+')';else{}
+  if(typeof updateSessionResultChoices==='function')updateSessionResultChoices();else{}
   const choices=document.getElementById('result-choices');choices.replaceChildren();
   [...retainedResults].reverse().forEach(([handle,result])=>{const option=document.createElement('option');option.value=handle;option.label=fmtVal(result.result);choices.appendChild(option);});
 }
@@ -76,20 +78,21 @@ function renderResult(container,result){
   container.appendChild(display);
   if(!result.handle)return;else{}
   const bar=document.createElement('div');bar.className='result-actions';const status=document.createElement('span');status.className='result-status';status.setAttribute('role','status');
-  bar.appendChild(navButton('Use in Playground',()=>{code.setRangeText(result.handle,code.selectionStart,code.selectionEnd,'select');closeM();closeExamples();document.getElementById('result-shelf').hidden=true;document.getElementById('recording-panel').hidden=true;code.focus();}));
+  bar.appendChild(navButton('Use in Playground',()=>{code.setRangeText((result.participantId||'')===currentParticipantID()?result.handle:valueExpression(result.result),code.selectionStart,code.selectionEnd,'select');closeM();closeExamples();closeSessionTools();document.getElementById('result-shelf').hidden=true;document.getElementById('recording-panel').hidden=true;code.focus();}));
   if(result.request&&['eval','call','workspace'].includes(result.request.kind)){const save=navButton('Save as example',async()=>{save.disabled=true;try{await saveInteractionExample(result,status);}finally{save.disabled=false;}});bar.appendChild(save);}else{}
+  bar.appendChild(navButton('Share in session',()=>shareResultInSession(result)));
   const more=document.createElement('details');more.className='result-more';const summary=document.createElement('summary');summary.textContent='More actions';more.appendChild(summary);
   const extra=document.createElement('div');extra.className='result-actions';more.appendChild(extra);
   extra.appendChild(navButton('Pick as argument',()=>{pickedResult=result.handle;extra.querySelector('.picked-status').textContent='Selected';document.getElementById('result-shelf').hidden=true;}));
   const picked=document.createElement('span');picked.className='picked-status';extra.appendChild(picked);
   const name=document.createElement('input');name.placeholder='Name this result';name.setAttribute('aria-label','Name this result');
-  extra.append(name,navButton('Save name',async()=>{try{const saved=await uiPost('/result',{action:'bind',handle:result.handle,name:name.value.trim()});if(saved.error)throw Error(saved.error);else{status.textContent='Saved as '+name.value.trim();}}catch(error){status.textContent=error.message;}}));
-  extra.appendChild(navButton('Release',async()=>{try{const released=await uiPost('/result',{action:'release',handle:result.handle});if(released.error)throw Error(released.error);else{retainedResults.delete(result.handle);updateResultChoices();bar.remove();more.remove();status.textContent='Released';}}catch(error){status.textContent=error.message;}}));
+  extra.append(name,navButton('Save name',async()=>{try{const saved=await uiPost('/result',{action:'bind',handle:result.handle,name:name.value.trim(),participantId:result.participantId||''});if(saved.error)throw Error(saved.error);else{status.textContent='Saved as '+name.value.trim();}}catch(error){status.textContent=error.message;}}));
+  extra.appendChild(navButton('Release',async()=>{try{const released=await uiPost('/result',{action:'release',handle:result.handle,participantId:result.participantId||''});if(released.error)throw Error(released.error);else{retainedResults.delete(result.handle);updateResultChoices();bar.remove();more.remove();status.textContent='Released';}}catch(error){status.textContent=error.message;}}));
   container.append(bar,more,status);
 }
 async function clearResults(){
   for(const handle of retainedResults.keys()){
-    const response=await uiPost('/result',{action:'release',handle});
+    const response=await uiPost('/result',{action:'release',handle,participantId:retainedResults.get(handle)?.participantId||''});
     if(response.error)throw Error(response.error);else{}
   }
   retainedResults.clear();updateResultChoices();out.replaceChildren();starterHelp();

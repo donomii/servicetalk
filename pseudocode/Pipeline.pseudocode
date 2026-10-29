@@ -1,0 +1,10 @@
+Pipeline owns a Process and its requested output file path.
+initialize creates the Process and empty output path.
+process returns the underlying Process. environment: and input: configure environment overrides and first-stage input before launch.
+start:cwd:outputFile: accepts an Array of nonempty argument Arrays, a working directory and optional final output file path.
+    Each stage uses literal executable and string arguments, connected by operating-system pipes.
+    An empty output path captures final standard output; a nonempty path streams final bytes into a created or truncated file.
+outputFile returns the configured destination. stdout, stderr, output and outputLines expose bounded captured text.
+status, error and command describe the aggregate job. exitCode is the rightmost nonzero stage exit, or zero if all succeed; exitCodes returns each stage's exit code in order.
+wait returns the aggregate exit code. signal: addresses all stage process groups; stop requests termination.
+inspectorMetadata supplies status, exit and destination properties. inspectorViews supplies commands, output streams, errors and actions for stage exits and stop.

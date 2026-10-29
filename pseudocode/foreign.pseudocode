@@ -1,0 +1,4 @@
+
+ForeignBridge retains an immutable child process handle for forced shutdown even while ordinary protocol dispatch holds its mutex.
+
+Forced retirement interrupts a busy foreign method with an explicit signal, including method and target identity.

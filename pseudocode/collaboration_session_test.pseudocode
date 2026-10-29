@@ -1,0 +1,5 @@
+Exercise two concurrent human/agent clients against one coordinator: independent scratch names, same published object identity, serialized shared mutations, participant-specific object workspaces and attributed activity.
+Race two publication updates at the same revision; exactly one succeeds. Preserve deletion tombstones and reject stale re-publication.
+Verify publication retention survives publisher leave, result handles stay in their participant workspace, and left identities cannot execute.
+Use MCP join/eval/note and validate typed participant results; retain legacy eval compatibility. Reject fractional revisions through direct ordinary Session calls.
+Hold one participant evaluation on external I/O, queue a publication binding, and prove another participant can append activity and read a snapshot. Release I/O, verify binding completion and transfer cleanup.

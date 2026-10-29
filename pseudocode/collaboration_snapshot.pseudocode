@@ -1,0 +1,2 @@
+The collaboration snapshot primitive reads ordinary session state and inspects its participant, publication, array and dictionary references through control messages. It does not send ordinary collection iteration messages that could wait behind application work.
+Describe active/left participants and workspace identities; sort named publications; decode the ordered bounded activity log and retain sequence numbers. Malformed retained state signals a readable error. Return JSON SessionResponse.

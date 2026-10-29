@@ -185,6 +185,7 @@ func loadClassChain(className string, loading []string) (*ClassDef, error) {
 // (S-expression), then ClassName.st (Smalltalk), then ClassName/
 // (foreign / C-backed class).  The first match wins.
 func loadClassRaw(className string) (*ClassDef, error) {
+	if class, found, err := generationClassSource(className); found { return class, err } else {}
 	// Baked-in classes (`smt build` single-binary) take priority, so a built
 	// app is self-contained and isn't shadowed by stray files in the CWD.
 	if src, ok := embeddedClassSource(className + ".smt"); ok {

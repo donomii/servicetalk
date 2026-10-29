@@ -55,3 +55,7 @@ The page composes the shared visual theme and layout behavior. Render a header, 
 
 The Playground empty output offers discovery actions. Object inspectors expose property shortcuts, matching examples, selector suggestions, method navigation and debugger actions; results include Save as example.
 The expression heading includes Load starter: object/messages, Explore files and Run a command templates, plus Restore my expression after a starter is selected. Choosing a template fills the editor; Run expression remains the execution action.
+
+Include Shared session and Services panels, styles and scripts. Source editing offers Prepare service update.
+
+Opening the object inspector closes covering Shell, Services and Shared session panels.

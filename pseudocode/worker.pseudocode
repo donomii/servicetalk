@@ -3,3 +3,5 @@ spawn worker-hosted object
     Supply this worker's identifier to the child for placement inspection.
 
 Serialize an incoming NativeSnapshot into a temporary file and pass --snapshot to the child before registration; clean up the file afterward.
+
+An explicit staged source bundle takes precedence over inherited SMT_PATH and normal source paths; propagate its directory to descendants as generation context.

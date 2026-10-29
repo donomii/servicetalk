@@ -1,0 +1,9 @@
+Shared session panel: show people and agents, shared names and revisions, attributed activity, the session object and MCP connection address.
+Join creates a participant and selects its scratch workspace for Playground and object-workspace interactions. Keep participant selection across refresh within the browser tab. Leave ends participation while published values remain shared.
+Share a retained typed result under a name with expected revision zero. Replace uses the revision explicitly selected from the board; refresh never silently changes this expectation. Unshare also uses that observed revision. Show conflicts without discarding the form.
+Use in Playground binds a shared name into the selected participant workspace. Keep result ownership when releasing or naming old results; use typed literals when inserting a result from another workspace.
+Refresh the board while open, preserving focused controls and drafts. Render remote content as text and object links. Layout fits narrow screens.
+
+Only joined participants see note composition. Notes use the API text field with a 2000-character input limit; backend enforces its byte bound. Named object links display their class and open the inspector after closing the session panel. Long participant names truncate in the header while the full name remains available.
+
+Opening this panel closes the other Session, Shell and Services panels. Result navigation closes covering session tools before showing its destination.

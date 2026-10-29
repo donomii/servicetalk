@@ -1,0 +1,11 @@
+Shell panel lists shared live Shell and Terminal objects. New shell retains a Shell in the current participant workspace; selecting one reads its directory. Change directory invokes cd: and preserves errors.
+Run command converts each argument line to one exact string, starts exec:args:, retains its Process and refreshes status/output/error. Open in terminal uses terminal:args:. Interactive shell uses the session SHELL or /bin/sh with -i.
+Program suggestions and file-argument choices call Shell completion methods. Directory choices refine the prefix; files append one argument. Ignore stale asynchronous completions.
+Attach the browser terminal renderer to the selected ordinary Terminal. Keep an independent byte cursor, decode base64 output, report dropped retained history, send keyboard data, and resize the host PTY to the panel. Interrupt, stop and inspect invoke ordinary object operations. Closing disposes browser rendering without stopping the live job.
+Refresh and selection preserve chosen objects when still registered. Panels remain readable on narrow screens. Serve vendored terminal assets from the Go runtime.
+
+Ignore stale session refresh, command completion, and directory results. Capture the chosen Shell before asynchronous command preparation. Never reopen a terminal after its panel was closed.
+
+Opening this panel closes the other Session, Shell and Services panels. Result navigation closes covering session tools before showing its destination.
+
+Continue reading delivered terminal batches after process exit until no data remains; nextOffset is the delivered boundary, not necessarily the produced output length.

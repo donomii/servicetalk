@@ -17,3 +17,7 @@ Route __controlState through the inspection channel so layout export cannot dead
 Control ownership reads/writes and validated configuration use the inspection channel with locked field snapshots/replacement. This lets layout saves complete while a control awaits its inherited receiver.
 
 Builtin Process observation, metadata and signal messages use the control lane so waiting for exit does not prevent viewing output or stopping the job. Other objects' same-named methods retain normal serialization.
+
+Standard Service entry points run independently of the serial mailbox, allowing promotion while older calls wait. Explicit __forceShutdown is a control message. Service call:arguments:timeoutMs: extends the outer reply deadline by the usual response overhead.
+
+Service preparation waits for spawn deadline plus initialize and response overhead; readiness and default route calls include response overhead.

@@ -5,3 +5,5 @@ examples: lazily create the catalog and its ordinary example objects.
 addExampleTitle:description:source:check: create, configure, retain and return a RunnableExample.
 populateExamples: install demonstrations of counters, clones, prototypes, wiring, promises, signal recovery, process integration, receipt calculation, JSON record filtering, Shell file exploration and direct command execution.
 inspectorViews: expose editable tools definition and default restoration.
+
+Default tools include Services for preparing and promoting new service generations.

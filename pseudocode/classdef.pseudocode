@@ -1,0 +1,2 @@
+
+An explicit SMT_SOURCE_BUNDLE_DIR generation source takes precedence before embedded classes; normal embedded precedence is unchanged.

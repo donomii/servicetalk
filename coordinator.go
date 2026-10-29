@@ -131,6 +131,7 @@ func runCoordinator(port int, mainClass string, mode string, evalExpr string) {
 	mux.HandleFunc("/message", c.handleMessage) // coordinator as Smalltalk object
 	mux.HandleFunc("/eval", c.handleEval)
 	mux.HandleFunc("/workspace", c.handleObjectWorkspace)
+	mux.HandleFunc("/session", c.handleSession)
 	mux.HandleFunc("/interaction", c.handleInteraction)
 	mux.HandleFunc("/result", c.handleResult)
 	mux.HandleFunc("/recording", c.handleRecording)
@@ -139,6 +140,7 @@ func runCoordinator(port int, mainClass string, mode string, evalExpr string) {
 	mux.HandleFunc("/trace", c.handleTrace)
 	mux.HandleFunc("/source", c.handleSource)
 	mux.HandleFunc("/wiring", c.handleWiring)
+	mux.HandleFunc("/web/terminal/", serveTerminalAsset)
 	mux.HandleFunc("/workbench", c.handleWorkbench)
 	mux.HandleFunc("/refactor", c.handleRefactor)
 	mux.HandleFunc("/refactoring.js", func(w http.ResponseWriter, r *http.Request) { w.Header().Set("Content-Type", "text/javascript"); fmt.Fprint(w, refactoringJS) })
@@ -633,6 +635,12 @@ func setWorkspaceShellContext(ws ObjectEntry, shellObjID string) error {
 // expect when typing args to `run:`, `cat:`, `cd:`, etc.
 func shellComplete(shell ObjectEntry, line string, pos int) (string, int, bool) {
 	pre := line[:pos]
+	if opening,fragment,quoted:=shellQuotedFragment(pre);quoted {
+		method:="completePath:"
+		head:=strings.TrimSpace(pre[:opening])
+		for _,selector:=range []string{"run:","exec:","terminal:","checked:"} { if strings.HasSuffix(head,selector) { method="completeCommand:" } else {} }
+		return shellQuotedCompletion(line,pos,opening,fragment,shellRemoteCompletions(shell,method,fragment))
+	} else {}
 	if !strings.ContainsAny(pre, " \t'\"") {
 		matches := matchPrefix(pre, shellNames())
 		return applyMatch(line, pos, pre, matches)
@@ -662,6 +670,7 @@ func shellNames() []string {
 		"write:text:", "append:text:", "mkdir:", "find:", "grep:in:",
 		"env:", "env:put:", "unsetEnv:", "environment", "lastProcess",
 		"exec:args:", "run:args:", "exec:args:input:", "run:args:input:", "checked:args:",
+		"terminal:args:", "pipeline:", "pipeline:outputFile:", "pipeline:input:outputFile:", "completeCommand:", "completePath:",
 		// Common classes
 		"Counter", "Process", "Dictionary", "Array",
 		"HttpClient", "HttpServer", "RobotsMatcher", "SitemapParser",
@@ -965,7 +974,8 @@ func (c *Coordinator) handleSpawn(w http.ResponseWriter, r *http.Request) {
 		pulseTimeoutSecs = envInt("SMT_PULSE_TIMEOUT_SECS", 60)
 	}
 
-	resp, err := c.spawnObject(req.ClassName, req.BlockDef, req.AutoInit, pulseTimeoutSecs, req.Snapshot)
+	req.PulseTimeoutSecs = pulseTimeoutSecs
+	resp, err := c.spawnRequest(req)
 	if err != nil {
 		json.NewEncoder(w).Encode(SpawnResponse{Error: err.Error()})
 		return
@@ -999,7 +1009,12 @@ func (c *Coordinator) handleTranscript(w http.ResponseWriter, r *http.Request) {
 // autoInit:  pass --init flag so the process self-initializes on startup
 // pulseTimeoutSecs:  idle timeout before the process exits (0 = never)
 func (c *Coordinator) spawnObject(className string, blockDef *BlockDef, autoInit bool, pulseTimeoutSecs int, snapshots ...*NativeSnapshot) (SpawnResponse, error) {
-	snapshot := nativeSnapshotArgument(snapshots)
+	return c.spawnRequest(SpawnRequest{ClassName:className, BlockDef:blockDef, AutoInit:autoInit, PulseTimeoutSecs:pulseTimeoutSecs, Snapshot:nativeSnapshotArgument(snapshots)})
+}
+
+func (c *Coordinator) spawnRequest(req SpawnRequest) (SpawnResponse, error) {
+	className, blockDef, autoInit := req.ClassName, req.BlockDef, req.AutoInit
+	snapshot := req.Snapshot
 	if snapshot != nil {
 		if err := validateNativeSnapshot(snapshot); err != nil { return SpawnResponse{}, err } else if autoInit || blockDef != nil || userToBuiltinClass(className) != snapshot.Definition.Name { return SpawnResponse{}, fmt.Errorf("clone spawn requires matching class, no initializer and no separate block definition") } else {}
 	} else {}
@@ -1012,16 +1027,23 @@ func (c *Coordinator) spawnObject(className string, blockDef *BlockDef, autoInit
 	worker := c.reserveWorker()
 	if worker != nil {
 		defer c.releaseWorker(worker.ID)
-		resp, err = c.spawnOnWorker(worker, className, blockDef, autoInit, pulseTimeoutSecs, snapshot)
+		resp, err = c.spawnOnWorker(worker, req)
 		return resp, err
 	}
 
-	resp, err = c.spawnLocal(className, blockDef, autoInit, pulseTimeoutSecs, snapshot)
+	resp, err = c.spawnLocalRequest(req)
 	return resp, err
 }
 
 // spawnLocal starts an object process on this machine via exec.Command.
 func (c *Coordinator) spawnLocal(className string, blockDef *BlockDef, autoInit bool, pulseTimeoutSecs int, snapshots ...*NativeSnapshot) (SpawnResponse, error) {
+	return c.spawnLocalRequest(SpawnRequest{ClassName:className, BlockDef:blockDef, AutoInit:autoInit, PulseTimeoutSecs:pulseTimeoutSecs, Snapshot:nativeSnapshotArgument(snapshots)})
+}
+
+func (c *Coordinator) spawnLocalRequest(req SpawnRequest) (SpawnResponse, error) {
+	className, blockDef, autoInit, pulseTimeoutSecs := req.ClassName, req.BlockDef, req.AutoInit, req.PulseTimeoutSecs
+	paths, err := spawnSourceArguments(req.SourceBundle)
+	if err != nil { return SpawnResponse{}, err } else {}
 	id := newUUID()
 
 	// Register the waiter BEFORE spawning to avoid any race
@@ -1044,7 +1066,7 @@ func (c *Coordinator) spawnLocal(className string, blockDef *BlockDef, autoInit 
 		"--coordinator", c.myURL,
 		"--pulse-timeout", strconv.Itoa(pulseTimeoutSecs),
 	}
-	args = append(args, ClassPathArgs()...)
+	args = append(args, paths...)
 	if autoInit {
 		args = append(args, "--init")
 	}
@@ -1071,7 +1093,8 @@ func (c *Coordinator) spawnLocal(className string, blockDef *BlockDef, autoInit 
 	}
 
 	cmd := exec.Command(bin, args...)
-	if snapshot := nativeSnapshotArgument(snapshots); snapshot != nil {
+	cmd.Env = spawnSourceEnvironment(req.SourceBundle, paths)
+	if snapshot := req.Snapshot; snapshot != nil {
 		file, err := snapshotArgumentFile(snapshot)
 		if err != nil { return SpawnResponse{}, err } else {}
 		defer os.Remove(file)
@@ -1145,19 +1168,11 @@ func (c *Coordinator) releaseWorker(workerID string) {
 }
 
 // spawnOnWorker delegates object spawning to a reserved worker.
-func (c *Coordinator) spawnOnWorker(worker *WorkerEntry, className string, blockDef *BlockDef, autoInit bool, pulseTimeoutSecs int, snapshots ...*NativeSnapshot) (SpawnResponse, error) {
-	req := SpawnRequest{
-		Snapshot:         nativeSnapshotArgument(snapshots),
-		ClassName:        className,
-		BlockDef:         blockDef,
-		AutoInit:         autoInit,
-		PulseTimeoutSecs: pulseTimeoutSecs,
-	}
-	bundle, err := classBundleFromClassPath()
-	if err != nil {
-		return SpawnResponse{}, fmt.Errorf("class source bundle: %w", err)
-	}
-	req.SourceBundle = bundle
+func (c *Coordinator) spawnOnWorker(worker *WorkerEntry, req SpawnRequest) (SpawnResponse, error) {
+	if req.SourceBundle == nil {
+		bundle, err := classBundleFromClassPath()
+		if err != nil { return SpawnResponse{}, fmt.Errorf("class source bundle: %w", err) } else { req.SourceBundle = bundle }
+	} else {}
 	body, _ := json.Marshal(req)
 	resp, err := rpcClient.Post(worker.URL()+"/spawn", "application/json", bytes.NewReader(body))
 	if err != nil {

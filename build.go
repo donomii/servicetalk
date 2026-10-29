@@ -251,7 +251,7 @@ func stageSource(src, dst string) error {
 	for _, e := range entries {
 		name := e.Name()
 		if e.IsDir() {
-			if name == "vendor" {
+			if name == "vendor" || name == "web" {
 				if err := copyTree(filepath.Join(src, name), filepath.Join(dst, name)); err != nil {
 					return err
 				}
